@@ -1,0 +1,17 @@
+.h1 redmine_medelexis
+
+A few goodies for the Medelexis MIS
+
+* admin-users see the api_key of all users
+* hooks are called after create/editing service tickets
+
+.h2 TODO
+
+* Scripts for the hooks
+
+.h2 installation
+
+.bc cd /path/to/redmine/plugins
+git clone git@github.com:ngiger/redmine_medelexis.github
+service restart redmine
+o
