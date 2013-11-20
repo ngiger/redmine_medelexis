@@ -6,8 +6,9 @@ class LicenseController < ApplicationController
   def gen_license_xml
     # Erstelle MedelexisLicenseFile.xml auf Basis MedelexisLicenseFile.xsd mit Enveloped Template MedelexisLicenseFileWithSignatureTemplate.xml
     # Signiere Datei 
-    # Verschlüsselte Datei     
+    # Verschlüsselte Datei 
     @login_name = find_user
+    system("logger #{File.basename(__FILE__)}: from IP #{request.remote_ip} tries to gen_license_xml for #{@login_name}")
     data_dir = File.expand_path(File.join(File.expand_path(File.dirname(__FILE__)), '..', '..', 'data'))
     keystore          = '/srv/distribution-keys'
     signingKey        = "#{keystore}/signingKey.pem"
@@ -20,7 +21,7 @@ class LicenseController < ApplicationController
     cmd_1 =  "xmlsec1 sign --privkey-pem #{signingKey} #{license} > #{signed}"
     cmd_2 =  "xmlsec1 encrypt --pubkey-pem #{encryptionKeyPub} --session-key des-192 --xml-data  #{signed} --output #{crypted}  #{template}"
     okay = system(cmd_1) and system(cmd_2) and
-        system("logger #{File.basename(__FILE__)}:signed  #{crypted} #{File.size(crypted)} bytes #{File.ctime(crypted)}")
+        system("logger #{File.basename(__FILE__)}: from IP #{request.remote_ip} signed  #{crypted} #{File.size(crypted)} bytes #{File.ctime(crypted)}")
     respond_to do |format|
       format.xml  { render :xml => IO.read(crypted) }
     end
