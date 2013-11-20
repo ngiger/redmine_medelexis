@@ -14,3 +14,9 @@ h2. installation
 bc. cd /path/to/redmine/plugins
 git clone git@github.com:ngiger/redmine_medelexis.github
 service restart redmine
+[09:51:04] Marco Descher: Für Admin user https://mis-beta.medelexis.ch/mmustermann/license.xml
+[09:52:15] Marco Descher:  https://mis-beta.medelexis.ch/my/license - list of all service tickets
+[09:52:23] Marco Descher:  https://mis-beta.medelexis.ch/my/license.xml - encrypted and signed license
+[09:52:35] Marco Descher: https://mis-beta.medelexis.ch/mmustermann/license - list of all service tickets
+[09:52:42] Marco Descher: https://mis-beta.medelexis.ch/mmustermann/license.xml -encrypted and signed license
+Im logger IP-Adresse des Aufrufes abspeichern.

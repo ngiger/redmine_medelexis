@@ -9,9 +9,9 @@ class LicenseController < ApplicationController
     # Verschlüsselte Datei     
     @login_name = find_user
     data_dir = File.expand_path(File.join(File.expand_path(File.dirname(__FILE__)), '..', '..', 'data'))
-    keystore          = '/srv/jarsigner-keystore'
+    keystore          = '/srv/distribution-keys'
     signingKey        = "#{keystore}/signingKey.pem"
-    encryptionKeyPub  = "#{keystore}/signingKeyPub.pem"
+    encryptionKeyPub  = "#{keystore}/encryptionKeyPub.pem"
     template          = "#{keystore}/session-key-template.xml"
     license           = "#{data_dir}/#{@login_name}.xml"
     FileUtils.cp("#{data_dir}/default.xml", license, :verbose => true, :preserve => true) unless File.exists?(license)
