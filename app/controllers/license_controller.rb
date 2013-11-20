@@ -1,7 +1,7 @@
 class LicenseController < ApplicationController
   unloadable
   layout 'base'
-  before_filter :find_user
+#  before_filter :find_user
   
   def gen_license_xml
     # Erstelle MedelexisLicenseFile.xml auf Basis MedelexisLicenseFile.xsd mit Enveloped Template MedelexisLicenseFileWithSignatureTemplate.xml
