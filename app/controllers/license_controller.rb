@@ -14,7 +14,7 @@ class LicenseController < ApplicationController
     encryptionKeyPub  = "#{keystore}/signingKeyPub.pem"
     template          = "#{keystore}/session-key-template.xml"
     license           = "#{data_dir}/#{@login_name}.xml"
-    FileUtils.cp_p("#{data_dir}/default.xml", license, :verbose => true) unless File.exists?(license)
+    FileUtils.cp("#{data_dir}/default.xml", license, :verbose => true, :preserve => true) unless File.exists?(license)
     signed            = "#{data_dir}/#{@login_name}_signed.xml"
     crypted           = "#{data_dir}/#{@login_name}_crypted.xml"
     cmd_1 =  "xmlsec1 sign --privkey-pem #{signingKey} #{license} > #{signed}"
