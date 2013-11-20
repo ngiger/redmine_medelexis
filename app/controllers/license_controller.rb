@@ -29,7 +29,7 @@ class LicenseController < ApplicationController
   
 private
   def find_user
-    @myUser = User.find_by_login(params[:login])
+    @myUser = User.find_by_id(request.session[:user_id])
     return @myUser.login
   end
 
