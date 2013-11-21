@@ -17,7 +17,7 @@ class LicenseController < ApplicationController
     encryptionKeyPub  = "#{keystore}/encryptionKeyPub.pem"
     template          = "#{keystore}/session-key-template.xml"
     [signingKey, encryptionKeyPub, template].each{ |f| @errors << "Missing file #{f}" unless File.exists?(f) }
-    @errors << "Cannot create license for user anonymous" if @curUser.anonymous?
+    @errors << "Cannot create license for user anonymous" if @curUser and @curUser.anonymous?
     if @errors.size == 0 and @curUser
       license           = "#{data_dir}/#{@login_name}.xml"
       FileUtils.cp("#{data_dir}/default.xml", license, :verbose => true, :preserve => true) unless File.exists?(license)
