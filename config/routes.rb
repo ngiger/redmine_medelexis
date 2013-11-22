@@ -3,7 +3,7 @@
 
 #custom routes for this plugin
   resources :licenses
-  match 'users/current/license', :to => 'license#gen_license_xml', :via => 'get'
+  match 'users/current/license', :to => 'license#gen_license_xml', :via => 'get', :login => 'current'
   match 'license/:login/license', :to => 'license#gen_license_xml', :via => 'get'
-  match 'my/license', :to => 'license#gen_license_xml', :via => 'get'
+  match 'my/license', :to => 'license#gen_license_xml', :via => 'get', :login => 'current'
   match ':login/license', :to => 'license#gen_license_xml', :via => 'get'

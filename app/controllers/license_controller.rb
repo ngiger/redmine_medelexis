@@ -16,8 +16,8 @@ class LicenseController < ApplicationController
     signingKey        = "#{keystore}/signingKey.pem"
     encryptionKeyPub  = "#{keystore}/encryptionKeyPub.pem"
     template          = "#{keystore}/session-key-template.xml"
-    [signingKey, encryptionKeyPub, template].each{ |f| @errors << "Missing file #{f}" unless File.exists?(f) }
-    @errors << "Cannot create license for user anonymous" if userLogin and userLogin.anonymous?
+    [signingKey, encryptionKeyPub, template].each{ |f| @errors << "Missing file #{f}" unless File.exists?(f) } # unless `hostname`.chomp.eql?('ng-tr')
+    @errors << "Cannot create license for user anonymous" if userLogin and userLogin.anonymous? 
     if @errors.size == 0 and userLogin
       license           = "#{data_dir}/#{@login_name}.xml"
       FileUtils.cp("#{data_dir}/default.xml", license, :verbose => true, :preserve => true) unless File.exists?(license)
@@ -28,11 +28,12 @@ class LicenseController < ApplicationController
       okay = system(cmd_1) and system(cmd_2) and
           system("logger #{File.basename(__FILE__)}: from IP #{request.remote_ip} signed  #{crypted} #{File.size(crypted)} bytes #{File.ctime(crypted)}")
       respond_to do |format|
-        format.xml  { render :xml => IO.read(crypted) }
+      # format.xml  { render :xml => IO.read("#{data_dir}/default.xml") }
+      format.xml  { render :xml => IO.read(crypted) }
       end
     else
       respond_to do |format|
-        format.xml  { render :xml => get_error_xml(userLogin, @errors) }
+        format.xml  { render :xml => get_error_xml(params, @errors) }
         # puts request.inspect
       end
     end
@@ -40,15 +41,25 @@ class LicenseController < ApplicationController
   
 private
   def find_user(params)
-    pp params
-    return User.find_by_login(params[:login]) if params[:login]    
-    User.find_by_id(request.session[:user_id]) if User.current.anonymous?
+    user_by_session = User.find_by_id(request.session[:user_id])
+    msg =  "find_user: User.current '#{User.current}' by session '#{user_by_session}' params #{params}"
+    puts msg
+    puts params
+    name = params[:login]
+    name if params[:login] and params[:login].eql?('current')
+    system("logger #{File.basename(__FILE__)}: #{msg}")
+    return nil unless user_by_session 
+    return User.find_by_id(user_by_session) if params[:login].eql?('current')
+    return User.find_by_login(params[:login]) if params[:login].eql?(user_by_session.login)
+    return nil unless user_by_session.admin?
+    return User.find_by_login(params[:login]) if params[:login]
+    nil
   end
   
-  def get_error_xml(user, error)
+  def get_error_xml(params, error)
     error_xml = %(
 <note>
-<heading>Error generating license for user '#{user ? user.login : ''}'</heading>
+<heading>User #{User.current}/#{User.find_by_id(request.session[:user_id])} cannot generate license.</heading>
 <reasons>
   <reason>#{error.join("</reason>\n  <reason>")}
   </reason>
