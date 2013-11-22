@@ -2,6 +2,7 @@ class LicenseController < ApplicationController
   unloadable
   layout 'base'
 #  before_filter :find_user
+  skip_before_filter :check_if_login_required
   
   def gen_license_xml
     # Erstelle MedelexisLicenseFile.xml auf Basis MedelexisLicenseFile.xsd mit Enveloped Template MedelexisLicenseFileWithSignatureTemplate.xml
@@ -19,10 +20,11 @@ class LicenseController < ApplicationController
     [signingKey, encryptionKeyPub, template].each{ |f| @errors << "Missing file #{f}" unless File.exists?(f) } # unless `hostname`.chomp.eql?('ng-tr')
     @errors << "Cannot create license for user anonymous" if userLogin and userLogin.anonymous? 
     if @errors.size == 0 and userLogin
-      license           = "#{data_dir}/#{@login_name}.xml"
+      userName          = userLogin.login
+      license           = "#{data_dir}/#{userName}.xml"
       FileUtils.cp("#{data_dir}/default.xml", license, :verbose => true, :preserve => true) unless File.exists?(license)
-      signed            = "#{data_dir}/#{@login_name}_signed.xml"
-      crypted           = "#{data_dir}/#{@login_name}_crypted.xml"
+      signed            = "#{data_dir}/#{userName}_signed.xml"
+      crypted           = "#{data_dir}/#{userName}_crypted.xml"
       cmd_1 =  "xmlsec1 sign --privkey-pem #{signingKey} #{license} > #{signed}"
       cmd_2 =  "xmlsec1 encrypt --pubkey-pem #{encryptionKeyPub} --session-key des-192 --xml-data  #{signed} --output #{crypted}  #{template}"
       okay = system(cmd_1) and system(cmd_2) and
@@ -45,8 +47,6 @@ private
     msg =  "find_user: User.current '#{User.current}' by session '#{user_by_session}' params #{params}"
     puts msg
     puts params
-    name = params[:login]
-    name if params[:login] and params[:login].eql?('current')
     system("logger #{File.basename(__FILE__)}: #{msg}")
     return nil unless user_by_session 
     return User.find_by_id(user_by_session) if params[:login].eql?('current')
