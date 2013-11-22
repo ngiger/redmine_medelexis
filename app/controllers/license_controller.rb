@@ -8,17 +8,17 @@ class LicenseController < ApplicationController
     # Signiere Datei 
     # Verschlüsselte Datei
     @errors = []
-    @curUser = find_user
-    @errors << "Could not determine userid" unless @curUser
-    @errors << "Cannot create license for user anonymous" if @curUser and @curUser.anonymous?
+    userLogin = find_user(params)
+    @errors << "Could not determine userid" unless userLogin
+    @errors << "Cannot create license for user anonymous" if userLogin and userLogin.anonymous?
     data_dir = File.expand_path(File.join(File.expand_path(File.dirname(__FILE__)), '..', '..', 'data'))
     keystore          = '/srv/distribution-keys'
     signingKey        = "#{keystore}/signingKey.pem"
     encryptionKeyPub  = "#{keystore}/encryptionKeyPub.pem"
     template          = "#{keystore}/session-key-template.xml"
     [signingKey, encryptionKeyPub, template].each{ |f| @errors << "Missing file #{f}" unless File.exists?(f) }
-    @errors << "Cannot create license for user anonymous" if @curUser and @curUser.anonymous?
-    if @errors.size == 0 and @curUser
+    @errors << "Cannot create license for user anonymous" if userLogin and userLogin.anonymous?
+    if @errors.size == 0 and userLogin
       license           = "#{data_dir}/#{@login_name}.xml"
       FileUtils.cp("#{data_dir}/default.xml", license, :verbose => true, :preserve => true) unless File.exists?(license)
       signed            = "#{data_dir}/#{@login_name}_signed.xml"
@@ -32,21 +32,23 @@ class LicenseController < ApplicationController
       end
     else
       respond_to do |format|
-        format.xml  { render :xml => get_error_xml(@login_name, @errors) }
-        puts request.inspect
+        format.xml  { render :xml => get_error_xml(userLogin, @errors) }
+        # puts request.inspect
       end
     end
   end
   
 private
-  def find_user
-    User.find_by_id(request.session[:user_id])
+  def find_user(params)
+    pp params
+    return User.find_by_login(params[:login]) if params[:login]    
+    User.find_by_id(request.session[:user_id]) if User.current.anonymous?
   end
   
   def get_error_xml(user, error)
     error_xml = %(
 <note>
-<heading>Error generating license for user '#{@login_name}'</heading>
+<heading>Error generating license for user '#{user ? user.login : ''}'</heading>
 <reasons>
   <reason>#{error.join("</reason>\n  <reason>")}
   </reason>
