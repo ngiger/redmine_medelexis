@@ -1,26 +1,33 @@
 class LicenseController < ApplicationController
   unloadable
   layout 'base'
-#  before_filter :find_user
   skip_before_filter :check_if_login_required
   
-  def gen_license_xml
-    # Erstelle MedelexisLicenseFile.xml auf Basis MedelexisLicenseFile.xsd mit Enveloped Template MedelexisLicenseFileWithSignatureTemplate.xml
-    # Signiere Datei 
-    # Verschlüsselte Datei
+  # Zum Testen 0.0.0.0:30001/my/license/fe2167a329f3c22799b1bcc3cb8cf93e7688f136.xml
+  def gen_license_xml_via_api
+    user = User.find_by_api_key(params['api_key'])
+    if user
+      gen_license_file(User.find_by_api_key(params['api_key']))
+    else
+      render :xml =>  get_error_xml(['Wrong api_key?']) 
+    end
+  end
+  
+  # Erstelle MedelexisLicenseFile.xml auf Basis MedelexisLicenseFile.xsd mit Enveloped Template MedelexisLicenseFileWithSignatureTemplate.xml
+  # Signiere Datei 
+  # Verschlüsselte Datei
+  def gen_license_file(user)
     @errors = []
-    userLogin = find_user(params)
-    @errors << "Could not determine userid" unless userLogin
-    @errors << "Cannot create license for user anonymous" if userLogin and userLogin.anonymous?
+    @errors << "Could not determine userid" unless user
+    @errors << "Cannot create license for user anonymous" if user and user.anonymous?
     data_dir = File.expand_path(File.join(File.expand_path(File.dirname(__FILE__)), '..', '..', 'data'))
     keystore          = '/srv/distribution-keys'
     signingKey        = "#{keystore}/signingKey.pem"
     encryptionKeyPub  = "#{keystore}/encryptionKeyPub.pem"
     template          = "#{keystore}/session-key-template.xml"
     [signingKey, encryptionKeyPub, template].each{ |f| @errors << "Missing file #{f}" unless File.exists?(f) } # unless `hostname`.chomp.eql?('ng-tr')
-    @errors << "Cannot create license for user anonymous" if userLogin and userLogin.anonymous? 
-    if @errors.size == 0 and userLogin
-      userName          = userLogin.login
+    if @errors.size == 0 and user
+      userName          = user.login
       license           = "#{data_dir}/#{userName}.xml"
       FileUtils.cp("#{data_dir}/default.xml", license, :verbose => true, :preserve => true) unless File.exists?(license)
       signed            = "#{data_dir}/#{userName}_signed.xml"
@@ -30,23 +37,24 @@ class LicenseController < ApplicationController
       okay = system(cmd_1) and system(cmd_2) and
           system("logger #{File.basename(__FILE__)}: from IP #{request.remote_ip} signed  #{crypted} #{File.size(crypted)} bytes #{File.ctime(crypted)}")
       respond_to do |format|
-      # format.xml  { render :xml => IO.read("#{data_dir}/default.xml") }
       format.xml  { render :xml => IO.read(crypted) }
       end
     else
+      system("logger #{File.basename(__FILE__)}: from IP #{request.remote_ip} had #{@errors.size} errors for user: #{user ? user.login : 'anonymous'}")
       respond_to do |format|
-        format.xml  { render :xml => get_error_xml(params, @errors) }
-        # puts request.inspect
+        format.xml  { render :xml => get_error_xml(@errors) }
       end
     end
+  end
+  
+  def gen_license_xml
+    gen_license_file(find_user(params))
   end
   
 private
   def find_user(params)
     user_by_session = User.find_by_id(request.session[:user_id])
     msg =  "find_user: User.current '#{User.current}' by session '#{user_by_session}' params #{params}"
-    puts msg
-    puts params
     system("logger #{File.basename(__FILE__)}: #{msg}")
     return nil unless user_by_session 
     return User.find_by_id(user_by_session) if params[:login].eql?('current')
@@ -56,7 +64,7 @@ private
     nil
   end
   
-  def get_error_xml(params, error)
+  def get_error_xml(error)
     error_xml = %(
 <note>
 <heading>User #{User.current}/#{User.find_by_id(request.session[:user_id])} cannot generate license.</heading>
