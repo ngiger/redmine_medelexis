@@ -3,11 +3,11 @@ class LicenseController < ApplicationController
   layout 'base'
   skip_before_filter :check_if_login_required
   
-  # Zum Testen 0.0.0.0:30001/my/license/fe2167a329f3c22799b1bcc3cb8cf93e7688f136.xml
+  # Zum Testen 0.0.0.0:30001/license.xml?key=fe2167a329f3c22799b1bcc3cb8cf93e7688f136
   def gen_license_xml_via_api
-    user = User.find_by_api_key(params['api_key'])
+    user = User.find_by_api_key(params['key'])
     if user
-      gen_license_file(User.find_by_api_key(params['api_key']))
+      gen_license_file(user)
     else
       render :xml =>  get_error_xml(['Wrong api_key?']) 
     end
