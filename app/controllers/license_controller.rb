@@ -9,7 +9,7 @@ class LicenseController < ApplicationController
     if user
       gen_license_file(user)
     else
-      render :xml =>  get_error_xml(['Wrong api_key?']) 
+      render :status => 403  #  forbidden
     end
   end
   
@@ -40,10 +40,10 @@ class LicenseController < ApplicationController
       format.xml  { render :xml => IO.read(crypted) }
       end
     else
+      pp __LINE__
       system("logger #{File.basename(__FILE__)}: from IP #{request.remote_ip} had #{@errors.size} errors for user: #{user ? user.login : 'anonymous'}")
-      respond_to do |format|
-        format.xml  { render :xml => get_error_xml(@errors) }
-      end
+      render :status => 403  #  forbidden
+      # render(:file => File.join(Rails.root, 'public/403.html'), :status => 403, :layout => false)
     end
   end
   
