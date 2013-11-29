@@ -20,11 +20,13 @@
 # along with redmine_contacts.  If not, see <http://www.gnu.org/licenses/>.
 require File.expand_path(File.dirname(__FILE__) + '/../../../test/test_helper')
 
+Medelexis_License_Regexp = /<license endOfLicense="([0-9\-\+:]*)"\s*id="([\w\.]*)"\s*licenseType="(\w*)"\s*startOfLicense="([0-9\-\+:]*)"/
+
 def fixture_files_path
   "#{File.expand_path('..',__FILE__)}/fixtures/files/"
 end
 
-def bypass_login(user_login)
+def login_as(user_login)
   clear_password = 'dummy'
   user = User.find_by_login(user_login)
   calculated =  User.hash_password("#{user.salt}#{User.hash_password clear_password}")

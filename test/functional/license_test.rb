@@ -22,7 +22,6 @@
 require File.expand_path(File.dirname(__FILE__) + '/../test_helper')
 
 class Redmine::ApiTest::LicenseTest < ActionController::IntegrationTest
-#  include Devise::TestHelpers
     ActiveRecord::Fixtures.create_fixtures(Redmine::Plugin.find(:redmine_medelexis).directory + '/test/fixtures/', 
                             [:settings,
                              :users,
@@ -38,15 +37,32 @@ class Redmine::ApiTest::LicenseTest < ActionController::IntegrationTest
     RedmineMedelexis::TestCase.plugin_fixtures :redmine_medelexis, :all
   end
   
+   test "auth by api_key and verify content of generated license.xml" do
+    signed_xml = File.join(Dir.tmpdir, 'redmine_medelexis', 'mmustermann_signed.xml')
+    FileUtils.rm_f(signed_xml)                           
+    get "/my/license.xml?key=#{User.find_by_login('mmustermann').api_key}"
+    assert_response :success
+    assert File.exists?(signed_xml)
+    content = IO.read(signed_xml)
+    assert_match('<medelexisLicense xmlns', content)
+    assert_match('<customerId>mmustermann</customerId>', content)
+    assert_match('<numberOfStations>0</numberOfStations>', content)
+    assert_match('<numberOfPractitioners>1</numberOfPractitioners>', content)
+    assert_match('<Signature xmlns', content)    
+    assert_match(Medelexis_License_Regexp, content)
+    assert_match('id="ch.medelexis.application.feature"', content)
+    assert_match('id="ch.elexis.base.textplugin.feature"', content)
+  end
+
   test "GET /my/license.xml invalid api_key" do
-    bypass_login('admin')
+    login_as('admin')
     @parameters = {:key => 'invalid_key' }
     put '/my/license/12345.xml', @parameters
     assert_response 404
   end
 
   test "GET /my/license.xml with good api key" do
-    bypass_login('mmustermann')
+    login_as('mmustermann')
     api_key = get_api_key('wfeconnector')
     url_with_api = "/my/license/#{api_key}.xml"
     @parameters = { 'key' => api_key }
@@ -54,26 +70,26 @@ class Redmine::ApiTest::LicenseTest < ActionController::IntegrationTest
     assert_response :success
   end
   
-  test "GET /mmustermann/license.xml as mmustermann" do
-    bypass_login('mmustermann')
+ test "GET /mmustermann/license.xml as mmustermann" do
+    login_as('mmustermann')
     res = get '/mmustermann/license.xml', nil
     assert_response :success
   end
   
   test "GET /mmustermann/license.xml as admin" do
-    bypass_login('admin')
+    login_as('admin')
     res = get '/mmustermann/license.xml', nil
     assert_response :success
   end
   
   test "GET /admin/license.xml as mmustermann" do
-    bypass_login('mmustermann')
+    login_as('mmustermann')
     res = get '/admin/license.xml', nil
     assert_response 404
   end
   
   test 'access to admin and my/page as admin' do
-    bypass_login('admin')
+    login_as('admin')
     assert_equal 'admin', User.current.login
     get '/my/page'
     assert_response :success
@@ -82,12 +98,12 @@ class Redmine::ApiTest::LicenseTest < ActionController::IntegrationTest
   end
   
   test 'access to admin and my/page as mmustermann' do
-    bypass_login('mmustermann')
+    login_as('mmustermann')
     assert_equal 'mmustermann', User.current.login
     get '/my/page'
     assert_response :success
     get '/admin'
     assert_response 403 # forbidden
   end
-  
+
 end
