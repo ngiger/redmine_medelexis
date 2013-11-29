@@ -24,63 +24,58 @@ class LicenseController < ApplicationController
   # issues_001:  id: 1  tracker_id: 4  project_id: 3 #  subject: ch.medelexis.application.feature
   # contacts_004:  id: 4  first_name: Praxis Dr. Mustermann  is_company: true created_on: 2013-11-15 14:30:21.000000000 +01:00
   # contacts_002:  id: 2  first_name: Max  last_name: Mustermann  is_company: false created_on: 2013-10-23 08:35:17.000000000 +02:00
+  # members_001:  id: 1  user_id: 5  project_id: 3
 
-  def get_license_issues(user)
-    if false
-    puts "get_project for #{user} with id #{user.id} current #{User.current}"
-      # Valid options:
-  # * :project => limit the condition to project
-  # * :with_subprojects => limit the condition to project and its subprojects
-  # * :member => limit the condition to the user projects
-#    pp Contact.visible.find(:all, :conditions => {:assigned_to_id  => user.id}, :limit => 20)
-#    contact = Contact.visible.find(:all, :conditions => {:author_id  => user.id}, :limit => 20)
-##    contact = Contact.find_by_emails([user.mail]) return project 2 the wrong one
-##    pp contact
-##    contact = Contact.find(user.id) throws error notne find
-    contact = Contact.find(1)
-    pp contact
-    pp Contact.find_by_id(3)
-#    contact = Contact.find(user.id) throws error notne find
-#    project = Project.find_by_contact_id(contact.id) 3  NoMethodError (undefined method `find_by_contact_id' for 
-    project = Project.find(1)
-    # pp Project.where(
-    pp project
-    pp Project.visible_condition(User.current)   #     => "projects.status = 1"
-    pp Project.visible_condition(user)   #     => "projects.status = 1"
-    pp Project.where(Project.visible_condition(user))   #     => "projects.status = 1"
-#    pp Issue.where(Issue.visible_condition(user))   #     => "projects.status = 1"
+  def get_ownerdata_and_license_issues(user)
+    # puts "get_project for #{user} with id #{user.id} current #{User.current} #{user.name}"
+    project = Project.find_by_identifier(user.name) || Project.find_by_name(user.name)
+    unless project
+      kundenRolle = Role.where("name = 'Kunde'")
+      members =  Member.find_all_by_user_id(user.id)
+      return nil, nil unless members.size == 1
+      member = members[0]
+      # Issue.all.each{|issue| pp issue}
+      # pp ContactQuery.where(Contact.visible_condition(user))
+      condition = "project_id = #{member.project_id}"
+      contact =  Contact.joins(:projects).where(condition)[0]
+      issues = Issue.where(condition, Date.today)
+      # puts "Customfield von contact ist #{contact.custom_field_values.inspect} (Should be Abostatus)"
+      ownerData = [
+                    {"customerId"             => [user.login],
+                      "misApiKey"              => ["encryptedMisApiKey"],
+                      "organization"           => [contact.company],
+                      "numberOfStations"       => ["0"],
+                      "numberOfPractitioners"  => ["1"]}
+
+                ]
+      licenses = []
+      # require 'pry'; binding.pry
+      issues.each{ |issue|  #>"2013-12-12+01:00",
+        licenses<< { "endOfLicense"    => "#{issue.due_date ? issue.due_date.strftime('%Y-%m-%d%Z') : 'Kein Datum'}",
+                      "id"              => issue.subject,
+                      "licenseType"     => issues.last.custom_field_values[0],
+                      "startOfLicense"  => "#{issue.start_date.strftime('%Y-%m-%d%Z')}",
+        }
+      }
+      return ownerData, licenses
+    end
     
-#    issues = Issue.find_by_project_id(project.id) 
-#    pp issues
-    end 
-    true
+    return nil, nil
   end
+  
   # Erstelle MedelexisLicenseFile.xml auf Basis MedelexisLicenseFile.xsd mit Enveloped Template MedelexisLicenseFileWithSignatureTemplate.xml
   def gen_xml_content(user, filename)
     # puts "gen_xml_content #{user} cur  #{User.current} -> #{filename}"
-    licenses = get_license_issues(user)
+    ownerData, licenses = get_ownerdata_and_license_issues(user)
+    unless ownerData
+      @errors << 'No ownerData found'
+      return false
+    end
     unless licenses
-      @errors << 'No project found'
+      @errors << 'No licenses found'
       return false
     end
     out = File.open(filename, 'w+')
-    ownerData =  [{"customerId"=>["mmustermann"],
-                   "misApiKey"=>["encryptedMisApiKey"],
-                   "organization"=>["Praxis Dr. Mustermann"],
-                   "numberOfStations"=>["0"],
-                   "numberOfPractitioners"=>["1"]}]
-
-    licenses =[{
-                   "endOfLicense"=>"2013-12-12+01:00",
-                   "id"=>"ch.medelexis.application.feature",
-                   "licenseType"=>"TRIAL",
-                   "startOfLicense"=>"2013-11-12+01:00"},
-               {"endOfLicense"=>"2013-12-12+01:00",
-                "id"=>"ch.elexis.base.textplugin.feature",
-                "licenseType"=>"TRIAL",
-                "startOfLicense"=>"2013-11-12+01:00"
-               }
-    ]
     all_xml = {"xmlns"=>"http://www.medelexis.ch/MedelexisLicenseFile",
   "generatedOn"=> Time.now.utc,
   "license"=>licenses,
