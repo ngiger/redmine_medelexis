@@ -119,7 +119,7 @@ class LicenseController < ApplicationController
       license           = "#{dest_dir}/#{userName}.xml"
       xml = gen_xml_content(user, license)
       unless xml
-        RedmineMedelexis.log_to_system(request, " had xml-errors for user: #{user ? user.login : 'anonymous'}")
+        log_to_system(request, " had xml-errors for user: #{user ? user.login : 'anonymous'}")
         render :status => 403
         return
       end
@@ -129,14 +129,14 @@ class LicenseController < ApplicationController
       cmd_1 =  "xmlsec1 sign --privkey-pem #{signingKey} #{license} > #{signed}"
       cmd_2 =  "xmlsec1 encrypt --pubkey-pem #{encryptionKeyPub} --session-key des-192 --xml-data  #{signed} --output #{crypted}  #{template}"
       okay = system(cmd_1) and system(cmd_2) and
-        RedmineMedelexis.log_to_system(request, "signed  #{crypted} #{File.size(crypted)} bytes #{File.ctime(crypted)}")
+        log_to_system(request, "signed  #{crypted} #{File.size(crypted)} bytes #{File.ctime(crypted)}")
       content = IO.read(crypted)
       respond_to do |format|
         format.xml  { render :xml => content }
       end
       FileUtils.rm_f([signed, crypted, license]) unless defined?(MiniTest)
     else
-      RedmineMedelexis.log_to_system(request, "had #{@errors.size} errors for user: #{user ? user.login : 'anonymous'}")
+      log_to_system(request, "had #{@errors.size} errors for user: #{user ? user.login : 'anonymous'}")
       render :status => 403  #  forbidden
       # render(:file => File.join(Rails.root, 'public/403.html'), :status => 403, :layout => false)
     end
@@ -145,14 +145,14 @@ class LicenseController < ApplicationController
 # Zum Testen http://0.0.0.0:30001/my/license/fe2167a329f3c22799b1bcc3cb8cf93e7688f136.xml # development
 # http://0.0.0.0:30001/my/license?e631d4560a13047970cc2ba4a95519782bdd4106.xml
   def gen_license_xml_via_api
-    RedmineMedelexis.log_to_system(request, "gen_license_xml_via_api user #{User.current}: #{params.inspect}\napi_key is #{params['key']} action_name #{action_name} enabled?#{Setting.rest_api_enabled?}  api_key_from_request #{api_key_from_request}")
+    log_to_system(request, "gen_license_xml_via_api user #{User.current}: #{params.inspect}\napi_key is #{params['key']} action_name #{action_name} enabled?#{Setting.rest_api_enabled?}  api_key_from_request #{api_key_from_request}")
     check_if_login_required if params['key'] == nil
     if params['key'] == nil and not User.current.anonymous?
-      RedmineMedelexis.log_to_system(request, "333: Must use current User #{User.current}")
+      log_to_system(request, "333: Must use current User #{User.current}")
       user = User.current
     else
       user = User.find_by_api_key(params['key'])
-      RedmineMedelexis.log_to_system(request, "333: Found user #{user.inspect} by apikey #{params['key'].inspect}")
+      log_to_system(request, "333: Found user #{user.inspect} by apikey #{params['key'].inspect}")
     end
     if user
       gen_license_file(user)
@@ -163,15 +163,20 @@ class LicenseController < ApplicationController
 
   def gen_license_xml
     # require 'pry'; binding.pry
-    RedmineMedelexis.log_to_system(request, "gen_license_xml #{params}")
+    log_to_system(request, "gen_license_xml #{params}")
     gen_license_file(find_user(params))
   end
 
 private
+  def log_to_system(request, msg)
+    puts msg
+    system("logger #{File.basename(__FILE__)} from IP #{request.remote_ip}: #{msg.gsub(/[\n'"]/,'')}")
+  end
+
   def find_user(params)
     user_by_session = User.find_by_id(request.session[:user_id])
     msg =  "find_user: User.current '#{User.current}' by session '#{user_by_session}' params #{params}"
-    RedmineMedelexis.log_to_system(request, msg)
+    log_to_system(request, msg)
     return nil unless user_by_session
     return User.find_by_id(user_by_session) if params[:login].eql?('current')
     return User.find_by_login(params[:login]) if params[:login].eql?(user_by_session.login)
