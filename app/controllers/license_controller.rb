@@ -5,17 +5,6 @@ class LicenseController < ApplicationController
   unloadable
   layout 'base'
   skip_before_filter :check_if_login_required
-  # Zum Testen http://0.0.0.0:30001/my/license/fe2167a329f3c22799b1bcc3cb8cf93e7688f136.xml # development
-  # http://0.0.0.0:30001/my/license?e631d4560a13047970cc2ba4a95519782bdd4106.xml
-  def gen_license_xml_via_api
-    # puts "gen_license_xml_via_api #{params}\napi_key is #{params['key']} action_name #{action_name} enabled?#{Setting.rest_api_enabled?}  api_key_from_request #{api_key_from_request}"
-    user = User.find_by_api_key(params['key'])
-    if user
-      gen_license_file(user)
-    else
-      render :status => 403  #  forbidden
-    end
-  end
 
   # projects_trackers project_id 3 -> tracker_id: 4
   # contacts_projects_003:  project_id: 3  contact_id: 3  created_on: 2013-10-23 08:28:25.000000000 +02:00
@@ -25,7 +14,9 @@ class LicenseController < ApplicationController
   # contacts_004:  id: 4  first_name: Praxis Dr. Mustermann  is_company: true created_on: 2013-11-15 14:30:21.000000000 +01:00
   # contacts_002:  id: 2  first_name: Max  last_name: Mustermann  is_company: false created_on: 2013-10-23 08:35:17.000000000 +02:00
   # members_001:  id: 1  user_id: 5  project_id: 3
-
+  Zeitformat        = '%Y-%m-%d%z'
+  EwigesAblaufdatum = Time.new(2099, 12, 31).strftime(Zeitformat)
+  TrialTime         = 31 # Days
   def get_ownerdata_and_license_issues(user)
     # puts "get_project for #{user} with id #{user.id} current #{User.current} #{user.name}"
     project = Project.find_by_identifier(user.name) || Project.find_by_name(user.name)
@@ -41,20 +32,25 @@ class LicenseController < ApplicationController
       issues = Issue.where(condition, Date.today)
       # puts "Customfield von contact ist #{contact.custom_field_values.inspect} (Should be Abostatus)"
       ownerData = [
-                    {"customerId"             => [user.login],
-                      "misApiKey"              => ["encryptedMisApiKey"],
+                    { "customerId"             => [user.login],
+                      "misApiKey"              => [get_api_key(user.login)],
+                      "projectId"              => member.project_id,
                       "organization"           => [contact.company],
                       "numberOfStations"       => ["0"],
                       "numberOfPractitioners"  => ["1"]}
 
                 ]
       licenses = []
-      # require 'pry'; binding.pry
       issues.each{ |issue|  #>"2013-12-12+01:00",
-        licenses<< { "endOfLicense"    => "#{issue.due_date ? issue.due_date.strftime('%Y-%m-%d%Z') : 'Kein Datum'}",
+                   endOfLicense = issue.due_date ? issue.due_date.strftime(Zeitformat) : Time.new(2099, 12, 31)
+                   if /TRIAL/i.match(issue.custom_field_values[0].to_s)
+                     endOfLicense = (issue.start_date + TrialTime)
+                     next if endOfLicense < Date.today
+                   end
+        licenses<< {  "endOfLicense"    => endOfLicense.strftime(Zeitformat),
                       "id"              => issue.subject,
-                      "licenseType"     => issues.last.custom_field_values[0],
-                      "startOfLicense"  => "#{issue.start_date.strftime('%Y-%m-%d%Z')}",
+                      "licenseType"     => issue.custom_field_values[0].to_s,
+                      "startOfLicense"  => issue.start_date.strftime(Zeitformat),
         }
       }
       return ownerData, licenses
@@ -99,7 +95,7 @@ class LicenseController < ApplicationController
     "SignatureValue"=>[{}]}]}
 
 #    all_xml[:ownerDate] =  ownerData
-    out.write(XmlSimple.xml_out(all_xml, {'RootName' => 'medelexisLicense' ,'XmlDeclaration' => '<?xml version="1.0" encoding="UTF-8" standalone="no" ?>' }))
+    out.write(XmlSimple.xml_out(all_xml, {'RootName' => 'medelexisLicense' ,'XmlDeclaration' => '<?xml version="1.0" encoding="UTF-8" standalone="no"?>' }))
     out.close
     true
   end
@@ -123,7 +119,7 @@ class LicenseController < ApplicationController
       license           = "#{dest_dir}/#{userName}.xml"
       xml = gen_xml_content(user, license)
       unless xml
-        system("logger #{File.basename(__FILE__)}: from IP #{request.remote_ip} had xml-errors for user: #{user ? user.login : 'anonymous'}")
+        RedmineMedelexis.log_to_system(request, " had xml-errors for user: #{user ? user.login : 'anonymous'}")
         render :status => 403
         return
       end
@@ -133,21 +129,41 @@ class LicenseController < ApplicationController
       cmd_1 =  "xmlsec1 sign --privkey-pem #{signingKey} #{license} > #{signed}"
       cmd_2 =  "xmlsec1 encrypt --pubkey-pem #{encryptionKeyPub} --session-key des-192 --xml-data  #{signed} --output #{crypted}  #{template}"
       okay = system(cmd_1) and system(cmd_2) and
-          system("logger #{File.basename(__FILE__)}: from IP #{request.remote_ip} signed  #{crypted} #{File.size(crypted)} bytes #{File.ctime(crypted)}")
+        RedmineMedelexis.log_to_system(request, "signed  #{crypted} #{File.size(crypted)} bytes #{File.ctime(crypted)}")
       content = IO.read(crypted)
       respond_to do |format|
         format.xml  { render :xml => content }
       end
       FileUtils.rm_f([signed, crypted, license]) unless defined?(MiniTest)
     else
-      system("logger #{File.basename(__FILE__)}: from IP #{request.remote_ip} had #{@errors.size} errors for user: #{user ? user.login : 'anonymous'}")
+      RedmineMedelexis.log_to_system(request, "had #{@errors.size} errors for user: #{user ? user.login : 'anonymous'}")
       render :status => 403  #  forbidden
       # render(:file => File.join(Rails.root, 'public/403.html'), :status => 403, :layout => false)
     end
   end
 
+# Zum Testen http://0.0.0.0:30001/my/license/fe2167a329f3c22799b1bcc3cb8cf93e7688f136.xml # development
+# http://0.0.0.0:30001/my/license?e631d4560a13047970cc2ba4a95519782bdd4106.xml
+  def gen_license_xml_via_api
+    RedmineMedelexis.log_to_system(request, "gen_license_xml_via_api user #{User.current}: #{params.inspect}\napi_key is #{params['key']} action_name #{action_name} enabled?#{Setting.rest_api_enabled?}  api_key_from_request #{api_key_from_request}")
+    check_if_login_required if params['key'] == nil
+    if params['key'] == nil and not User.current.anonymous?
+      RedmineMedelexis.log_to_system(request, "333: Must use current User #{User.current}")
+      user = User.current
+    else
+      user = User.find_by_api_key(params['key'])
+      RedmineMedelexis.log_to_system(request, "333: Found user #{user.inspect} by apikey #{params['key'].inspect}")
+    end
+    if user
+      gen_license_file(user)
+    else
+      render :status => 403  #  forbidden
+    end
+  end
+
   def gen_license_xml
-    # puts "gen_license_xml #{params}"
+    # require 'pry'; binding.pry
+    RedmineMedelexis.log_to_system(request, "gen_license_xml #{params}")
     gen_license_file(find_user(params))
   end
 
@@ -155,7 +171,7 @@ private
   def find_user(params)
     user_by_session = User.find_by_id(request.session[:user_id])
     msg =  "find_user: User.current '#{User.current}' by session '#{user_by_session}' params #{params}"
-    system("logger #{File.basename(__FILE__)}: #{msg}")
+    RedmineMedelexis.log_to_system(request, msg)
     return nil unless user_by_session
     return User.find_by_id(user_by_session) if params[:login].eql?('current')
     return User.find_by_login(params[:login]) if params[:login].eql?(user_by_session.login)
