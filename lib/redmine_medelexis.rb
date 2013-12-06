@@ -106,6 +106,7 @@ module RedmineMedelexis
                   endOfLicense = issue.due_date ? issue.due_date.strftime(Zeitformat) : Time.new(2099, 12, 31)
                   if /TRIAL/i.match(issue.custom_field_values[0].to_s)
                     endOfLicense = (issue.start_date + TrialTime)
+                    self.debug "TRIAL issue #{issue.id} of #{issue.due_date} endOfLicense #{endOfLicense} is expired? #{endOfLicense < Date.today}"
                     next if endOfLicense < Date.today
                   end
       licenses<< {  "endOfLicense"    => endOfLicense.strftime(Zeitformat),
