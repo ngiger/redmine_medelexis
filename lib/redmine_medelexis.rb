@@ -17,7 +17,7 @@ require 'xmlsimple'
 
 module RedmineMedelexis  
   def self.log_to_system(msg)
-    puts "#{Time.now}: #{msg}"
+    # puts "#{Time.now}: #{msg}"
     system("logger #{File.basename(__FILE__)}: #{msg.gsub(/[\n'"]/,'')}")
   end
   

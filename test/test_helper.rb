@@ -27,7 +27,10 @@ def fixture_files_path
 end
 
 def login_as(user_login)
-  clear_password = 'dummy'
+  clear_password = 'dummy8753'
+  change_user_password(user_login, clear_password)
+  log_user(user_login, clear_password)
+  return
   user = User.find_by_login(user_login)
   calculated =  User.hash_password("#{user.salt}#{User.hash_password clear_password}")
   user.hashed_password =  calculated

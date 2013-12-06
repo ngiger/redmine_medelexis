@@ -20,7 +20,7 @@
 # along with redmine_contacts.  If not, see <http://www.gnu.org/licenses/>.
 require File.expand_path(File.dirname(__FILE__) + '/../test_helper')
 
-class Redmine::ApiTest::LicenseTest < ActionController::IntegrationTest
+class Redmine::ApiTest::LicenseTest < ActionController::TestCase
     ActiveRecord::Fixtures.create_fixtures(Redmine::Plugin.find(:redmine_medelexis).directory + '/test/fixtures/',
                             [:settings,
                              :issues,
@@ -37,6 +37,7 @@ class Redmine::ApiTest::LicenseTest < ActionController::IntegrationTest
                              :custom_values,
                              ])
   def setup
+    @controller = LicenseController.new
     Setting.rest_api_enabled = '1'
     Setting.login_required = '1'
     FileUtils.rm_rf(File.join(Dir.tmpdir, 'redmine_medelexis'))
@@ -104,5 +105,6 @@ class Redmine::ApiTest::LicenseTest < ActionController::IntegrationTest
 #    assert     ( /"ch.medelexis.application.feature"/ .match(xml) )
     verify_license_xml_content(xml, username)
   end
+
 
 end
