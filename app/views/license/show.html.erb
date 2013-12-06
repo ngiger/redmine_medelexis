@@ -1,5 +1,29 @@
-<h2>License</h2>
-Current user: <%= User.current.inspect %></br>
+<h2>License for user <%= @user %></h2>
+<p>API-Key is: <%= @api_key%></p>
+<% info = @info %></br>
+<% if info %>
+  Info: <%= info.inspect %></br>
+  <ul>
+    <li>customerId: <%= info['customerId'] %> </li>
+    <li>projectId: <%= info['projectId'] %> </li>
+    <li>organization: <%= info['organization'] %> </li>
+    <li>numberOfStations: <%= info['numberOfStations'] %> </li>
+    <li>numberOfPractitioners: <%= info['numberOfPractitioners'] %> </li>
+  </ul>
+  <% info['license'].each{ |item| %>
+  <ol>
+    license:<%= item.inspect %></br>
+    <li>Lizenz for <h3><%= item['id'] %></h3></li>
+    <ul>
+      <li>licenseType: <%= item['licenseType'] %> </li>
+      <li>startOfLicense: <%= item['startOfLicense'] %> </li>
+      <li>endOfLicense: <%= item['endOfLicense'] %> </li>
+    <ul>
+  </ol>
+  <% } %>
+<% else %>
+  Lizenz ungültig!
+<% end %>
 
  
 

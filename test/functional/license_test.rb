@@ -88,7 +88,7 @@ class Redmine::ApiTest::LicenseTest < ActionController::TestCase
     assert_not_nil res
     content = res.inspect.to_s
     assert     ( /#{username}/.match(content) )
-    assert     ( /#{get_api_key(username)}/.match(content) )
+    assert     ( /#{RedmineMedelexis.get_api_key(username)}/.match(content) )
     assert     ( /Praxis Dr. Mustermann/.match(content) )
     assert     ( /"ch.medelexis.application.feature"/ .match(content) )
   end
@@ -100,7 +100,7 @@ class Redmine::ApiTest::LicenseTest < ActionController::TestCase
     xml  = RedmineMedelexis.xml_content(info)
     assert_not_nil xml
     assert     ( /#{username}/.match(xml) )
-    assert     ( /#{get_api_key(username)}/.match(xml) )
+    assert     ( /#{RedmineMedelexis.get_api_key(username)}/.match(xml) )
     assert     ( /Praxis Dr. Mustermann/.match(xml) )
 #    assert     ( /"ch.medelexis.application.feature"/ .match(xml) )
     verify_license_xml_content(xml, username)

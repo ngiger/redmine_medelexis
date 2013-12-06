@@ -3,5 +3,5 @@
 
 #custom routes for this plugin
   resources :licenses
-  match 'my/license', :to => 'license#gen_license', :via => 'get'
-  match ':login/license', :to => 'license#gen_license', :via => 'get'
+  match 'my/license', :to => 'license#show', :via => 'get'
+#  match ':login/license', :to => 'license#show', :via => 'get', :render => :api

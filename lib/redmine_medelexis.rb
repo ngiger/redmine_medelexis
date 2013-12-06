@@ -16,13 +16,27 @@
 require 'xmlsimple'
 
 module RedmineMedelexis  
+  def self.debug(msg)
+    # puts "#{Time.now} dbg: #{msg}"
+  end
+  
   def self.log_to_system(msg)
-    # puts "#{Time.now}: #{msg}"
+    self.debug(msg)
     system("logger #{File.basename(__FILE__)}: #{msg.gsub(/[\n'"]/,'')}")
+  end
+
+  def self.get_api_key(username)
+    user = User.find_by_login(username)
+    token = Token.find_by_user_id(user.id)
+    token = Token.where("user_id = #{user.id} and action == 'api'")
+    api_key = token[0].value
   end
   
   def self.license_info_for_user(user)
+    RedmineMedelexis.debug "#{__LINE__}: user #{user.inspect}"
     project = RedmineMedelexis.get_project(user)
+    
+    RedmineMedelexis.debug "#{__LINE__}: project #{project.inspect}"
     return nil unless project
     info = {}
     info['ownerdata'] =  RedmineMedelexis.get_ownerdata(user)
@@ -33,7 +47,9 @@ module RedmineMedelexis
   def self.xml_content(license_info)
     return nil unless license_info
     ownerData = license_info['ownerdata'] 
+    return nil unless ownerData
     licenses  = license_info['license']
+    return nil unless licenses
     all_xml = {"xmlns"=>"http://www.medelexis.ch/MedelexisLicenseFile",
   "generatedOn"=> Time.now.utc,
   "license"=>licenses,
@@ -75,11 +91,13 @@ module RedmineMedelexis
     TrialTime         = 31 # Days
   def self.get_member(user)
     members =  Member.find_all_by_user_id(user.id)
+    RedmineMedelexis.debug "#{__LINE__}: members #{members.inspect}"
     if members.size == 1
       members.first
     else
       kundenRolle = Role.where("name = 'Kunde'")
       members =  Member.find_all_by_user_id(user.id)
+      RedmineMedelexis.debug "#{__LINE__}: members #{members.inspect}"
       return nil unless members.size == 1
       return members.first
     end
@@ -89,6 +107,7 @@ module RedmineMedelexis
     # Project.all.each{|p| pp puts "Project id #{p.id} identifier #{p.identifier} name #{p.name}" }
     return nil unless user
     project = Project.find_by_identifier(user.name) || Project.find_by_name(user.name)
+    RedmineMedelexis.debug "#{__LINE__}: project #{project.inspect}"
     return project if project
     member = get_member(user)
     return nil unless member
@@ -102,6 +121,7 @@ module RedmineMedelexis
     member = members[0]
     condition = "project_id = #{member.project_id}"
     contact =  Contact.joins(:projects).where(condition)[0]
+    return nil unless contact
     ownerData = [
                   { "customerId"             => [user.login],
                     "misApiKey"              => [get_api_key(user.login)],

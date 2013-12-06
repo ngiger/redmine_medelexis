@@ -15,7 +15,7 @@ class MedelexisHookListener < Redmine::Hook::ViewListener
     return nil unless User.current.admin
     userId = context[:user].id
     apiKey = User.find(userId).api_key
-    return content_tag(:a, l("gen_license_jar"), :href => "/license/#{context[:user].login}/gen_license_jar") + content_tag("div", "#{l(:setting_mail_handler_api_key)} #{apiKey}")
+    return content_tag(:a, l("gen_license_jar"), :href => "/my/#{context[:user].login}/license") + content_tag("div", "#{l(:setting_mail_handler_api_key)} #{apiKey}")
   end
   
   def log_issue(action, context)
