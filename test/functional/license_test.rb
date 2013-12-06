@@ -93,18 +93,4 @@ class Redmine::ApiTest::LicenseTest < ActionController::TestCase
     assert     ( /"ch.medelexis.application.feature"/ .match(content) )
   end
 
-  test "verify license.xml content of a valid user" do
-    username = 'mmustermann'
-    user = User.find_by_login(username)
-    info = RedmineMedelexis.license_info_for_user(user)
-    xml  = RedmineMedelexis.xml_content(info)
-    assert_not_nil xml
-    assert     ( /#{username}/.match(xml) )
-    assert     ( /#{RedmineMedelexis.get_api_key(username)}/.match(xml) )
-    assert     ( /Praxis Dr. Mustermann/.match(xml) )
-#    assert     ( /"ch.medelexis.application.feature"/ .match(xml) )
-    verify_license_xml_content(xml, username)
-  end
-
-
 end

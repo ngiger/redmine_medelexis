@@ -12,7 +12,6 @@ class LicenseController < ApplicationController
   def show
     RedmineMedelexis.log_to_system("show from IP #{request.remote_ip} user #{User.current} : api_key is #{params['key']} action_name #{action_name} enabled?#{Setting.rest_api_enabled?}  api_key_from_request #{api_key_from_request}")
     @user = find_user(params)
-    pp @info
     find_license_info
     respond_to do |format| 
       format.html { render template: "license/show"; } 
@@ -24,12 +23,15 @@ class LicenseController < ApplicationController
 private
   def find_user(params)
     check_if_login_required if params['key'] == nil
-    if params['key'] == nil and not User.current.anonymous?
-      RedmineMedelexis.log_to_system("333: Must use current User #{User.current}")
+    if params['key'] == nil and params['login']
+      @user = User.find_by_login(params['login'])
+      RedmineMedelexis.log_to_system("#{__LINE__}: Must use user passed as login #{params['login']} is #{@user}. current User #{User.current}")
+    elsif params['key'] == nil and not User.current.anonymous?
+      RedmineMedelexis.log_to_system("#{__LINE__}: Must use current User #{User.current}")
       @user = User.current
     else
       @user = User.find_by_api_key(params['key'])
-      RedmineMedelexis.log_to_system("3334: Found user #{@user.inspect} by apikey #{params['key'].inspect}")
+      RedmineMedelexis.log_to_system("#{__LINE__}: Found user #{@user.inspect} by apikey #{params['key'].inspect}")
     end
     RedmineMedelexis.debug("#{__LINE__}: user ist #{@user.inspect}")
     @user

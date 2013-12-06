@@ -1,6 +1,6 @@
 <h2>License for user <%= @user %></h2>
 <p>API-key is: <%= @api_key%></p>
-<% info = @info; ownerdata = info['ownerdata'] if @info %></br>
+<% ownerdata = {}; info = @info; ownerdata = @info['ownerdata'] if @info and @info['ownerdata'] %>
 <% if info %>
   <ul>
     <li>customerId: <%= ownerdata['customerId'] %> </li>
@@ -11,18 +11,18 @@
   </ul>
   <% info['license'].each{ |item| %>
   <ol>
-    license:<%= item.inspect %></br>
+    license:<%= item.inspect %>
     <li>Lizenz for <h3><%= item['id'] %></h3></li>
     <ul>
       <li>licenseType: <%= item['licenseType'] %> </li>
       <li>startOfLicense: <%= item['startOfLicense'] %> </li>
       <li>endOfLicense: <%= item['endOfLicense'] %> </li>
-    <ul>
+    </ul>
   </ol>
   <% } %>
-  Info (raw data): <%= @info.inspect %></br>
+  Info (raw data): <%= @info.inspect %>
 <% else %>
-  Lizenz ungültig!
+  <h3>Invalid license.</h3>
 <% end %>
 
  

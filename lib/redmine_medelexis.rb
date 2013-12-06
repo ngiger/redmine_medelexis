@@ -15,7 +15,7 @@
 
 module RedmineMedelexis  
   def self.debug(msg)
-    puts "#{Time.now} dbg: #{msg}"
+    # puts "#{Time.now} dbg: #{msg}"
   end
   
   def self.log_to_system(msg)
@@ -77,6 +77,7 @@ module RedmineMedelexis
     RedmineMedelexis.debug "#{__LINE__}: project #{project.inspect}"
     return project if project
     member = get_member(user)
+    RedmineMedelexis.debug "#{__LINE__}: member #{member.inspect}"
     return nil unless member
     Project.find(member.project_id)
   end
@@ -88,6 +89,7 @@ module RedmineMedelexis
     member = members[0]
     condition = "project_id = #{member.project_id}"
     contact =  Contact.joins(:projects).where(condition)[0]
+    RedmineMedelexis.debug "#{__LINE__}: contact #{contact.inspect} for member #{member.inspect}"
     return nil unless contact
     ownerData = { "customerId"             => user.login,
                   "misApiKey"              => get_api_key(user.login),

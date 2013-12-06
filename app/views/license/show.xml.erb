@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <medelexisLicense xmlns="http://www.medelexis.ch/MedelexisLicenseFile" generatedOn="<%= Time.now %>">
 <% if @info %>
-  <% ownerdata = {}; ownerdata = @info['ownerdata'] if @info %>
+  <% ownerdata = {}; ownerdata = @info['ownerdata'] if @info and @info['ownerdata'] %>
   <ownerData>
     <customerId><%= ownerdata['customerId'] %></customerId>
     <misApiKey><%= ownerdata['misApiKey'] %></misApiKey>
