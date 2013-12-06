@@ -15,9 +15,9 @@ class LicenseController < ApplicationController
     pp @info
     find_license_info
     respond_to do |format| 
-      format.html { render template: "license/show"; RedmineMedelexis.debug("#{__LINE__}: html") } 
+      format.html { render template: "license/show"; } 
       format.xml  { if  @info then render else render_error(:status => :unauthorized) end; } 
-      format.api  { render template: "license/show"; RedmineMedelexis.debug("#{__LINE__}: api") } 
+      format.api  { render template: "license/show"; } 
     end
   end
   
