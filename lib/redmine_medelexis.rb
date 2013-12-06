@@ -26,10 +26,9 @@ module RedmineMedelexis
   end
 
   def self.get_api_key(username)
-    user = User.find_by_login(username)
-    token = Token.find_by_user_id(user.id)
-    token = Token.where("user_id = #{user.id} and action == 'api'")
-    api_key = token[0].value
+    user = User.find_by_login(username)    
+    token = Token.find_by_user_id_and_action(user.id, :api)
+    token ? token.value : nil
   end
   
   def self.license_info_for_user(user)
