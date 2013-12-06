@@ -8,4 +8,5 @@ Redmine::Plugin.register :redmine_medelexis do
 end
 
 where = File.expand_path(File.dirname(__FILE__))
-require "#{where}/lib/medelexis_hook_listener"
+# require "#{where}/lib/medelexis_hook_listener"
+require 'redmine_medelexis'

@@ -26,7 +26,7 @@ class MedelexisHookListener < Redmine::Hook::ViewListener
   def log_issue(action, context)
     issue = context[:issue]
     params = context[:params]
-    system("logger redmine:#{action} issue '#{issue.inspect}' params '#{params.inspect}'")
+    RedmineMedelexis.log_to_system("logger redmine:#{action} issue '#{issue.inspect}' params '#{params.inspect}'")
   end
   
   # :controller_issues_edit_after_save    :params, :issue, :time_entry, :journal
