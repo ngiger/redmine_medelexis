@@ -1,0 +1,51 @@
+---
+issues_001:
+  id: 1
+  tracker_id: 4
+  project_id: 3
+  subject: ch.medelexis.application.feature
+  description: ''
+  due_date: 
+  category_id: 
+  status_id: 1
+  assigned_to_id: 
+  priority_id: 2
+  fixed_version_id: 
+  author_id: 3
+  lock_version: 2
+  created_on: 2013-10-23 08:42:20.000000000 +02:00
+  updated_on: 2013-11-15 14:37:47.000000000 +01:00
+  start_date: 2013-10-23
+  done_ratio: 0
+  estimated_hours: 
+  parent_id: 
+  root_id: 1
+  lft: 1
+  rgt: 2
+  is_private: false
+  closed_on: 
+issues_002:
+  id: 2
+  tracker_id: 4
+  project_id: 3
+  subject: ch.elexis.base.textplugin.feature
+  description: ''
+  due_date: 2013-11-23
+  category_id: 
+  status_id: 1
+  assigned_to_id: 
+  priority_id: 2
+  fixed_version_id: 
+  author_id: 3
+  lock_version: 0
+  created_on: 2013-10-23 08:55:51.000000000 +02:00
+  updated_on: 2013-10-23 08:55:51.000000000 +02:00
+  start_date: 2013-10-23
+  done_ratio: 0
+  estimated_hours: 
+  parent_id: 
+  root_id: 2
+  lft: 1
+  rgt: 2
+  is_private: false
+  closed_on: 

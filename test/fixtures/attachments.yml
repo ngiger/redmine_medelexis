@@ -1,0 +1,43 @@
+---
+attachments_001:
+  id: 1
+  container_id: 2
+  container_type: Contact
+  filename: foto_arzt.png
+  disk_filename: 131023083840_foto_arzt.png
+  filesize: 190643
+  content_type: image/png
+  digest: 41bb82acd7718cc1a862c10cd6499e2f
+  downloads: 0
+  author_id: 3
+  created_on: 2013-10-23 08:38:40.000000000 +02:00
+  description: avatar
+  disk_directory: 2013/10
+attachments_002:
+  id: 2
+  container_id: 1
+  container_type: Contact
+  filename: marco.jpg
+  disk_filename: 131023084001_marco.jpg
+  filesize: 250833
+  content_type: image/jpeg
+  digest: 3b8702fd599f5407f4415c66f2580924
+  downloads: 0
+  author_id: 3
+  created_on: 2013-10-23 08:40:01.000000000 +02:00
+  description: avatar
+  disk_directory: 2013/10
+attachments_003:
+  id: 3
+  container_id: 3
+  container_type: Contact
+  filename: Olivia-Wilde-2289.jpg
+  disk_filename: 131113160046_Olivia-Wilde-2289.jpg
+  filesize: 116011
+  content_type: image/jpeg
+  digest: e432c12e9a6576cf6b19d4e64c94cd2f
+  downloads: 0
+  author_id: 7
+  created_on: 2013-11-13 16:00:46.000000000 +01:00
+  description: avatar
+  disk_directory: 2013/11

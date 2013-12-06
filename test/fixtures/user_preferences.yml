@@ -1,0 +1,97 @@
+---
+user_preferences_001:
+  id: 1
+  user_id: 1
+  others: '---
+
+    :no_self_notified: ''0''
+
+    :comments_sorting: asc
+
+    :warn_on_leaving_unsaved: ''1''
+
+'
+  hide_mail: false
+  time_zone: ''
+user_preferences_002:
+  id: 2
+  user_id: 3
+  others: '---
+
+    :no_self_notified: ''0''
+
+    :comments_sorting: asc
+
+    :warn_on_leaving_unsaved: ''1''
+
+    :gantt_zoom: 2
+
+    :gantt_months: 6
+
+'
+  hide_mail: false
+  time_zone: ''
+user_preferences_003:
+  id: 3
+  user_id: 4
+  others: '---
+
+    :no_self_notified: ''0''
+
+    :comments_sorting: asc
+
+    :warn_on_leaving_unsaved: ''0''
+
+'
+  hide_mail: false
+  time_zone: Vienna
+user_preferences_004:
+  id: 4
+  user_id: 5
+  others: '---
+
+    :no_self_notified: ''0''
+
+    :comments_sorting: asc
+
+    :warn_on_leaving_unsaved: ''1''
+
+'
+  hide_mail: false
+  time_zone: ''
+user_preferences_005:
+  id: 5
+  user_id: 6
+  others: ! '--- {}
+
+'
+  hide_mail: false
+  time_zone: 
+user_preferences_006:
+  id: 6
+  user_id: 7
+  others: '---
+
+    :no_self_notified: ''0''
+
+    :comments_sorting: asc
+
+    :warn_on_leaving_unsaved: ''1''
+
+'
+  hide_mail: false
+  time_zone: ''
+user_preferences_007:
+  id: 8
+  user_id: 9
+  others: '---
+
+    :no_self_notified: ''0''
+
+    :comments_sorting: asc
+
+    :warn_on_leaving_unsaved: ''1''
+
+'
+  hide_mail: false
+  time_zone: ''

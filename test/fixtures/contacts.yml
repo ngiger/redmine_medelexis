@@ -1,0 +1,85 @@
+---
+contacts_001:
+  id: 1
+  first_name: Marco
+  last_name: Descher
+  middle_name: ''
+  company: MEDEVIT OG
+  phone: ''
+  email: descher@medevit.at
+  website: ''
+  skype_name: ''
+  birthday: 
+  avatar: 
+  background: ''
+  job_title: ''
+  is_company: false
+  author_id: 3
+  assigned_to_id: 
+  created_on: 2013-09-26 14:54:01.000000000 +02:00
+  updated_on: 2013-10-23 08:40:01.000000000 +02:00
+  cached_tag_list: ''
+  visibility: 0
+contacts_002:
+  id: 2
+  first_name: Max
+  last_name: Mustermann
+  middle_name: ''
+  company: Praxis Dr. Mustermann
+  phone: ''
+  email: mmustermann@medevit.at
+  website: ''
+  skype_name: ''
+  birthday: 
+  avatar: 
+  background: ''
+  job_title: Internist
+  is_company: false
+  author_id: 3
+  assigned_to_id: 
+  created_on: 2013-10-23 08:35:17.000000000 +02:00
+  updated_on: 2013-11-15 14:32:07.000000000 +01:00
+  cached_tag_list: Hauptkontakt
+  visibility: 0
+contacts_003:
+  id: 3
+  first_name: Chantalle
+  last_name: Laborista
+  middle_name: ''
+  company: Praxis Dr. Mustermann
+  phone: ''
+  email: chantallepraxismustermann@medevit.at
+  website: ''
+  skype_name: ''
+  birthday: 1984-10-10
+  avatar: 
+  background: ''
+  job_title: MPA
+  is_company: false
+  author_id: 7
+  assigned_to_id: 
+  created_on: 2013-11-13 15:58:58.000000000 +01:00
+  updated_on: 2013-11-15 14:36:34.000000000 +01:00
+  cached_tag_list: ''
+  visibility: 0
+contacts_004:
+  id: 4
+  first_name: Praxis Dr. Mustermann
+  last_name: ''
+  middle_name: ''
+  company: ''
+  phone: '+41718588122'
+  email: praxismustermann@medevit.at
+  website: www.medelexis.ch/praxisdrmustermann
+  skype_name: ''
+  birthday: 
+  avatar: 
+  background: ''
+  job_title: ''
+  is_company: true
+  author_id: 3
+  assigned_to_id: 
+  created_on: 2013-11-15 14:30:21.000000000 +01:00
+  updated_on: 2013-11-15 14:34:26.000000000 +01:00
+  cached_tag_list: ''
+  visibility: 0

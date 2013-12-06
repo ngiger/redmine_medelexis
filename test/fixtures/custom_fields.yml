@@ -1,0 +1,167 @@
+---
+custom_fields_001:
+  id: 1
+  type: ProjectCustomField
+  name: Kundenstatus
+  field_format: list
+  possible_values: ! '---
+
+    - Interessent
+
+    - Neukunde
+
+    - Kunde
+
+    - Ehem. Kunde
+
+    - Inaktiv
+
+    - Nicht anwendbar
+
+'
+  regexp: ''
+  min_length: 0
+  max_length: 0
+  is_required: false
+  is_for_all: false
+  is_filter: true
+  position: 1
+  searchable: true
+  default_value: ''
+  editable: true
+  visible: true
+  multiple: false
+custom_fields_002:
+  id: 2
+  type: IssueCustomField
+  name: Abostatus
+  field_format: list
+  possible_values: ! '---
+
+    - TRIAL
+
+    - LICENSED
+
+    - EXPIRED
+
+'
+  regexp: ''
+  min_length: 0
+  max_length: 0
+  is_required: true
+  is_for_all: true
+  is_filter: true
+  position: 1
+  searchable: true
+  default_value: ''
+  editable: true
+  visible: true
+  multiple: false
+custom_fields_003:
+  id: 3
+  type: InvoiceCustomField
+  name: Stichtag
+  field_format: date
+  possible_values: 
+  regexp: ''
+  min_length: 0
+  max_length: 0
+  is_required: true
+  is_for_all: true
+  is_filter: false
+  position: 1
+  searchable: false
+  default_value: 
+  editable: true
+  visible: true
+  multiple: false
+custom_fields_004:
+  id: 4
+  type: ProjectCustomField
+  name: Beta-Tester
+  field_format: bool
+  possible_values: 
+  regexp: ''
+  min_length: 0
+  max_length: 0
+  is_required: false
+  is_for_all: false
+  is_filter: false
+  position: 2
+  searchable: false
+  default_value: 
+  editable: true
+  visible: true
+  multiple: false
+custom_fields_005:
+  id: 5
+  type: ProjectCustomField
+  name: ! '# Ärzte'
+  field_format: int
+  possible_values: 
+  regexp: ''
+  min_length: 0
+  max_length: 10000
+  is_required: false
+  is_for_all: false
+  is_filter: false
+  position: 3
+  searchable: false
+  default_value: 
+  editable: true
+  visible: true
+  multiple: false
+custom_fields_006:
+  id: 6
+  type: ProjectCustomField
+  name: ! '# Stationen'
+  field_format: int
+  possible_values: 
+  regexp: ''
+  min_length: 0
+  max_length: 10000
+  is_required: false
+  is_for_all: false
+  is_filter: false
+  position: 4
+  searchable: false
+  default_value: 
+  editable: true
+  visible: true
+  multiple: false
+custom_fields_007:
+  id: 7
+  type: ProjectCustomField
+  name: Newsletter
+  field_format: bool
+  possible_values: 
+  regexp: ''
+  min_length: 0
+  max_length: 0
+  is_required: false
+  is_for_all: false
+  is_filter: false
+  position: 5
+  searchable: false
+  default_value: 
+  editable: true
+  visible: true
+  multiple: false
+custom_fields_008:
+  id: 9
+  type: ContactCustomField
+  name: Rechnungsadresse
+  field_format: text
+  possible_values: ! "--- \n...\n"
+  regexp: ''
+  min_length: 0
+  max_length: 0
+  is_required: false
+  is_for_all: false
+  is_filter: false
+  position: 1
+  searchable: false
+  default_value: ''
+  editable: true
+  visible: true
+  multiple: false

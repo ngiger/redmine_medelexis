@@ -1,0 +1,43 @@
+---
+addresses_001:
+  id: 1
+  street1: Flüsliweg 14
+  street2: 
+  city: Rosenheim
+  region: ''
+  postcode: '68422'
+  country_code: CH
+  full_address: Flüsliweg 14, Rosenheim, 68422, Schweiz
+  address_type: business
+  addressable_id: 2
+  addressable_type: Contact
+  created_at: 2013-10-23 08:35:17.000000000 +02:00
+  updated_at: 2013-10-23 08:35:17.000000000 +02:00
+addresses_002:
+  id: 2
+  street1: ''
+  street2: 
+  city: ''
+  region: ''
+  postcode: ''
+  country_code: AT
+  full_address: Österreich
+  address_type: business
+  addressable_id: 1
+  addressable_type: Contact
+  created_at: 2013-10-23 08:40:01.000000000 +02:00
+  updated_at: 2013-10-23 08:40:01.000000000 +02:00
+addresses_003:
+  id: 4
+  street1: Flüsliweg 14
+  street2: 
+  city: Rapperswil
+  region: St. Gallen
+  postcode: '8640'
+  country_code: CH
+  full_address: Flüsliweg 14, Rapperswil, 8640, St. Gallen, Schweiz
+  address_type: business
+  addressable_id: 4
+  addressable_type: Contact
+  created_at: 2013-11-15 14:31:23.000000000 +01:00
+  updated_at: 2013-11-15 14:35:38.000000000 +01:00

@@ -1,0 +1,443 @@
+---
+roles_001:
+  id: 1
+  name: Non member
+  position: 1
+  assignable: true
+  builtin: 1
+  permissions: ! '---
+
+    - :view_issues
+
+    - :add_issues
+
+    - :add_issue_notes
+
+    - :save_queries
+
+    - :view_gantt
+
+    - :view_calendar
+
+    - :view_time_entries
+
+    - :comment_news
+
+    - :view_documents
+
+    - :view_wiki_pages
+
+    - :view_wiki_edits
+
+    - :add_messages
+
+    - :view_files
+
+    - :browse_repository
+
+    - :view_changesets
+
+'
+  issues_visibility: default
+roles_002:
+  id: 2
+  name: Anonymous
+  position: 2
+  assignable: true
+  builtin: 2
+  permissions: ! '---
+
+    - :view_issues
+
+    - :view_gantt
+
+    - :view_calendar
+
+    - :view_time_entries
+
+    - :view_documents
+
+    - :view_wiki_pages
+
+    - :view_wiki_edits
+
+    - :view_files
+
+    - :browse_repository
+
+    - :view_changesets
+
+'
+  issues_visibility: default
+roles_003:
+  id: 3
+  name: Manager
+  position: 3
+  assignable: true
+  builtin: 0
+  permissions: ! '---
+
+    - :add_project
+
+    - :edit_project
+
+    - :close_project
+
+    - :select_project_modules
+
+    - :manage_members
+
+    - :manage_versions
+
+    - :add_subprojects
+
+    - :manage_categories
+
+    - :view_issues
+
+    - :add_issues
+
+    - :edit_issues
+
+    - :manage_issue_relations
+
+    - :manage_subtasks
+
+    - :set_issues_private
+
+    - :set_own_issues_private
+
+    - :add_issue_notes
+
+    - :edit_issue_notes
+
+    - :edit_own_issue_notes
+
+    - :view_private_notes
+
+    - :set_notes_private
+
+    - :move_issues
+
+    - :delete_issues
+
+    - :manage_public_queries
+
+    - :save_queries
+
+    - :view_issue_watchers
+
+    - :add_issue_watchers
+
+    - :delete_issue_watchers
+
+    - :log_time
+
+    - :view_time_entries
+
+    - :edit_time_entries
+
+    - :edit_own_time_entries
+
+    - :manage_project_activities
+
+    - :manage_news
+
+    - :comment_news
+
+    - :add_documents
+
+    - :edit_documents
+
+    - :delete_documents
+
+    - :view_documents
+
+    - :manage_files
+
+    - :view_files
+
+    - :manage_wiki
+
+    - :rename_wiki_pages
+
+    - :delete_wiki_pages
+
+    - :view_wiki_pages
+
+    - :export_wiki_pages
+
+    - :view_wiki_edits
+
+    - :edit_wiki_pages
+
+    - :delete_wiki_pages_attachments
+
+    - :protect_wiki_pages
+
+    - :manage_repository
+
+    - :browse_repository
+
+    - :view_changesets
+
+    - :commit_access
+
+    - :manage_related_issues
+
+    - :manage_boards
+
+    - :add_messages
+
+    - :edit_messages
+
+    - :edit_own_messages
+
+    - :delete_messages
+
+    - :delete_own_messages
+
+    - :view_calendar
+
+    - :view_gantt
+
+    - :view_contacts
+
+    - :view_private_contacts
+
+    - :add_contacts
+
+    - :edit_contacts
+
+    - :delete_contacts
+
+    - :add_notes
+
+    - :delete_notes
+
+    - :delete_own_notes
+
+    - :send_contacts_mail
+
+    - :delete_deals
+
+    - :view_deals
+
+    - :edit_deals
+
+    - :add_deals
+
+    - :manage_contacts
+
+    - :import_contacts
+
+    - :import_deals
+
+    - :manage_public_contacts_queries
+
+    - :save_contacts_queries
+
+    - :view_helpdesk_tickets
+
+    - :view_helpdesk_reports
+
+    - :send_response
+
+    - :edit_helpdesk_settings
+
+    - :edit_helpdesk_tickets
+
+    - :manage_public_canned_responses
+
+    - :manage_canned_responses
+
+    - :view_invoices
+
+    - :edit_invoices
+
+    - :edit_own_invoices
+
+    - :delete_invoices
+
+    - :comment_invoices
+
+    - :edit_invoice_payments
+
+    - :manage_invoices
+
+    - :import_invoices
+
+    - :view_expenses
+
+    - :edit_expenses
+
+    - :edit_own_expenses
+
+    - :delete_expenses
+
+    - :import_expenses
+
+'
+  issues_visibility: all
+roles_004:
+  id: 4
+  name: Entwickler
+  position: 4
+  assignable: true
+  builtin: 0
+  permissions: ! '---
+
+    - :manage_versions
+
+    - :manage_categories
+
+    - :view_issues
+
+    - :add_issues
+
+    - :edit_issues
+
+    - :view_private_notes
+
+    - :set_notes_private
+
+    - :manage_issue_relations
+
+    - :manage_subtasks
+
+    - :add_issue_notes
+
+    - :save_queries
+
+    - :view_gantt
+
+    - :view_calendar
+
+    - :log_time
+
+    - :view_time_entries
+
+    - :comment_news
+
+    - :view_documents
+
+    - :view_wiki_pages
+
+    - :view_wiki_edits
+
+    - :edit_wiki_pages
+
+    - :delete_wiki_pages
+
+    - :add_messages
+
+    - :edit_own_messages
+
+    - :view_files
+
+    - :manage_files
+
+    - :browse_repository
+
+    - :view_changesets
+
+    - :commit_access
+
+    - :manage_related_issues
+
+'
+  issues_visibility: default
+roles_005:
+  id: 5
+  name: Reporter
+  position: 5
+  assignable: true
+  builtin: 0
+  permissions: ! '---
+
+    - :view_issues
+
+    - :add_issues
+
+    - :add_issue_notes
+
+    - :save_queries
+
+    - :view_gantt
+
+    - :view_calendar
+
+    - :log_time
+
+    - :view_time_entries
+
+    - :comment_news
+
+    - :view_documents
+
+    - :view_wiki_pages
+
+    - :view_wiki_edits
+
+    - :add_messages
+
+    - :edit_own_messages
+
+    - :view_files
+
+    - :browse_repository
+
+    - :view_changesets
+
+'
+  issues_visibility: default
+roles_006:
+  id: 6
+  name: Kunde
+  position: 6
+  assignable: true
+  builtin: 0
+  permissions: ! '---
+
+    - :add_messages
+
+    - :edit_own_messages
+
+    - :view_calendar
+
+    - :view_contacts
+
+    - :add_contacts
+
+    - :edit_contacts
+
+    - :add_notes
+
+    - :view_helpdesk_tickets
+
+    - :view_invoices
+
+    - :comment_invoices
+
+    - :view_documents
+
+    - :view_files
+
+    - :view_gantt
+
+    - :view_issues
+
+    - :add_issues
+
+    - :add_issue_notes
+
+    - :save_queries
+
+    - :comment_news
+
+    - :view_wiki_pages
+
+    - :view_wiki_edits
+
+'
+  issues_visibility: own

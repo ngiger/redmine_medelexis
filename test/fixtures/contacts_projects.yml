@@ -1,0 +1,13 @@
+---
+contacts_projects_001:
+  project_id: 1
+  contact_id: 1
+contacts_projects_002:
+  project_id: 3
+  contact_id: 2
+contacts_projects_003:
+  project_id: 3
+  contact_id: 3
+contacts_projects_004:
+  project_id: 3
+  contact_id: 4

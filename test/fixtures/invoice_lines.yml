@@ -1,0 +1,13 @@
+---
+invoice_lines_001:
+  id: 1
+  invoice_id: 1
+  position: 1
+  quantity: 1.0
+  description: Servicebezug Medelexis Basis Applikation
+  tax: 6.0
+  price: 800.0
+  units: 
+  created_at: 2013-11-15 14:42:50.000000000 +01:00
+  updated_at: 2013-11-15 14:42:50.000000000 +01:00
+  discount: 

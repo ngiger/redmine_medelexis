@@ -1,0 +1,153 @@
+---
+users_001:
+  id: 1
+  login: admin
+  hashed_password: ''
+  firstname: Redmine
+  lastname: Admin
+  mail: admin@example.net
+  admin: true
+  status: 1
+  last_login_on: 2013-11-28 16:18:38.629462000 +01:00
+  language: ''
+  auth_source_id: 
+  created_on: 2013-10-18 08:40:19.793398000 +02:00
+  updated_on: 2013-10-18 08:40:19.793398000 +02:00
+  type: User
+  identity_url: 
+  mail_notification: all
+  salt: 11111111111111111111111111111111
+  must_change_passwd: false
+users_002:
+  id: 2
+  login: ''
+  hashed_password: ''
+  firstname: ''
+  lastname: Anonymous
+  mail: ''
+  admin: false
+  status: 0
+  last_login_on: 
+  language: ''
+  auth_source_id: 
+  created_on: 2013-09-26 08:37:03.000000000 +02:00
+  updated_on: 2013-09-26 08:37:03.000000000 +02:00
+  type: AnonymousUser
+  identity_url: 
+  mail_notification: only_my_events
+  salt: 
+  must_change_passwd: false
+users_003:
+  id: 3
+  login: mdescher
+  hashed_password: ''
+  firstname: Marco
+  lastname: Descher
+  mail: descher@medevit.at
+  admin: true
+  status: 1
+  last_login_on: 2013-11-22 14:23:00.000000000 +01:00
+  language: de
+  auth_source_id: 1
+  created_on: 2013-09-26 10:19:28.000000000 +02:00
+  updated_on: 2013-09-26 10:20:47.000000000 +02:00
+  type: User
+  identity_url: 
+  mail_notification: only_my_events
+  salt: 
+  must_change_passwd: false
+users_004:
+  id: 4
+  login: wfeconnector
+  hashed_password: ''
+  firstname: WebFrontend
+  lastname: Connector
+  mail: wfe@medevit.at
+  admin: true
+  status: 1
+  last_login_on: 2013-11-22 08:36:07.000000000 +01:00
+  language: de
+  auth_source_id: 
+  created_on: 2013-10-23 08:15:39.000000000 +02:00
+  updated_on: 2013-11-22 08:36:00.000000000 +01:00
+  type: User
+  identity_url: 
+  mail_notification: only_my_events
+  salt: 11111111111111111111111111111111
+  must_change_passwd: false
+users_005:
+  id: 5
+  login: mmustermann
+  hashed_password: ''
+  firstname: Max
+  lastname: Mustermann
+  mail: mmustermann@medevit.at
+  admin: false
+  status: 1
+  last_login_on: 2013-11-22 14:09:46.000000000 +01:00
+  language: de
+  auth_source_id: 
+  created_on: 2013-10-23 08:31:40.000000000 +02:00
+  updated_on: 2013-10-23 08:32:02.000000000 +02:00
+  type: User
+  identity_url: 
+  mail_notification: only_my_events
+  salt: 11111111111111111111111111111111
+  must_change_passwd: false
+users_006:
+  id: 6
+  login: ngiger
+  hashed_password: ''
+  firstname: Niklaus
+  lastname: Giger
+  mail: niklaus.giger@member.fsf.org
+  admin: false
+  status: 1
+  last_login_on: 2013-10-25 11:34:56.000000000 +02:00
+  language: de
+  auth_source_id: 1
+  created_on: 2013-10-25 11:33:45.000000000 +02:00
+  updated_on: 2013-10-25 11:33:45.000000000 +02:00
+  type: User
+  identity_url: 
+  mail_notification: only_my_events
+  salt: 
+  must_change_passwd: false
+users_007:
+  id: 7
+  login: jkappis
+  hashed_password: ''
+  firstname: Julian
+  lastname: Kappis
+  mail: julian.kappis@argomed.ch
+  admin: true
+  status: 1
+  last_login_on: 2013-11-21 11:23:11.000000000 +01:00
+  language: de
+  auth_source_id: 1
+  created_on: 2013-11-08 12:43:21.000000000 +01:00
+  updated_on: 2013-11-13 15:57:04.000000000 +01:00
+  type: User
+  identity_url: 
+  mail_notification: only_my_events
+  salt: 
+  must_change_passwd: false
+users_008:
+  id: 9
+  login: testuser
+  hashed_password: ''
+  firstname: Test
+  lastname: User
+  mail: testuser@medevit.at
+  admin: false
+  status: 1
+  last_login_on: 2013-11-15 17:10:53.000000000 +01:00
+  language: de
+  auth_source_id: 
+  created_on: 2013-11-15 17:10:32.000000000 +01:00
+  updated_on: 2013-11-15 17:10:32.000000000 +01:00
+  type: User
+  identity_url: 
+  mail_notification: only_my_events
+  salt: 11111111111111111111111111111111
+  must_change_passwd: false

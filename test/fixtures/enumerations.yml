@@ -1,0 +1,91 @@
+---
+enumerations_001:
+  id: 1
+  name: Niedrig
+  position: 1
+  is_default: false
+  type: IssuePriority
+  active: true
+  project_id: 
+  parent_id: 
+  position_name: lowest
+enumerations_002:
+  id: 2
+  name: Normal
+  position: 2
+  is_default: true
+  type: IssuePriority
+  active: true
+  project_id: 
+  parent_id: 
+  position_name: default
+enumerations_003:
+  id: 3
+  name: Hoch
+  position: 3
+  is_default: false
+  type: IssuePriority
+  active: true
+  project_id: 
+  parent_id: 
+  position_name: high3
+enumerations_004:
+  id: 4
+  name: Dringend
+  position: 4
+  is_default: false
+  type: IssuePriority
+  active: true
+  project_id: 
+  parent_id: 
+  position_name: high2
+enumerations_005:
+  id: 5
+  name: Sofort
+  position: 5
+  is_default: false
+  type: IssuePriority
+  active: true
+  project_id: 
+  parent_id: 
+  position_name: highest
+enumerations_006:
+  id: 6
+  name: Benutzerdokumentation
+  position: 1
+  is_default: false
+  type: DocumentCategory
+  active: true
+  project_id: 
+  parent_id: 
+  position_name: 
+enumerations_007:
+  id: 7
+  name: Technische Dokumentation
+  position: 2
+  is_default: false
+  type: DocumentCategory
+  active: true
+  project_id: 
+  parent_id: 
+  position_name: 
+enumerations_008:
+  id: 8
+  name: Design
+  position: 1
+  is_default: false
+  type: TimeEntryActivity
+  active: true
+  project_id: 
+  parent_id: 
+  position_name: 
+enumerations_009:
+  id: 9
+  name: Entwicklung
+  position: 2
+  is_default: false
+  type: TimeEntryActivity
+  active: true
+  project_id: 
+  parent_id: 
+  position_name: 

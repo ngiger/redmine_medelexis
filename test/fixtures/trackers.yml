@@ -1,0 +1,29 @@
+---
+trackers_001:
+  id: 1
+  name: Fehler
+  is_in_chlog: true
+  position: 1
+  is_in_roadmap: false
+  fields_bits: 0
+trackers_002:
+  id: 2
+  name: Feature
+  is_in_chlog: true
+  position: 2
+  is_in_roadmap: true
+  fields_bits: 0
+trackers_003:
+  id: 3
+  name: Unterstützung
+  is_in_chlog: false
+  position: 3
+  is_in_roadmap: false
+  fields_bits: 0
+trackers_004:
+  id: 4
+  name: Service
+  is_in_chlog: false
+  position: 4
+  is_in_roadmap: false
+  fields_bits: 205

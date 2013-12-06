@@ -1,0 +1,547 @@
+---
+schema_migrations_001:
+  version: '1'
+schema_migrations_002:
+  version: 1-redmine_contacts_helpdesk
+schema_migrations_003:
+  version: 1-redmine_contacts_invoices
+schema_migrations_004:
+  version: '10'
+schema_migrations_005:
+  version: 10-redmine_contacts_invoices
+schema_migrations_006:
+  version: '100'
+schema_migrations_007:
+  version: '101'
+schema_migrations_008:
+  version: '102'
+schema_migrations_009:
+  version: '103'
+schema_migrations_010:
+  version: '104'
+schema_migrations_011:
+  version: '105'
+schema_migrations_012:
+  version: '106'
+schema_migrations_013:
+  version: '107'
+schema_migrations_014:
+  version: '108'
+schema_migrations_015:
+  version: '11'
+schema_migrations_016:
+  version: 11-redmine_contacts_invoices
+schema_migrations_017:
+  version: '12'
+schema_migrations_018:
+  version: '13'
+schema_migrations_019:
+  version: '14'
+schema_migrations_020:
+  version: '15'
+schema_migrations_021:
+  version: '16'
+schema_migrations_022:
+  version: 16-redmine_contacts
+schema_migrations_023:
+  version: '17'
+schema_migrations_024:
+  version: 17-redmine_contacts
+schema_migrations_025:
+  version: '18'
+schema_migrations_026:
+  version: 18-redmine_contacts
+schema_migrations_027:
+  version: '19'
+schema_migrations_028:
+  version: 19-redmine_contacts
+schema_migrations_029:
+  version: '2'
+schema_migrations_030:
+  version: 2-redmine_contacts_helpdesk
+schema_migrations_031:
+  version: 2-redmine_contacts_invoices
+schema_migrations_032:
+  version: '20'
+schema_migrations_033:
+  version: 20-redmine_contacts
+schema_migrations_034:
+  version: '20090214190337'
+schema_migrations_035:
+  version: '20090312172426'
+schema_migrations_036:
+  version: '20090312194159'
+schema_migrations_037:
+  version: '20090318181151'
+schema_migrations_038:
+  version: '20090323224724'
+schema_migrations_039:
+  version: '20090401221305'
+schema_migrations_040:
+  version: '20090401231134'
+schema_migrations_041:
+  version: '20090403001910'
+schema_migrations_042:
+  version: '20090406161854'
+schema_migrations_043:
+  version: '20090425161243'
+schema_migrations_044:
+  version: '20090503121501'
+schema_migrations_045:
+  version: '20090503121505'
+schema_migrations_046:
+  version: '20090503121510'
+schema_migrations_047:
+  version: '20090614091200'
+schema_migrations_048:
+  version: '20090704172350'
+schema_migrations_049:
+  version: '20090704172355'
+schema_migrations_050:
+  version: '20090704172358'
+schema_migrations_051:
+  version: '20091010093521'
+schema_migrations_052:
+  version: '20091017212227'
+schema_migrations_053:
+  version: '20091017212457'
+schema_migrations_054:
+  version: '20091017212644'
+schema_migrations_055:
+  version: '20091017212938'
+schema_migrations_056:
+  version: '20091017213027'
+schema_migrations_057:
+  version: '20091017213113'
+schema_migrations_058:
+  version: '20091017213151'
+schema_migrations_059:
+  version: '20091017213228'
+schema_migrations_060:
+  version: '20091017213257'
+schema_migrations_061:
+  version: '20091017213332'
+schema_migrations_062:
+  version: '20091017213444'
+schema_migrations_063:
+  version: '20091017213536'
+schema_migrations_064:
+  version: '20091017213642'
+schema_migrations_065:
+  version: '20091017213716'
+schema_migrations_066:
+  version: '20091017213757'
+schema_migrations_067:
+  version: '20091017213835'
+schema_migrations_068:
+  version: '20091017213910'
+schema_migrations_069:
+  version: '20091017214015'
+schema_migrations_070:
+  version: '20091017214107'
+schema_migrations_071:
+  version: '20091017214136'
+schema_migrations_072:
+  version: '20091017214236'
+schema_migrations_073:
+  version: '20091017214308'
+schema_migrations_074:
+  version: '20091017214336'
+schema_migrations_075:
+  version: '20091017214406'
+schema_migrations_076:
+  version: '20091017214440'
+schema_migrations_077:
+  version: '20091017214519'
+schema_migrations_078:
+  version: '20091017214611'
+schema_migrations_079:
+  version: '20091017214644'
+schema_migrations_080:
+  version: '20091017214720'
+schema_migrations_081:
+  version: '20091017214750'
+schema_migrations_082:
+  version: '20091025163651'
+schema_migrations_083:
+  version: '20091108092559'
+schema_migrations_084:
+  version: '20091114105931'
+schema_migrations_085:
+  version: '20091123212029'
+schema_migrations_086:
+  version: '20091205124427'
+schema_migrations_087:
+  version: '20091220183509'
+schema_migrations_088:
+  version: '20091220183727'
+schema_migrations_089:
+  version: '20091220184736'
+schema_migrations_090:
+  version: '20091225164732'
+schema_migrations_091:
+  version: '20091227112908'
+schema_migrations_092:
+  version: '20100129193402'
+schema_migrations_093:
+  version: '20100129193813'
+schema_migrations_094:
+  version: '20100221100219'
+schema_migrations_095:
+  version: '20100313132032'
+schema_migrations_096:
+  version: '20100313171051'
+schema_migrations_097:
+  version: '20100705164950'
+schema_migrations_098:
+  version: '20100819172912'
+schema_migrations_099:
+  version: '20101104182107'
+schema_migrations_100:
+  version: '20101107130441'
+schema_migrations_101:
+  version: '20101114115114'
+schema_migrations_102:
+  version: '20101114115359'
+schema_migrations_103:
+  version: '20110220160626'
+schema_migrations_104:
+  version: '20110223180944'
+schema_migrations_105:
+  version: '20110223180953'
+schema_migrations_106:
+  version: '20110224000000'
+schema_migrations_107:
+  version: '20110226120112'
+schema_migrations_108:
+  version: '20110226120132'
+schema_migrations_109:
+  version: '20110227125750'
+schema_migrations_110:
+  version: '20110228000000'
+schema_migrations_111:
+  version: '20110228000100'
+schema_migrations_112:
+  version: '20110401192910'
+schema_migrations_113:
+  version: '20110408103312'
+schema_migrations_114:
+  version: '20110412065600'
+schema_migrations_115:
+  version: '20110511000000'
+schema_migrations_116:
+  version: 201108021245-redmine_ldap_sync
+schema_migrations_117:
+  version: '20110902000000'
+schema_migrations_118:
+  version: 201110050735-redmine_ldap_sync
+schema_migrations_119:
+  version: 201111271700-redmine_ldap_sync
+schema_migrations_120:
+  version: '20111201201315'
+schema_migrations_121:
+  version: 201201010043-redmine_ldap_sync
+schema_migrations_122:
+  version: 201201071359-redmine_ldap_sync
+schema_migrations_123:
+  version: '20120115143024'
+schema_migrations_124:
+  version: '20120115143100'
+schema_migrations_125:
+  version: '20120115143126'
+schema_migrations_126:
+  version: '20120127174243'
+schema_migrations_127:
+  version: 201201291950-redmine_ldap_sync
+schema_migrations_128:
+  version: 201201302250-redmine_ldap_sync
+schema_migrations_129:
+  version: '20120205111326'
+schema_migrations_130:
+  version: 201202082153-redmine_ldap_sync
+schema_migrations_131:
+  version: '20120223110929'
+schema_migrations_132:
+  version: '20120301153455'
+schema_migrations_133:
+  version: '20120422150750'
+schema_migrations_134:
+  version: '20120705074331'
+schema_migrations_135:
+  version: '20120707064544'
+schema_migrations_136:
+  version: '20120714122000'
+schema_migrations_137:
+  version: '20120714122100'
+schema_migrations_138:
+  version: '20120714122200'
+schema_migrations_139:
+  version: '20120731164049'
+schema_migrations_140:
+  version: '20120930112914'
+schema_migrations_141:
+  version: '20121026002032'
+schema_migrations_142:
+  version: '20121026003537'
+schema_migrations_143:
+  version: 201211202050-redmine_ldap_sync
+schema_migrations_144:
+  version: '20121209123234'
+schema_migrations_145:
+  version: '20121209123358'
+schema_migrations_146:
+  version: '20121213084931'
+schema_migrations_147:
+  version: '20130110122628'
+schema_migrations_148:
+  version: '20130201184705'
+schema_migrations_149:
+  version: '20130202090625'
+schema_migrations_150:
+  version: 201302052050-redmine_ldap_sync
+schema_migrations_151:
+  version: '20130207175206'
+schema_migrations_152:
+  version: '20130207181455'
+schema_migrations_153:
+  version: '20130215073721'
+schema_migrations_154:
+  version: '20130215111127'
+schema_migrations_155:
+  version: '20130215111141'
+schema_migrations_156:
+  version: '20130217094251'
+schema_migrations_157:
+  version: 201302202301-redmine_ldap_sync
+schema_migrations_158:
+  version: 201302212308-redmine_ldap_sync
+schema_migrations_159:
+  version: '20130602092539'
+schema_migrations_160:
+  version: '20130710182539'
+schema_migrations_161:
+  version: '20130713104233'
+schema_migrations_162:
+  version: '20130713111657'
+schema_migrations_163:
+  version: '20130729070143'
+schema_migrations_164:
+  version: '20130911193200'
+schema_migrations_165:
+  version: '20131004113137'
+schema_migrations_166:
+  version: '20131005100610'
+schema_migrations_167:
+  version: '21'
+schema_migrations_168:
+  version: 21-redmine_contacts
+schema_migrations_169:
+  version: '22'
+schema_migrations_170:
+  version: 22-redmine_contacts
+schema_migrations_171:
+  version: '23'
+schema_migrations_172:
+  version: 23-redmine_contacts
+schema_migrations_173:
+  version: '24'
+schema_migrations_174:
+  version: 24-redmine_contacts
+schema_migrations_175:
+  version: '25'
+schema_migrations_176:
+  version: 25-redmine_contacts
+schema_migrations_177:
+  version: '26'
+schema_migrations_178:
+  version: 26-redmine_contacts
+schema_migrations_179:
+  version: '27'
+schema_migrations_180:
+  version: 27-redmine_contacts
+schema_migrations_181:
+  version: '28'
+schema_migrations_182:
+  version: 28-redmine_contacts
+schema_migrations_183:
+  version: '29'
+schema_migrations_184:
+  version: 29-redmine_contacts
+schema_migrations_185:
+  version: '3'
+schema_migrations_186:
+  version: 3-redmine_contacts_helpdesk
+schema_migrations_187:
+  version: 3-redmine_contacts_invoices
+schema_migrations_188:
+  version: '30'
+schema_migrations_189:
+  version: 30-redmine_contacts
+schema_migrations_190:
+  version: '31'
+schema_migrations_191:
+  version: 31-redmine_contacts
+schema_migrations_192:
+  version: '32'
+schema_migrations_193:
+  version: 32-redmine_contacts
+schema_migrations_194:
+  version: '33'
+schema_migrations_195:
+  version: '34'
+schema_migrations_196:
+  version: '35'
+schema_migrations_197:
+  version: '36'
+schema_migrations_198:
+  version: '37'
+schema_migrations_199:
+  version: '38'
+schema_migrations_200:
+  version: '39'
+schema_migrations_201:
+  version: '4'
+schema_migrations_202:
+  version: 4-redmine_contacts_helpdesk
+schema_migrations_203:
+  version: 4-redmine_contacts_invoices
+schema_migrations_204:
+  version: '40'
+schema_migrations_205:
+  version: '41'
+schema_migrations_206:
+  version: '42'
+schema_migrations_207:
+  version: '43'
+schema_migrations_208:
+  version: '44'
+schema_migrations_209:
+  version: '45'
+schema_migrations_210:
+  version: '46'
+schema_migrations_211:
+  version: '47'
+schema_migrations_212:
+  version: '48'
+schema_migrations_213:
+  version: '49'
+schema_migrations_214:
+  version: '5'
+schema_migrations_215:
+  version: 5-redmine_contacts_invoices
+schema_migrations_216:
+  version: '50'
+schema_migrations_217:
+  version: '51'
+schema_migrations_218:
+  version: '52'
+schema_migrations_219:
+  version: '53'
+schema_migrations_220:
+  version: '54'
+schema_migrations_221:
+  version: '55'
+schema_migrations_222:
+  version: '56'
+schema_migrations_223:
+  version: '57'
+schema_migrations_224:
+  version: '58'
+schema_migrations_225:
+  version: '59'
+schema_migrations_226:
+  version: '6'
+schema_migrations_227:
+  version: 6-redmine_contacts_invoices
+schema_migrations_228:
+  version: '60'
+schema_migrations_229:
+  version: '61'
+schema_migrations_230:
+  version: '62'
+schema_migrations_231:
+  version: '63'
+schema_migrations_232:
+  version: '64'
+schema_migrations_233:
+  version: '65'
+schema_migrations_234:
+  version: '66'
+schema_migrations_235:
+  version: '67'
+schema_migrations_236:
+  version: '68'
+schema_migrations_237:
+  version: '69'
+schema_migrations_238:
+  version: '7'
+schema_migrations_239:
+  version: 7-redmine_contacts_invoices
+schema_migrations_240:
+  version: '70'
+schema_migrations_241:
+  version: '71'
+schema_migrations_242:
+  version: '72'
+schema_migrations_243:
+  version: '73'
+schema_migrations_244:
+  version: '74'
+schema_migrations_245:
+  version: '75'
+schema_migrations_246:
+  version: '76'
+schema_migrations_247:
+  version: '77'
+schema_migrations_248:
+  version: '78'
+schema_migrations_249:
+  version: '79'
+schema_migrations_250:
+  version: '8'
+schema_migrations_251:
+  version: 8-redmine_contacts_invoices
+schema_migrations_252:
+  version: '80'
+schema_migrations_253:
+  version: '81'
+schema_migrations_254:
+  version: '82'
+schema_migrations_255:
+  version: '83'
+schema_migrations_256:
+  version: '84'
+schema_migrations_257:
+  version: '85'
+schema_migrations_258:
+  version: '86'
+schema_migrations_259:
+  version: '87'
+schema_migrations_260:
+  version: '88'
+schema_migrations_261:
+  version: '89'
+schema_migrations_262:
+  version: '9'
+schema_migrations_263:
+  version: 9-redmine_contacts_invoices
+schema_migrations_264:
+  version: '90'
+schema_migrations_265:
+  version: '91'
+schema_migrations_266:
+  version: '92'
+schema_migrations_267:
+  version: '93'
+schema_migrations_268:
+  version: '94'
+schema_migrations_269:
+  version: '95'
+schema_migrations_270:
+  version: '96'
+schema_migrations_271:
+  version: '97'
+schema_migrations_272:
+  version: '98'
+schema_migrations_273:
+  version: '99'

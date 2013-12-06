@@ -1,0 +1,44 @@
+---
+projects_001:
+  id: 1
+  name: Management
+  description: Zentrales Management Projekt
+  homepage: ''
+  is_public: true
+  parent_id: 
+  created_on: 2013-09-26 14:53:39.000000000 +02:00
+  updated_on: 2013-09-26 14:53:39.000000000 +02:00
+  identifier: management
+  status: 1
+  lft: 5
+  rgt: 6
+  inherit_members: false
+projects_002:
+  id: 2
+  name: Kunden
+  description: Hauptprojekt zur Verwaltung der Installationen bei Kunden
+  homepage: ''
+  is_public: false
+  parent_id: 
+  created_on: 2013-10-23 08:27:31.000000000 +02:00
+  updated_on: 2013-10-23 08:27:31.000000000 +02:00
+  identifier: kunden
+  status: 1
+  lft: 1
+  rgt: 4
+  inherit_members: false
+projects_003:
+  id: 3
+  name: Praxis Dr. Mustermann
+  description: ! '*Testprojekt* Praxis Dr. Mustermann - nur zur Systementwicklung
+    bzw. Demonstrationen'
+  homepage: ''
+  is_public: false
+  parent_id: 2
+  created_on: 2013-10-23 08:28:25.000000000 +02:00
+  updated_on: 2013-10-25 11:32:25.000000000 +02:00
+  identifier: mustermann
+  status: 1
+  lft: 2
+  rgt: 3
+  inherit_members: false

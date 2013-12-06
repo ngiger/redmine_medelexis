@@ -1,0 +1,49 @@
+---
+recently_vieweds_001:
+  id: 1
+  viewer_id: 3
+  viewed_id: 1
+  viewed_type: Contact
+  views_count: 5
+  created_at: 2013-09-26 14:54:01.000000000 +02:00
+  updated_at: 2013-10-23 08:40:01.000000000 +02:00
+recently_vieweds_002:
+  id: 2
+  viewer_id: 3
+  viewed_id: 2
+  viewed_type: Contact
+  views_count: 13
+  created_at: 2013-10-23 08:35:17.000000000 +02:00
+  updated_at: 2013-11-15 14:32:07.000000000 +01:00
+recently_vieweds_003:
+  id: 3
+  viewer_id: 7
+  viewed_id: 3
+  viewed_type: Contact
+  views_count: 3
+  created_at: 2013-11-13 15:58:58.000000000 +01:00
+  updated_at: 2013-11-13 16:00:46.000000000 +01:00
+recently_vieweds_004:
+  id: 4
+  viewer_id: 7
+  viewed_id: 2
+  viewed_type: Contact
+  views_count: 2
+  created_at: 2013-11-13 15:59:08.000000000 +01:00
+  updated_at: 2013-11-21 11:23:27.000000000 +01:00
+recently_vieweds_005:
+  id: 5
+  viewer_id: 3
+  viewed_id: 3
+  viewed_type: Contact
+  views_count: 7
+  created_at: 2013-11-14 08:24:09.000000000 +01:00
+  updated_at: 2013-11-15 14:36:34.000000000 +01:00
+recently_vieweds_006:
+  id: 6
+  viewer_id: 3
+  viewed_id: 4
+  viewed_type: Contact
+  views_count: 11
+  created_at: 2013-11-15 14:30:21.000000000 +01:00
+  updated_at: 2013-11-15 14:36:46.000000000 +01:00

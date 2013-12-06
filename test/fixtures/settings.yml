@@ -1,0 +1,422 @@
+---
+settings_001:
+  id: 1
+  name: plugin_redmine_contacts_invoices
+  value: ! "--- !ruby/hash:ActiveSupport::HashWithIndifferentAccess\ninvoices_invoice_number_format:
+    ! '%%YEARLY_ID%%, %%MONTHLY_ID%%, %%DAILY_ID%%, %%ID%%,\n  %%YEAR%%, %%MONTH%%,
+    %%DAY%%'\ninvoices_template: classic\ninvoices_line_grouping: '0'\ninvoices_default_tax:
+    ''\ninvoices_default_currency: CHF\ninvoices_thousands_delimiter: ! ' '\ninvoices_decimal_separator:
+    .\ninvoices_select_companies: '1'\ninvoices_contact_extra_field: ''\ninvoices_units:
+    ''\ninvoices_company_name: MEDELEXIS AG\ninvoices_company_representative: ''\ninvoices_company_logo_url:
+    http://www.medelexis.ch/fileadmin/templates/skins/skin_cityscape/css/images/Logo.png\ninvoices_company_info:
+    ''\ninvoices_bill_info: ''\n"
+  updated_on: 2013-11-15 14:39:36.000000000 +01:00
+settings_002:
+  id: 2
+  name: app_title
+  value: Management Information System
+  updated_on: 2013-09-26 10:21:52.000000000 +02:00
+settings_003:
+  id: 3
+  name: welcome_text
+  value: ! "*Management Information System*\r\nMedelexis AG"
+  updated_on: 2013-11-15 17:12:04.000000000 +01:00
+settings_004:
+  id: 4
+  name: attachment_max_size
+  value: '5120'
+  updated_on: 2013-09-26 10:21:52.000000000 +02:00
+settings_005:
+  id: 5
+  name: per_page_options
+  value: '25,50,100'
+  updated_on: 2013-09-26 10:21:52.000000000 +02:00
+settings_006:
+  id: 6
+  name: activity_days_default
+  value: '30'
+  updated_on: 2013-09-26 10:21:52.000000000 +02:00
+settings_007:
+  id: 7
+  name: host_name
+  value: mis.medelexis.ch
+  updated_on: 2013-10-25 11:34:56.000000000 +02:00
+settings_008:
+  id: 8
+  name: protocol
+  value: https
+  updated_on: 2013-10-25 11:34:56.000000000 +02:00
+settings_009:
+  id: 9
+  name: text_formatting
+  value: textile
+  updated_on: 2013-09-26 10:21:52.000000000 +02:00
+settings_010:
+  id: 10
+  name: cache_formatted_text
+  value: '0'
+  updated_on: 2013-09-26 10:21:52.000000000 +02:00
+settings_011:
+  id: 11
+  name: wiki_compression
+  value: ''
+  updated_on: 2013-09-26 10:21:52.000000000 +02:00
+settings_012:
+  id: 12
+  name: feeds_limit
+  value: '15'
+  updated_on: 2013-09-26 10:21:52.000000000 +02:00
+settings_013:
+  id: 13
+  name: file_max_size_displayed
+  value: '512'
+  updated_on: 2013-09-26 10:21:52.000000000 +02:00
+settings_014:
+  id: 14
+  name: diff_max_lines_displayed
+  value: '1500'
+  updated_on: 2013-09-26 10:21:52.000000000 +02:00
+settings_015:
+  id: 15
+  name: repositories_encodings
+  value: ''
+  updated_on: 2013-09-26 10:21:52.000000000 +02:00
+settings_016:
+  id: 16
+  name: ui_theme
+  value: highrise_tabs
+  updated_on: 2013-09-26 10:23:53.000000000 +02:00
+settings_017:
+  id: 17
+  name: default_language
+  value: de
+  updated_on: 2013-09-26 10:22:00.000000000 +02:00
+settings_018:
+  id: 18
+  name: start_of_week
+  value: ''
+  updated_on: 2013-09-26 10:22:00.000000000 +02:00
+settings_019:
+  id: 19
+  name: date_format
+  value: ''
+  updated_on: 2013-09-26 10:22:00.000000000 +02:00
+settings_020:
+  id: 20
+  name: time_format
+  value: ''
+  updated_on: 2013-09-26 10:22:00.000000000 +02:00
+settings_021:
+  id: 21
+  name: user_format
+  value: firstname_lastname
+  updated_on: 2013-09-26 10:22:00.000000000 +02:00
+settings_022:
+  id: 22
+  name: gravatar_enabled
+  value: '0'
+  updated_on: 2013-09-26 10:22:00.000000000 +02:00
+settings_023:
+  id: 23
+  name: gravatar_default
+  value: ''
+  updated_on: 2013-09-26 10:22:00.000000000 +02:00
+settings_024:
+  id: 24
+  name: thumbnails_enabled
+  value: '0'
+  updated_on: 2013-09-26 10:22:00.000000000 +02:00
+settings_025:
+  id: 25
+  name: thumbnails_size
+  value: '100'
+  updated_on: 2013-09-26 10:22:00.000000000 +02:00
+settings_026:
+  id: 26
+  name: login_required
+  value: '1'
+  updated_on: 2013-09-26 10:22:42.000000000 +02:00
+settings_027:
+  id: 27
+  name: autologin
+  value: '0'
+  updated_on: 2013-09-26 10:22:42.000000000 +02:00
+settings_028:
+  id: 28
+  name: self_registration
+  value: '0'
+  updated_on: 2013-09-26 10:22:42.000000000 +02:00
+settings_029:
+  id: 29
+  name: unsubscribe
+  value: '0'
+  updated_on: 2013-09-26 10:22:42.000000000 +02:00
+settings_030:
+  id: 30
+  name: password_min_length
+  value: '8'
+  updated_on: 2013-09-26 10:22:42.000000000 +02:00
+settings_031:
+  id: 31
+  name: lost_password
+  value: '0'
+  updated_on: 2013-10-23 08:47:41.000000000 +02:00
+settings_032:
+  id: 32
+  name: openid
+  value: '0'
+  updated_on: 2013-09-26 10:22:42.000000000 +02:00
+settings_033:
+  id: 33
+  name: rest_api_enabled
+  value: '1'
+  updated_on: 2013-09-26 10:22:42.000000000 +02:00
+settings_034:
+  id: 34
+  name: jsonp_enabled
+  value: '0'
+  updated_on: 2013-09-26 10:22:42.000000000 +02:00
+settings_035:
+  id: 35
+  name: session_lifetime
+  value: '1440'
+  updated_on: 2013-10-25 14:48:42.000000000 +02:00
+settings_036:
+  id: 36
+  name: session_timeout
+  value: '720'
+  updated_on: 2013-10-25 14:48:42.000000000 +02:00
+settings_037:
+  id: 37
+  name: mail_from
+  value: mis@mis.medelexis.ch
+  updated_on: 2013-09-26 10:24:45.000000000 +02:00
+settings_038:
+  id: 38
+  name: bcc_recipients
+  value: '1'
+  updated_on: 2013-09-26 10:24:45.000000000 +02:00
+settings_039:
+  id: 39
+  name: plain_text_mail
+  value: '0'
+  updated_on: 2013-09-26 10:24:45.000000000 +02:00
+settings_040:
+  id: 40
+  name: default_notification_option
+  value: only_my_events
+  updated_on: 2013-09-26 10:24:45.000000000 +02:00
+settings_041:
+  id: 41
+  name: notified_events
+  value: ! '---
+
+    - issue_added
+
+    - issue_updated
+
+'
+  updated_on: 2013-09-26 10:24:45.000000000 +02:00
+settings_042:
+  id: 42
+  name: emails_header
+  value: ''
+  updated_on: 2013-09-26 10:24:45.000000000 +02:00
+settings_043:
+  id: 43
+  name: emails_footer
+  value: ! "You have received this notification because you have either subscribed
+    to it, or are involved in it.\r\nTo change your notification preferences, please
+    click here: http://hostname/my/account"
+  updated_on: 2013-09-26 10:24:45.000000000 +02:00
+settings_044:
+  id: 44
+  name: enabled_scm
+  value: ! '---
+
+    - Mercurial
+
+    - Git
+
+'
+  updated_on: 2013-09-26 10:25:05.000000000 +02:00
+settings_045:
+  id: 45
+  name: autofetch_changesets
+  value: '1'
+  updated_on: 2013-09-26 10:25:05.000000000 +02:00
+settings_046:
+  id: 46
+  name: sys_api_enabled
+  value: '0'
+  updated_on: 2013-09-26 10:25:05.000000000 +02:00
+settings_047:
+  id: 47
+  name: repository_log_display_limit
+  value: '100'
+  updated_on: 2013-09-26 10:25:05.000000000 +02:00
+settings_048:
+  id: 48
+  name: commit_ref_keywords
+  value: refs,references,IssueID
+  updated_on: 2013-09-26 10:25:05.000000000 +02:00
+settings_049:
+  id: 52
+  name: commit_cross_project_ref
+  value: '0'
+  updated_on: 2013-09-26 10:25:05.000000000 +02:00
+settings_050:
+  id: 53
+  name: commit_logtime_enabled
+  value: '0'
+  updated_on: 2013-09-26 10:25:05.000000000 +02:00
+settings_051:
+  id: 54
+  name: plugin_redmine_contacts
+  value: ! '--- !ruby/hash:ActiveSupport::HashWithIndifferentAccess
+
+    name_format: lastname_firstname_middlename
+
+    list_partial_style: list_excerpt
+
+    default_currency: CHF
+
+    note_authoring_time: ''1''
+
+'
+  updated_on: 2013-09-26 10:25:54.000000000 +02:00
+settings_052:
+  id: 55
+  name: default_projects_public
+  value: '0'
+  updated_on: 2013-10-23 08:48:08.000000000 +02:00
+settings_053:
+  id: 56
+  name: default_projects_modules
+  value: ! '---
+
+    - issue_tracking
+
+    - time_tracking
+
+    - documents
+
+    - files
+
+    - contacts
+
+    - contacts_invoices
+
+'
+  updated_on: 2013-10-23 08:48:08.000000000 +02:00
+settings_054:
+  id: 57
+  name: default_projects_tracker_ids
+  value: ! '---
+
+    - ''3''
+
+    - ''4''
+
+'
+  updated_on: 2013-10-23 08:48:08.000000000 +02:00
+settings_055:
+  id: 58
+  name: sequential_project_identifiers
+  value: '0'
+  updated_on: 2013-10-23 08:48:08.000000000 +02:00
+settings_056:
+  id: 59
+  name: new_project_user_role_id
+  value: '6'
+  updated_on: 2013-10-23 08:48:08.000000000 +02:00
+settings_057:
+  id: 60
+  name: cross_project_issue_relations
+  value: '0'
+  updated_on: 2013-10-23 08:49:11.000000000 +02:00
+settings_058:
+  id: 61
+  name: cross_project_subtasks
+  value: tree
+  updated_on: 2013-10-23 08:49:11.000000000 +02:00
+settings_059:
+  id: 62
+  name: issue_group_assignment
+  value: '0'
+  updated_on: 2013-10-23 08:49:11.000000000 +02:00
+settings_060:
+  id: 63
+  name: default_issue_start_date_to_creation_date
+  value: '1'
+  updated_on: 2013-10-23 08:49:11.000000000 +02:00
+settings_061:
+  id: 64
+  name: display_subprojects_issues
+  value: '1'
+  updated_on: 2013-10-23 08:49:11.000000000 +02:00
+settings_062:
+  id: 65
+  name: issue_done_ratio
+  value: issue_field
+  updated_on: 2013-10-23 08:49:11.000000000 +02:00
+settings_063:
+  id: 66
+  name: non_working_week_days
+  value: ! '---
+
+    - ''6''
+
+    - ''7''
+
+'
+  updated_on: 2013-10-23 08:49:11.000000000 +02:00
+settings_064:
+  id: 67
+  name: issues_export_limit
+  value: '500'
+  updated_on: 2013-10-23 08:49:11.000000000 +02:00
+settings_065:
+  id: 68
+  name: gantt_items_limit
+  value: '500'
+  updated_on: 2013-10-23 08:49:11.000000000 +02:00
+settings_066:
+  id: 69
+  name: issue_list_default_columns
+  value: ! '---
+
+    - tracker
+
+    - status
+
+    - cf_2
+
+    - priority
+
+    - subject
+
+    - assigned_to
+
+    - updated_on
+
+'
+  updated_on: 2013-10-23 08:49:11.000000000 +02:00
+settings_067:
+  id: 70
+  name: plugin_redmine_contacts_helpdesk
+  value: ! "--- !ruby/hash:ActiveSupport::HashWithIndifferentAccess\nhelpdesk_answer_from:
+    helpdesk@medelexis.ch\nhelpdesk_add_contact_notes: '1'\nhelpdesk_public_title:
+    ''\nhelpdesk_answer_subject: ! 'Re: {%ticket.subject%} [{%ticket.tracker%} #{%ticket.id%}]'\nhelpdesk_emails_header:
+    ''\nhelpdesk_emails_footer: ''\nhelpdesk_first_answer_subject: ! '{%ticket.project%}
+    support message [{%ticket.tracker%}\n  #{%ticket.id%}]'\nhelpdesk_first_answer_template:
+    ! \"Hello, {%contact.first_name%}\\r\\n\\r\\nWe hereby\n  confirm that we have
+    received your message.\\r\\n\\r\\nWe will handle your request and\n  get back
+    to you as soon as possible.\\r\\n\\r\\nYour request has been assigned the following\n
+    \ case ID #{%ticket.id%}.\"\nhelpdesk_helpdesk_css: ''\n"
+  updated_on: 2013-10-25 14:52:02.000000000 +02:00
+settings_068:
+  id: 71
+  name: commit_update_keywords
+  value: ! "---\n- keywords: fixes,closes\n  status_id: '0'\n  done_ratio: '100'\n"
+  updated_on: 2013-11-19 22:02:16.000000000 +01:00

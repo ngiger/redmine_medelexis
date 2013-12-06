@@ -1,0 +1,18 @@
+---
+auth_sources_001:
+  id: 1
+  type: AuthSourceLdap
+  name: ldap.medelexis.ch (localhost)
+  host: 127.0.0.1
+  port: 389
+  account: ''
+  account_password: ''
+  base_dn: ou=People,dc=medelexis,dc=ch
+  attr_login: userid
+  attr_firstname: givenName
+  attr_lastname: sN
+  attr_mail: mail
+  onthefly_register: true
+  tls: false
+  filter: (&(objectClass=posixAccount)(memberOf=cn=MISRedmineUser,ou=Groups,dc=medelexis,dc=ch))
+  timeout: 

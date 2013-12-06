@@ -1,0 +1,11 @@
+---
+wikis_001:
+  id: 1
+  project_id: 1
+  start_page: Wiki
+  status: 1
+wikis_002:
+  id: 2
+  project_id: 2
+  start_page: Wiki
+  status: 1

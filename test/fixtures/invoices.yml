@@ -1,0 +1,23 @@
+---
+invoices_001:
+  id: 1
+  number: 0001, 001, 01, 01, 2013, 11, 15
+  invoice_date: 2013-11-15 01:00:00.000000000 +01:00
+  discount: 0.0
+  discount_type: 0
+  description: ''
+  due_date: 2013-12-15 01:00:00.000000000 +01:00
+  language: ''
+  currency: CHF
+  status_id: 1
+  contact_id: 4
+  project_id: 3
+  assigned_to_id: 5
+  author_id: 3
+  created_at: 2013-11-15 14:42:50.000000000 +01:00
+  updated_at: 2013-11-15 14:42:50.000000000 +01:00
+  subject: Jahresrechnung Bezug Services Medelexis
+  amount: 848.0
+  comments_count: 
+  paid_date: 
+  balance: 0.0

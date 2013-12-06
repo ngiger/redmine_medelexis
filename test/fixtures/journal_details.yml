@@ -1,0 +1,22 @@
+---
+journal_details_001:
+  id: 1
+  journal_id: 1
+  property: cf
+  prop_key: '2'
+  old_value: Test
+  value: TRIAL
+journal_details_002:
+  id: 2
+  journal_id: 2
+  property: attr
+  prop_key: due_date
+  old_value: '2013-11-23'
+  value: 
+journal_details_003:
+  id: 3
+  journal_id: 2
+  property: cf
+  prop_key: '2'
+  old_value: TRIAL
+  value: LICENSED

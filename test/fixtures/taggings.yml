@@ -1,0 +1,10 @@
+---
+taggings_001:
+  id: 3
+  tag_id: 1
+  taggable_id: 2
+  tagger_id: 
+  tagger_type: 
+  taggable_type: Contact
+  context: tags
+  created_at: 2013-11-15 14:32:07.000000000 +01:00

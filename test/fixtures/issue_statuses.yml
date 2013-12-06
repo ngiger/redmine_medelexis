@@ -1,0 +1,43 @@
+---
+issue_statuses_001:
+  id: 1
+  name: Neu
+  is_closed: false
+  is_default: true
+  position: 1
+  default_done_ratio: 
+issue_statuses_002:
+  id: 2
+  name: In Bearbeitung
+  is_closed: false
+  is_default: false
+  position: 2
+  default_done_ratio: 
+issue_statuses_003:
+  id: 3
+  name: Gelöst
+  is_closed: false
+  is_default: false
+  position: 3
+  default_done_ratio: 
+issue_statuses_004:
+  id: 4
+  name: Feedback
+  is_closed: false
+  is_default: false
+  position: 4
+  default_done_ratio: 
+issue_statuses_005:
+  id: 5
+  name: Erledigt
+  is_closed: true
+  is_default: false
+  position: 5
+  default_done_ratio: 
+issue_statuses_006:
+  id: 6
+  name: Abgewiesen
+  is_closed: true
+  is_default: false
+  position: 6
+  default_done_ratio: 
