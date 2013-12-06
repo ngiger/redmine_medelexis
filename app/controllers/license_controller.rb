@@ -12,10 +12,11 @@ class LicenseController < ApplicationController
   def show
     RedmineMedelexis.log_to_system("show from IP #{request.remote_ip} user #{User.current} : api_key is #{params['key']} action_name #{action_name} enabled?#{Setting.rest_api_enabled?}  api_key_from_request #{api_key_from_request}")
     @user = find_user(params)
+    pp @info
     find_license_info
     respond_to do |format| 
       format.html { render template: "license/show"; RedmineMedelexis.debug("#{__LINE__}: html") } 
-      format.xml  { if  @info then render else render_error(:status => :unauthorized) end;  RedmineMedelexis.debug("#{__LINE__}: xml #{@xml.inspect} end")  } 
+      format.xml  { if  @info then render else render_error(:status => :unauthorized) end; } 
       format.api  { render template: "license/show"; RedmineMedelexis.debug("#{__LINE__}: api") } 
     end
   end
@@ -40,12 +41,9 @@ private
       RedmineMedelexis.debug("#{__LINE__}: user ist #{@user.inspect}")
       @info = RedmineMedelexis.license_info_for_user(@user)
       RedmineMedelexis.debug("#{__LINE__}: @info ist #{@info.inspect}")
-      @xml  = RedmineMedelexis.xml_content(@info)
-      RedmineMedelexis.debug("#{__LINE__}: @xml ist #{@xml.inspect}")
     else
       @api_key = nil
       @info = nil
-      @xml = nil
     end
   end
 end

@@ -1,14 +1,13 @@
 <h2>License for user <%= @user %></h2>
-<p>API-Key is: <%= @api_key%></p>
-<% info = @info %></br>
+<p>API-key is: <%= @api_key%></p>
+<% info = @info; ownerdata = info['ownerdata'] if @info %></br>
 <% if info %>
-  Info: <%= info.inspect %></br>
   <ul>
-    <li>customerId: <%= info['customerId'] %> </li>
-    <li>projectId: <%= info['projectId'] %> </li>
-    <li>organization: <%= info['organization'] %> </li>
-    <li>numberOfStations: <%= info['numberOfStations'] %> </li>
-    <li>numberOfPractitioners: <%= info['numberOfPractitioners'] %> </li>
+    <li>customerId: <%= ownerdata['customerId'] %> </li>
+    <li>projectId: <%= ownerdata['projectId'] %> </li>
+    <li>organization: <%= ownerdata['organization'] %> </li>
+    <li>numberOfStations: <%= ownerdata['numberOfStations'] %> </li>
+    <li>numberOfPractitioners: <%= ownerdata['numberOfPractitioners'] %> </li>
   </ul>
   <% info['license'].each{ |item| %>
   <ol>
@@ -21,6 +20,7 @@
     <ul>
   </ol>
   <% } %>
+  Info (raw data): <%= @info.inspect %></br>
 <% else %>
   Lizenz ungültig!
 <% end %>

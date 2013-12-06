@@ -13,11 +13,9 @@
 # You should have received a copy of the GNU General Public License
 # along with redmine_medelexis.  If not, see <http://www.gnu.org/licenses/>.
 
-require 'xmlsimple'
-
 module RedmineMedelexis  
   def self.debug(msg)
-    # puts "#{Time.now} dbg: #{msg}"
+    puts "#{Time.now} dbg: #{msg}"
   end
   
   def self.log_to_system(msg)
@@ -43,36 +41,6 @@ module RedmineMedelexis
     info
   end
   
-  def self.xml_content(license_info)
-    return nil unless license_info
-    ownerData = license_info['ownerdata'] 
-    return nil unless ownerData
-    licenses  = license_info['license']
-    return nil unless licenses
-    all_xml = {"xmlns"=>"http://www.medelexis.ch/MedelexisLicenseFile",
-  "generatedOn"=> Time.now.utc,
-  "license"=>licenses,
-  "ownerData"=> ownerData,
-  "Signature"=>
-    [{"xmlns"=>"http://www.w3.org/2000/09/xmldsig#",
-      "SignedInfo"=>
-      [{"CanonicalizationMethod"=>
-          [{"Algorithm"=>"http://www.w3.org/TR/2001/REC-xml-c14n-20010315"}],
-        "SignatureMethod"=>
-          [{"Algorithm"=>"http://www.w3.org/2000/09/xmldsig#rsa-sha1"}],
-        "Reference"=>
-          [{"URI"=>"",
-            "Transforms"=>
-            [{"Transform"=>
-                [{"Algorithm"=>
-                  "http://www.w3.org/2000/09/xmldsig#enveloped-signature"}]}],
-            "DigestMethod"=>
-            [{"Algorithm"=>"http://www.w3.org/2000/09/xmldsig#sha1"}],
-            "DigestValue"=>[{}]}]}],
-    "SignatureValue"=>[{}]}]}
-    XmlSimple.xml_out(all_xml, {'RootName' => 'medelexisLicense' ,'XmlDeclaration' => '<?xml version="1.0" encoding="UTF-8" standalone="no"?>' })
-  end
-
   private
 
   # Resumen of project mmustermann
@@ -121,15 +89,12 @@ module RedmineMedelexis
     condition = "project_id = #{member.project_id}"
     contact =  Contact.joins(:projects).where(condition)[0]
     return nil unless contact
-    ownerData = [
-                  { "customerId"             => [user.login],
-                    "misApiKey"              => [get_api_key(user.login)],
-                    "projectId"              => member.project_id,
-                    "organization"           => [contact.company],
-                    "numberOfStations"       => ["0"],
-                    "numberOfPractitioners"  => ["1"]}
-
-              ]
+    ownerData = { "customerId"             => user.login,
+                  "misApiKey"              => get_api_key(user.login),
+                  "projectId"              => member.project_id,
+                  "organization"           => contact.company,
+                  "numberOfStations"       => "0",
+                  "numberOfPractitioners"  => "1"}
   end
   
   def self.get_license(project)

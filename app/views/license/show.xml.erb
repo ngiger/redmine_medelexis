@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <medelexisLicense xmlns="http://www.medelexis.ch/MedelexisLicenseFile" generatedOn="<%= Time.now %>">
 <% if @info %>
+  <% ownerdata = {}; ownerdata = @info['ownerdata'] if @info %>
   <ownerData>
-    <customerId><%= @info['customerId'] %></customerId>
-    <misApiKey><%= @info['misApiKey'] %></misApiKey>
-    <organization><%= @info['organization'] %></organization>
-    <numberOfStations><%= @info['numberOfStations'] %></numberOfStations>
-    <numberOfPractitioners><%= @info['numberOfPractitioners'] %></numberOfPractitioners>
+    <customerId><%= ownerdata['customerId'] %></customerId>
+    <misApiKey><%= ownerdata['misApiKey'] %></misApiKey>
+    <organization><%= ownerdata['organization'] %></organization>
+    <numberOfStations><%= ownerdata['numberOfStations'] %></numberOfStations>
+    <numberOfPractitioners><%= ownerdata['numberOfPractitioners'] %></numberOfPractitioners>
   </ownerData>
+  <!-- number of licenses is <%= @info['license'].size %> --> 
   <% @info['license'].each{ |item| %>
   <license endOfLicense="<%= item['endOfLicense'] %>" id="<%= item['id'] %>" licenseType="<%= item['licenseType'] %>" startOfLicense="<%= item['startOfLicense'] %>" />
   <% } if @info['license'] %>
