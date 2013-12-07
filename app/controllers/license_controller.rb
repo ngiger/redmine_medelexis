@@ -15,7 +15,7 @@ class LicenseController < ApplicationController
     find_license_info
     respond_to do |format| 
       format.html { render template: "license/show"; } 
-      format.xml  { if  @info then render else render_error(:status => :unauthorized) end; } 
+      format.xml  { if  @info then render :xml => @encrypted else render_error(:status => :unauthorized) end; }
       format.api  { render template: "license/show"; } 
     end
   end
@@ -43,6 +43,7 @@ private
       RedmineMedelexis.debug("#{__LINE__}: user ist #{@user.inspect}")
       @info = RedmineMedelexis.license_info_for_user(@user)
       RedmineMedelexis.debug("#{__LINE__}: @info ist #{@info.inspect}")
+      @encrypted = RedmineMedelexis.encrypt(@info, @user.login)
     else
       @api_key = nil
       @info = nil

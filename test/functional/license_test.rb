@@ -92,5 +92,5 @@ class Redmine::ApiTest::LicenseTest < ActionController::TestCase
     assert     ( /Praxis Dr. Mustermann/.match(content) )
     assert     ( /"ch.medelexis.application.feature"/ .match(content) )
   end
-
+  
 end

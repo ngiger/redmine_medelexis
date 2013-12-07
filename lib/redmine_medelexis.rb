@@ -12,10 +12,11 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with redmine_medelexis.  If not, see <http://www.gnu.org/licenses/>.
+require 'xmlsimple'
 
 module RedmineMedelexis  
   def self.debug(msg)
-    # puts "#{Time.now} dbg: #{msg}"
+    puts "#{Time.now} dbg: #{msg}"
   end
   
   def self.log_to_system(msg)
@@ -84,13 +85,15 @@ module RedmineMedelexis
   
   def self.get_ownerdata(user)
     return nil unless user
-    return nil if user.anonymous?
+    return {'customerId' => 'anonymous?' } if user.anonymous?
     members =  Member.find_all_by_user_id(user.id)
     member = members[0]
     condition = "project_id = #{member.project_id}"
+    RedmineMedelexis.debug "#{__LINE__}: member #{member.inspect}"
+#    contact = Contact.all.each{|contact| contact if contact.projects.find{|x| x.id == 1 }}.first
     contact =  Contact.joins(:projects).where(condition)[0]
     RedmineMedelexis.debug "#{__LINE__}: contact #{contact.inspect} for member #{member.inspect}"
-    return nil unless contact
+    return {'customerId' => 'unknown customer' } unless contact
     ownerData = { "customerId"             => user.login,
                   "misApiKey"              => get_api_key(user.login),
                   "projectId"              => member.project_id,
@@ -120,4 +123,66 @@ module RedmineMedelexis
     licenses
   end
   
+  def self.write_unencrypted_xml(license, info)
+    owner = info['ownerdata']
+    all_xml = {"xmlns"=>"http://www.medelexis.ch/MedelexisLicenseFile",
+    "generatedOn"=> Time.now.utc,
+    "license"=> info['license'],
+    "ownerData"=> [
+                    { "customerId"            => [owner["customerId"]],
+                      "misApiKey"             => [owner["misApiKey"]],
+                      "projectId"             => [owner["projectId"]],
+                      "organization"          => [owner["organization"]],
+                      "numberOfStations"      => [owner["numberOfStations"]],
+                      "numberOfPractitioners" => [owner["numberOfPractitioners"]],                      
+                   }
+                  ] ,
+    "Signature"=>
+      [{"xmlns"=>"http://www.w3.org/2000/09/xmldsig#",
+        "SignedInfo"=>
+        [{"CanonicalizationMethod"=>
+            [{"Algorithm"=>"http://www.w3.org/TR/2001/REC-xml-c14n-20010315"}],
+          "SignatureMethod"=>
+            [{"Algorithm"=>"http://www.w3.org/2000/09/xmldsig#rsa-sha1"}],
+          "Reference"=>
+            [{"URI"=>"",
+              "Transforms"=>
+              [{"Transform"=>
+                  [{"Algorithm"=>
+                    "http://www.w3.org/2000/09/xmldsig#enveloped-signature"}]}],
+              "DigestMethod"=>
+              [{"Algorithm"=>"http://www.w3.org/2000/09/xmldsig#sha1"}],
+              "DigestValue"=>[{}]}]}],
+      "SignatureValue"=>[{}]}]}
+
+    out = File.open(license, 'w+')
+    out.write(XmlSimple.xml_out(all_xml, {'RootName' => 'medelexisLicense' ,'XmlDeclaration' => '<?xml version="1.0" encoding="UTF-8" standalone="no"?>' }))
+    out.close
+    all_xml = XmlSimple.xml_out(all_xml, {'RootName' => 'medelexisLicense' ,'XmlDeclaration' => '<?xml version="1.0" encoding="UTF-8" standalone="no"?>' })
+    all_xml
+  end
+  
+  def self.encrypt(info, userName)
+    data_dir = File.expand_path(File.join(File.expand_path(File.dirname(__FILE__)), '..', '..', 'data'))
+    dest_dir = File.join(Dir.tmpdir, 'redmine_medelexis')
+    keystore          = '/srv/distribution-keys'
+    signingKey        = "#{keystore}/signingKey.pem"
+    encryptionKeyPub  = "#{keystore}/encryptionKeyPub.pem"
+    template          = "#{keystore}/session-key-template.xml"
+    license           = "#{dest_dir}/#{userName}.xml"
+    signed            = "#{dest_dir}/#{userName}_signed.xml"
+    crypted           = "#{dest_dir}/#{userName}_crypted.xml"
+    cmd_1 =  "xmlsec1 sign --privkey-pem #{signingKey} #{license} > #{signed}"
+    cmd_2 =  "xmlsec1 encrypt --pubkey-pem #{encryptionKeyPub} --session-key des-192 --xml-data  #{signed} --output #{crypted}  #{template}"
+    FileUtils.makedirs(dest_dir)
+    # RedmineMedelexis.log_to_system("encrypting  #{license} #{info.inspect}")
+    unencrypted = write_unencrypted_xml(license, info)
+    # RedmineMedelexis.log_to_system("unencrypted  #{license} #{File.size(license)} bytes #{File.ctime(license)}")
+    okay = system(cmd_1) and system(cmd_2) and
+    RedmineMedelexis.log_to_system("signed  #{crypted} #{File.size(crypted)} bytes #{File.ctime(crypted)}")
+    content = IO.read(crypted)
+    FileUtils.rm_f([signed, crypted, license]) unless defined?(MiniTest)
+    content
+  end
+
 end
