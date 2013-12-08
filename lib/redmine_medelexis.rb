@@ -16,7 +16,7 @@ require 'xmlsimple'
 
 module RedmineMedelexis  
   def self.debug(msg)
-    puts "#{Time.now} dbg: #{msg}"
+    # puts "#{Time.now} dbg: #{msg}"
   end
   
   def self.log_to_system(msg)
@@ -124,10 +124,11 @@ module RedmineMedelexis
   end
   
   def self.write_unencrypted_xml(license, info)
-    owner = info['ownerdata']
+    info ?  owner   = info['ownerdata'] : owner   = {}
+    info ?  licInfo = info['license']   : licInfo = [ {} ]
     all_xml = {"xmlns"=>"http://www.medelexis.ch/MedelexisLicenseFile",
     "generatedOn"=> Time.now.utc,
-    "license"=> info['license'],
+    "license"=> licInfo,
     "ownerData"=> [
                     { "customerId"            => [owner["customerId"]],
                       "misApiKey"             => [owner["misApiKey"]],
@@ -154,7 +155,7 @@ module RedmineMedelexis
               [{"Algorithm"=>"http://www.w3.org/2000/09/xmldsig#sha1"}],
               "DigestValue"=>[{}]}]}],
       "SignatureValue"=>[{}]}]}
-
+    FileUtils.makedirs(File.dirname(license))
     out = File.open(license, 'w+')
     out.write(XmlSimple.xml_out(all_xml, {'RootName' => 'medelexisLicense' ,'XmlDeclaration' => '<?xml version="1.0" encoding="UTF-8" standalone="no"?>' }))
     out.close

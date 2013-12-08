@@ -49,6 +49,24 @@ class Redmine::ApiTest::LicenseTest < ActionController::IntegrationTest
     Setting.rest_api_enabled = '0'
     Setting.login_required = '0'
   end
+  
+  def get_signed_xml_path(username)
+    signed_xml = File.join(Dir.tmpdir, 'redmine_medelexis', "#{username}_signed.xml")
+  end
+  def verify_license_file(username)
+    signed_xml = get_signed_xml_path(username)
+    pp signed_xml
+    assert(File.exists?(signed_xml))
+    content = IO.read(signed_xml)
+    assert_match('<medelexisLicense xmlns', content)
+    assert_match("<customerId>#{username}</customerId>", content)
+    assert_match("<projectId>3", content)
+    assert_match('<numberOfStations', content)
+    assert_match('<numberOfPractitioners', content)
+    assert_match('<Signature xmlns', content)
+    assert_match(Medelexis_License_Regexp, content)
+  end
+  
 #  Redmine::ApiTest::Base.should_allow_api_authentication(:get, "/my/license.xml") # now has only 4 errors
   test "GET /my/license.xml by api_key" do
     username = 'mmustermann'    
@@ -89,24 +107,6 @@ class Redmine::ApiTest::LicenseTest < ActionController::IntegrationTest
     assert_template 'license/show'
   end
 
-  
-   def get_signed_xml_path(username)
-    signed_xml = File.join(Dir.tmpdir, 'redmine_medelexis', "#{username}_signed.xml")
-  end
-  def verify_license_file(username)
-    signed_xml = get_signed_xml_path(username)
-    pp signed_xml
-    assert(File.exists?(signed_xml))
-    content = IO.read(signed_xml)
-    assert_match('<medelexisLicense xmlns', content)
-    assert_match("<customerId>#{username}</customerId>", content)
-    assert_match("<projectId>3", content)
-    assert_match('<numberOfStations', content)
-    assert_match('<numberOfPractitioners', content)
-    assert_match('<Signature xmlns', content)
-    assert_match(Medelexis_License_Regexp, content)
-  end
-  
   test "auth by api_key and verify content of generated license.xml" do
     username = 'mmustermann'    
     login_as(username)
@@ -118,5 +118,14 @@ class Redmine::ApiTest::LicenseTest < ActionController::IntegrationTest
     content = IO.read(signed_xml)
     assert     ( /id="ch.medelexis.application.feature"/ .match(content) )
     assert_nil ( /id="ch.elexis.base.textplugin.feature"/.match(content) )
+  end
+  
+  test "admin calls /my/license" do
+    username = 'admin'
+    login_as(username)
+    signed_xml = get_signed_xml_path(username)
+    FileUtils.rm_f(signed_xml)               
+    res = get "/my/license.xml"
+    assert res != :success
   end
 end
