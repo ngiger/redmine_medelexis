@@ -20,3 +20,38 @@ service restart redmine
 [09:52:35] Marco Descher: https://mis-beta.medelexis.ch/mmustermann/license - list of all service tickets
 [09:52:42] Marco Descher: https://mis-beta.medelexis.ch/mmustermann/license.xml -encrypted and signed license
 Im logger IP-Adresse des Aufrufes abspeichern.
+
+
+h2. Installation from scratch for development
+
+Get the needed zip files. Used versions are found under https://mis-beta.medelexis.ch/admin/info
+redmine-2.4.2.zip
+redmine_contacts-3_2_13-pro.zip
+redmine_contacts_helpdesk-2_2_8.zip
+redmine_contacts_invoices-3_1_0-pro.zip
+redmine_products-1_0_1-pro.zip
+
+unzip redmine-*.zip
+cd redmine-2.4.2
+cd plugins
+unzip redmine_contacts-*-pro.zip
+unzip redmine_contacts_helpdesk-*.zip
+unzip redmine_contacts_invoices-*.zip
+unzip redmine_products-*.zip
+# git clone https://github.com/thorin/redmine_ldap_sync
+git clone git@github.com:ngiger/redmine_medelexis.git # or https://github.com/ngiger/redmine_medelexis.git
+# use ruby 1.9
+echo "gem 'yaml_db'" >> Gemfile
+bundle install
+bundle exec rake db:migrate RAILS_ENV=development
+rake RAILS_ENV=development redmine:plugins NAME=redmine_contacts
+rake RAILS_ENV=development redmine:plugins NAME=redmine_contacts_helpdesk
+rake RAILS_ENV=development redmine:plugins NAME=redmine_contacts_invoices
+rake RAILS_ENV=development redmine:plugins NAME=redmine_products
+rake RAILS_ENV=development redmine:plugins NAME=redmine_medelexis
+# rake RAILS_ENV=development redmine:plugins NAME=redmine_ldap_sync
+# try loading the dump
+rake RAILS_ENV=development db:data:load # loads db/data.yml. Had to remove entries for table tags
+script/rails server webrick RAILS_ENV=production --port=30001 # start rails
+
+To run the tests call @rake redmine:plugins:test@, which runs the test for all installed plugins
