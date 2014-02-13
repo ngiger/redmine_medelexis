@@ -74,8 +74,14 @@ module RedmineMedelexis
   def self.get_project(user)
     # Project.all.each{|p| pp puts "Project id #{p.id} identifier #{p.identifier} name #{p.name}" }
     return nil unless user
-    project = Project.find_by_identifier(user.name) || Project.find_by_name(user.name)
-    RedmineMedelexis.debug "#{__LINE__}: project #{project.inspect}"
+    project = nil
+    Project.all.each do |proj|
+      if proj.identifier == user.login
+        project = proj
+        break
+      end
+    end
+    RedmineMedelexis.debug "#{__LINE__}: user #{user.name} #{user.name} > project #{project.inspect}"
     return project if project
     member = get_member(user)
     RedmineMedelexis.debug "#{__LINE__}: member #{member.inspect}"
