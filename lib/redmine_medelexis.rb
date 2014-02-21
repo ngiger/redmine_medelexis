@@ -37,7 +37,7 @@ module RedmineMedelexis
     RedmineMedelexis.debug "#{__LINE__}: project #{project.inspect}"
     return nil unless project
     info = {}
-    info['ownerdata'] =  RedmineMedelexis.get_ownerdata(user)
+    info['ownerdata'] =  RedmineMedelexis.get_ownerdata(user, project)
     info['license']    = RedmineMedelexis.get_license(project)
     info
   end
@@ -83,13 +83,9 @@ module RedmineMedelexis
     end
     RedmineMedelexis.debug "#{__LINE__}: user #{user.name} #{user.name} > project #{project.inspect}"
     return project if project
-    member = get_member(user)
-    RedmineMedelexis.debug "#{__LINE__}: member #{member.inspect}"
-    return nil unless member
-    Project.find(member.project_id)
   end
   
-  def self.get_ownerdata(user)
+  def self.get_ownerdata(user, project)
     return nil unless user
     return {'customerId' => 'anonymous?' } if user.anonymous?
     members =  Member.find_all_by_user_id(user.id)
@@ -102,9 +98,9 @@ module RedmineMedelexis
     return {'customerId' => 'unknown customer' } unless contact
     ownerData = { "customerId"             => user.login,
                   "misApiKey"              => get_api_key(user.login),
-                  "projectId"              => member.project_id,
-                  "organization"           => contact.company,
-                  "numberOfStations"       => "0",
+                  "projectId"              => project.id,
+                  "organization"           => project.name,
+                  "numberOfStations"       => "0", # project.
                   "numberOfPractitioners"  => "1"}
   end
   

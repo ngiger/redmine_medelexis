@@ -54,4 +54,9 @@ rake RAILS_ENV=development redmine:plugins NAME=redmine_medelexis
 rake RAILS_ENV=development db:data:load # loads db/data.yml. Had to remove entries for table tags
 script/rails server webrick RAILS_ENV=production --port=30001 # start rails
 
-To run the tests call @rake redmine:plugins:test NAME=redmine_medelexis@, which runs the test for all installed plugins. Run tests for redmine_medelexis-plugins using @rake redmine:plugins:test NAME=redmine_medelexis@
+To run the tests call
+* @rake redmine:plugins:test NAME=redmine_medelexis@, which runs the test for all installed plugins.
+Run tests for redmine_medelexis-plugins using
+* @rake redmine:plugins:test NAME=redmine_medelexis@
+* @ruby test/functional/license_test.rb@
+* @ruby test/integration/license_test.rb@

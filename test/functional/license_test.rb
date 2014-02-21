@@ -74,7 +74,7 @@ class Redmine::ApiTest::LicenseTest < ActionController::TestCase
   end
   
   test "verify expired trial not in license" do
-    username = 'mmustermann'
+    username = 'mustermann'
     user = User.find_by_login(username)
     res = RedmineMedelexis.license_info_for_user(user)
     assert_not_nil res
@@ -82,7 +82,7 @@ class Redmine::ApiTest::LicenseTest < ActionController::TestCase
   end
   
   test "verify license valid user" do
-    username = 'mmustermann'
+    username = 'mustermann'
     user = User.find_by_login(username)
     res = RedmineMedelexis.license_info_for_user(user)
     assert_not_nil res

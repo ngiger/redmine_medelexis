@@ -77,11 +77,11 @@ users_004:
   must_change_passwd: false
 users_005:
   id: 5
-  login: mmustermann
+  login: mustermann
   hashed_password: ''
   firstname: Max
   lastname: Mustermann
-  mail: mmustermann@medevit.at
+  mail: mustermann@medevit.at
   admin: false
   status: 1
   last_login_on: 2013-11-22 14:09:46.000000000 +01:00

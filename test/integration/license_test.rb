@@ -69,7 +69,7 @@ class Redmine::ApiTest::LicenseTest < ActionController::IntegrationTest
   
 #  Redmine::ApiTest::Base.should_allow_api_authentication(:get, "/my/license.xml") # now has only 4 errors
   test "GET /my/license.xml by api_key" do
-    username = 'mmustermann'    
+    username = 'mustermann'    
     res = get "/my/license.xml", { 'key' => RedmineMedelexis.get_api_key(username) }
     assert_response :success
   end
@@ -92,23 +92,23 @@ class Redmine::ApiTest::LicenseTest < ActionController::IntegrationTest
     assert res != :success
   end
   
- test "GET /mmustermann/license as non non-admin for myself" do
-    username = 'mmustermann'  
+ test "GET /mustermann/license as non non-admin for myself" do
+    username = 'mustermann'  
     login_as(username)
-    get "/mmustermann/license"
+    get "/mustermann/license"
     assert_response :success
   end
   
-  test "GET /mmustermann/license as admin" do
+  test "GET /mustermann/license as admin" do
     username = 'admin'  
     login_as(username)
-    get "/mmustermann/license"
+    get "/mustermann/license"
     assert_response :success
     assert_template 'license/show'
   end
 
   test "auth by api_key and verify content of generated license.xml" do
-    username = 'mmustermann'    
+    username = 'mustermann'    
     login_as(username)
     signed_xml = get_signed_xml_path(username)
     FileUtils.rm_f(signed_xml)               
