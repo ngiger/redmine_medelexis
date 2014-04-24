@@ -15,12 +15,17 @@
 require 'xmlsimple'
 
 module RedmineMedelexis  
+  Keystore          = '/srv/distribution-keys'
+  LicenseStore      = File.join(Dir.tmpdir, 'redmine_medelexis')
+                       
   def self.debug(msg)
-    # puts "#{Time.now} dbg: #{msg}"
+    return unless Setting.plugin_redmine_medelexis['debug'].to_i == 1
+    log_to_system(msg)
   end
   
-  def self.log_to_system(msg)
-    self.debug(msg)
+  def self.log_to_system(msg, debug=false)
+    return if debug and Setting.plugin_redmine_medelexis['debug'].to_i == 0
+    puts msg if Setting.plugin_redmine_medelexis['debug'].to_i == 1
     system("logger #{File.basename(__FILE__)}: #{msg.gsub(/[\n'"]/,'')}")
   end
 
@@ -167,24 +172,22 @@ module RedmineMedelexis
   
   def self.encrypt(info, userName)
     data_dir = File.expand_path(File.join(File.expand_path(File.dirname(__FILE__)), '..', '..', 'data'))
-    dest_dir = File.join(Dir.tmpdir, 'redmine_medelexis')
-    keystore          = '/srv/distribution-keys'
-    signingKey        = "#{keystore}/signingKey.pem"
-    encryptionKeyPub  = "#{keystore}/encryptionKeyPub.pem"
-    template          = "#{keystore}/session-key-template.xml"
-    license           = "#{dest_dir}/#{userName}.xml"
-    signed            = "#{dest_dir}/#{userName}_signed.xml"
-    crypted           = "#{dest_dir}/#{userName}_crypted.xml"
+    signingKey        = "#{Keystore}/signingKey.pem"
+    encryptionKeyPub  = "#{Keystore}/encryptionKeyPub.pem"
+    template          = "#{Keystore}/session-key-template.xml"
+    license           = "#{LicenseStore}/#{userName}.xml"
+    signed            = "#{LicenseStore}/#{userName}_signed.xml"
+    crypted           = "#{LicenseStore}/#{userName}_crypted.xml"
     cmd_1 =  "xmlsec1 sign --privkey-pem #{signingKey} #{license} > #{signed}"
     cmd_2 =  "xmlsec1 encrypt --pubkey-pem #{encryptionKeyPub} --session-key des-192 --xml-data  #{signed} --output #{crypted}  #{template}"
-    FileUtils.makedirs(dest_dir)
+    FileUtils.makedirs(LicenseStore)
     # RedmineMedelexis.log_to_system("encrypting  #{license} #{info.inspect}")
     unencrypted = write_unencrypted_xml(license, info)
     # RedmineMedelexis.log_to_system("unencrypted  #{license} #{File.size(license)} bytes #{File.ctime(license)}")
     okay = system(cmd_1) and system(cmd_2) and
     RedmineMedelexis.log_to_system("signed  #{crypted} #{File.size(crypted)} bytes #{File.ctime(crypted)}")
     content = IO.read(crypted)
-    FileUtils.rm_f([signed, crypted, license]) unless defined?(MiniTest)
+    FileUtils.rm_f([signed, crypted, license]) unless defined?(MiniTest) or Setting.plugin_redmine_medelexis['keep_temp_license_files'].to_i == 1
     content
   end
 
