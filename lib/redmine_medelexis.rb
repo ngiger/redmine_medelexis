@@ -26,7 +26,7 @@ module RedmineMedelexis
   def self.log_to_system(msg, debug=false)
     return if debug and Setting.plugin_redmine_medelexis['debug'].to_i == 0
     puts msg if Setting.plugin_redmine_medelexis['debug'].to_i == 1
-    system("logger #{File.basename(__FILE__)}: #{msg.gsub(/[\n'"]/,'')}")
+    system("logger '#{File.basename(__FILE__)}: #{msg.gsub(/[\n'"]/,'')}'")
   end
 
   def self.get_api_key(username)
@@ -97,10 +97,6 @@ module RedmineMedelexis
     member = members[0]
     condition = "project_id = #{member.project_id}"
     RedmineMedelexis.debug "#{__LINE__}: member #{member.inspect}"
-#    contact = Contact.all.each{|contact| contact if contact.projects.find{|x| x.id == 1 }}.first
-    contact =  Contact.joins(:projects).where(condition)[0]
-    RedmineMedelexis.debug "#{__LINE__}: contact #{contact.inspect} for member #{member.inspect}"
-    return {'customerId' => 'unknown customer' } unless contact
     ownerData = { "customerId"             => user.login,
                   "misApiKey"              => get_api_key(user.login),
                   "projectId"              => project.id,

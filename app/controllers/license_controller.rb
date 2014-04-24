@@ -27,7 +27,7 @@ private
       @user = User.find_by_login(params['login'])
       RedmineMedelexis.log_to_system("#{__LINE__}: Must use user passed as login #{params['login']} is #{@user}. current User #{User.current}")
     elsif params['key'] == nil and not User.current.anonymous?
-      RedmineMedelexis.log_to_system("#{__LINE__}: Must use current User #{User.current}")
+      RedmineMedelexis.log_to_system("#{__LINE__}: Must use current User #{User.current} login #{User.current.login} id #{User.current.id}")
       @user = User.current
     else
       @user = User.find_by_api_key(params['key'])
@@ -40,7 +40,7 @@ private
   def find_license_info
     if @user
       @api_key =  RedmineMedelexis.get_api_key(@user.login)
-      RedmineMedelexis.debug("#{__LINE__}: user ist #{@user.inspect}")
+      RedmineMedelexis.debug("#{__LINE__}: user ist #{@user.login}")
       @info = RedmineMedelexis.license_info_for_user(@user)
       RedmineMedelexis.debug("#{__LINE__}: @info ist #{@info.inspect}")
       @encrypted = RedmineMedelexis.encrypt(@info, @user.login)
