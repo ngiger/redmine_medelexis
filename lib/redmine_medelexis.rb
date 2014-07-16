@@ -59,7 +59,7 @@ module RedmineMedelexis
   # contacts_002:  id: 2  first_name: Max  last_name: Mustermann  is_company: false created_on: 2013-10-23 08:35:17.000000000 +02:00
   # members_001:  id: 1  user_id: 5  project_id: 3
   
-    Zeitformat        = '%Y-%m-%d%z'
+    Zeitformat        = '%Y-%m-%d%:z'
     EwigesAblaufdatum = Time.new(2099, 12, 31).strftime(Zeitformat)
     TrialTime         = 31 # Days
   def self.get_member(user)
@@ -130,7 +130,7 @@ module RedmineMedelexis
     info ?  owner   = info['ownerdata'] : owner   = {}
     info ?  licInfo = info['license']   : licInfo = [ {} ]
     all_xml = {"xmlns"=>"http://www.medelexis.ch/MedelexisLicenseFile",
-    "generatedOn"=> Time.now.utc,
+    "generatedOn"=> Time.now.utc.strftime("%Y-%m-%dT%H:%M:%S.%L%:z"),
     "license"=> licInfo,
     "ownerData"=> [
                     { "customerId"            => [owner["customerId"]],
