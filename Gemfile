@@ -1,2 +1,4 @@
-gem 'xml-simple'
-gem 'simplecov'
+source 'https://rubygems.org'
+
+# Specify your gem's dependencies in redmine_medelexis.gemspec
+gemspec
