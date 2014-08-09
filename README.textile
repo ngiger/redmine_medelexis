@@ -28,39 +28,60 @@ Under http://foo.org/settings/plugin/redmine_medelexis you can add more debuggin
 h2. Installation from scratch for development
 
 Get the needed zip files. Used versions are found under https://mis-beta.medelexis.ch/admin/info
-redmine-2.4.2.zip
-redmine_contacts-3_2_13-pro.zip
-redmine_contacts_helpdesk-2_2_8.zip
-redmine_contacts_invoices-3_1_0-pro.zip
-redmine_products-1_0_1-pro.zip
+* redmine-2.4.2.zip
+* redmine_contacts-3_2_13-pro.zip
+* redmine_contacts_helpdesk-2_2_8.zip
+* redmine_contacts_invoices-3_1_0-pro.zip
+* redmine_products-1_0_1-pro.zip
 
-unzip redmine-*.zip
+Afterwards execute and verify these steps (assuming a bash shell). Using ruby 1.9.3p547 was fine for me. Ruby 2.1.2 had some problems
+
+bc. unzip redmine-*.zip
 cd redmine-2.4.2
 cd plugins
 unzip redmine_contacts-*-pro.zip
 unzip redmine_contacts_helpdesk-*.zip
 unzip redmine_contacts_invoices-*.zip
 unzip redmine_products-*.zip
-# git clone https://github.com/thorin/redmine_ldap_sync
+# (Skip unless production) git clone https://github.com/thorin/redmine_ldap_sync
 git clone git@github.com:ngiger/redmine_medelexis.git # or https://github.com/ngiger/redmine_medelexis.git
-# use ruby 1.9
-echo "gem 'yaml_db'" >> Gemfile
+cd ..
 bundle install
 bundle exec rake db:migrate RAILS_ENV=development
-rake RAILS_ENV=development redmine:plugins NAME=redmine_contacts
-rake RAILS_ENV=development redmine:plugins NAME=redmine_contacts_helpdesk
-rake RAILS_ENV=development redmine:plugins NAME=redmine_contacts_invoices
-rake RAILS_ENV=development redmine:plugins NAME=redmine_products
-rake RAILS_ENV=development redmine:plugins NAME=redmine_medelexis
-# rake RAILS_ENV=development redmine:plugins NAME=redmine_ldap_sync
-# try loading the dump
-rake RAILS_ENV=development db:data:load # loads db/data.yml. Had to remove entries for table tags
-script/rails server webrick RAILS_ENV=production --port=30001 # start rails
+bundle exec rake RAILS_ENV=development redmine:plugins NAME=redmine_contacts
+bundle exec rake RAILS_ENV=development redmine:plugins NAME=redmine_contacts_helpdesk
+bundle exec rake RAILS_ENV=development redmine:plugins NAME=redmine_contacts_invoices
+bundle exec rake RAILS_ENV=development redmine:plugins NAME=redmine_products
+bundle exec rake RAILS_ENV=development redmine:plugins NAME=redmine_ldap_sync
+bundle exec rake RAILS_ENV=development redmine:plugins NAME=redmine_medelexis
 
+
+h2. development: Loading a dump
+
+@bundle exec rake RAILS_ENV=development db:data:load@ # loads db/data.yml
+
+h2. Creating a dump from the production server
+
+@bundle exec rake RAILS_ENV=production db:data:dump@ # loads db/data.yml
+
+h2. Reset admin login, password and skip ldap
+
+bc. RAILS_ENV=development bundle exec script/rails runner 'user = User.find(:first, :conditions => {:admin => true}) ; \
+user.login = "admin"; user.auth_source_id = nil; user.password, user.password_confirmation = "my_password"; user.save!'
+
+If you know the login of you might also use something like @:conditions => {:login => "myLogin"}@
+
+h2. Start rails for development
+
+@bundle exec rake RAILS_ENV=development script/rails server webrick --port=30001@
+
+h2. Running the tests
+
+Now you should be able to login under
 To run the tests call
-* @rake redmine:plugins:test NAME=redmine_medelexis@, which runs the test for all installed plugins.
+* @bundle exec rake redmine:plugins:test NAME=redmine_medelexis@, which runs the test for all installed plugins.
 Run tests for redmine_medelexis-plugins using
-* @rake redmine:plugins:test NAME=redmine_medelexis@
+* @bundle exec rake redmine:plugins:test NAME=redmine_medelexis@
 * @ruby test/functional/license_test.rb@
 * @ruby test/integration/license_test.rb@
 
