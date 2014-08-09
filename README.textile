@@ -85,22 +85,3 @@ Run tests for redmine_medelexis-plugins using
 * @ruby test/functional/license_test.rb@
 * @ruby test/integration/license_test.rb@
 
-
-h2. Create/installing dump from a server for deployment
-
-Append a line @gem 'yaml_db'@ to the main Gemfile
-rm -rf dump_output
-bundle install
-bundle exec rake db:data:dump_dir dir="dump_output"
-rake db:data:dump_dir dir="redmine_dump" RAILS_ENV=production
-
-install it with
-
-h2. Resetting forgotten user password
-
-RAILS_ENV=development bundle exec rails console
-user = User.find_by_login('admin') ; user.password, user.password_confirmation = "adminadmin"; user.save!
-
-# you might also use User.find_by_login('admin')
-
-# user passwords must be at least 8 characters ong
