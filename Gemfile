@@ -1,4 +1,6 @@
 source 'https://rubygems.org'
 
-# Specify your gem's dependencies in redmine_medelexis.gemspec
-gemspec
+gem  "bundler", "~> 1.6"
+gem  "xml-simple"
+gem  "simplecov"
+gem  "yaml_db"
