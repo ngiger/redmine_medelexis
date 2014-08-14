@@ -13,22 +13,12 @@
 # You should have received a copy of the GNU General Public License
 # along with redmine_medelexis.  If not, see <http://www.gnu.org/licenses/>.
 require 'xmlsimple'
+require 'medelexis_helpers'
 
 module RedmineMedelexis  
   Keystore          = '/srv/distribution-keys'
   LicenseStore      = File.join(Dir.tmpdir, 'redmine_medelexis')
                        
-  def self.debug(msg)
-    return unless Setting.plugin_redmine_medelexis['debug'].to_i == 1
-    log_to_system(msg)
-  end
-  
-  def self.log_to_system(msg, debug=false)
-    return if debug and Setting.plugin_redmine_medelexis['debug'].to_i == 0
-    puts msg if Setting.plugin_redmine_medelexis['debug'].to_i == 1
-    system("logger '#{File.basename(__FILE__)}: #{msg.gsub(/[\n'"]/,'')}'")
-  end
-
   def self.get_api_key(username)
     user = User.find_by_login(username)    
     token = Token.find_by_user_id_and_action(user.id, :api)
