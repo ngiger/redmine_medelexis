@@ -28,6 +28,10 @@ module RedmineMedelexis
     system("logger '#{File.basename(__FILE__)}: #{msg.gsub(/[\n'"]/,'')}'")
   end
 
+  def self.shortenSubject(subject)
+    subject.sub('feature.feature.group', 'feature')
+  end
+
   def self.addJournal(type, id, msg)
     journal = Journal.new
     journal.journalized_id = id

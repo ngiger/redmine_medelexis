@@ -101,3 +101,9 @@ custom_values_017:
   customized_id: 1
   custom_field_id: 3
   value: '2014-11-15'
+custom_values_018:
+  id: 18
+  customized_type: Issue
+  customized_id: 3
+  custom_field_id: 2
+  value: LICENSED

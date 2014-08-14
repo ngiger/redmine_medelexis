@@ -90,7 +90,8 @@ class Redmine::ApiTest::LicenseTest < ActionController::TestCase
     assert     ( /#{username}/.match(content) )
     assert     ( /#{RedmineMedelexis.get_api_key(username)}/.match(content) )
     assert     ( /Praxis Dr. Mustermann/.match(content) )
-    assert     ( /"ch.medelexis.application.feature"/ .match(content) )
+    assert     ( /"id"=>"ch.medelexis.application.feature", "licenseType"=>"LICENSED",/ .match(content) ) # 'Must find ch.medelexis.application.feature'
+    assert     ( /"id"=>"ch.elexis.fop_wrapper.feature", "licenseType"=>"LICENSED",/ .match(content) ) # 'Must find eternal license for fop'
   end
   
 end

@@ -99,8 +99,9 @@ module RedmineMedelexis
     return nil unless project
     condition = "project_id = #{project.id}"
     issues = Issue.where(condition, Date.today)
+    eternal = Issue.find(:all, :conditions => {:project_id => 1, :tracker_id => 4, :closed_on => nil})
     licenses = []
-    issues.each{ |issue|  #>"2013-12-12+01:00",
+    (issues+eternal).each{ |issue|  #>"2013-12-12+01:00",
                   endOfLicense = issue.due_date ? issue.due_date : Time.new(2099, 12, 31)
                   if /TRIAL/i.match(issue.custom_field_values[0].to_s)
                     endOfLicense = issue.due_date ? issue.due_date : (issue.start_date + TrialTime)
@@ -108,7 +109,7 @@ module RedmineMedelexis
                     next if endOfLicense < Date.today
                   end
       licenses<< {  "endOfLicense"    => endOfLicense.strftime(Zeitformat),
-                    "id"              => issue.subject,
+                    "id"              => RedmineMedelexis.shortenSubject(issue.subject),
                     "licenseType"     => issue.custom_field_values[0].to_s,
                     "startOfLicense"  => issue.start_date.strftime(Zeitformat),
       }

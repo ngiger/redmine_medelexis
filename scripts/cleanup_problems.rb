@@ -4,10 +4,6 @@ $: << dir unless $:.index(dir)
 require 'medelexis_helpers'
 require 'active_record'
 
-def shortenSubject(subject)
-  subject.sub('feature.feature.group', 'feature')
-end
-
 def showProblems(ausgabe = File.open('problems.txt', 'w+'))
   nrProblems = 0
   ausgabe.puts "Here is a list of all Service tickets which do not have exactly one attached product"
@@ -17,11 +13,11 @@ def showProblems(ausgabe = File.open('problems.txt', 'w+'))
    Issue.find(:all, :conditions => {:tracker_id => 4, :closed_on => nil}).each{
      |issue| 
     next unless issue.tracker_id == 4
-    nrProducts = Product.find(:all, :conditions => { :code => shortenSubject(issue.subject) }).size
+    nrProducts = Product.find(:all, :conditions => { :code => RedmineMedelexis.shortenSubject(issue.subject) }).size
     next if nrProducts == 1
     ausgabe.puts "Issue #{issue.id} changed #{issue.updated_on} #{issue.subject} has #{nrProducts} products"
     nrProblems += 1
-    missingSubjects << shortenSubject(issue.subject) if nrProducts << 0
+    missingSubjects << RedmineMedelexis.shortenSubject(issue.subject) if nrProducts << 0
   }
   nrServiceIssues = Issue.find(:all, :conditions => { :tracker_id => 4} ).size
   ausgabe.puts "#{nrProblems} out of #{nrServiceIssues} service issues had problems #{missingSubjects.sort.uniq.size}/#{missingSubjects.size} missing"
