@@ -28,11 +28,11 @@ module RedmineMedelexis
     system("logger '#{File.basename(__FILE__)}: #{msg.gsub(/[\n'"]/,'')}'")
   end
 
-  def self.addJournal(id, type, msg)
+  def self.addJournal(type, id, msg)
     journal = Journal.new
     journal.journalized_id = id
     journal.journalized_type = type
-    journal.notes = "#{File.basename(__FILE__)}: TRIAL -> LICENSED"
+    journal.notes = "#{File.basename(__FILE__)}: #{msg}"
     journal.save
   end
 
@@ -45,7 +45,7 @@ module RedmineMedelexis
     issue.custom_field_values.first.value = 'LICENSED'
     issue.save_custom_field_values
     issue.save!
-    addJournal(issue.id, 'Issue', "#{File.basename(__FILE__)}: TRIAL -> LICENSED")
+    addJournal('Issue', issue.id, "#{File.basename(__FILE__)}: TRIAL -> LICENSED")
     @@idFromTials2License << issue.id
   end
 
@@ -58,6 +58,10 @@ module RedmineMedelexis
       self.log_to_system("issue_to_licensed took #{duration} second for ids #{@@idFromTials2License.join(',')}")
     end
     @@idFromTials2License
+  end
+
+  def getHauptkontakt(project_id)
+    Project.find(project_id).contacts.find(:all, :conditions => { :cached_tag_list => 'Hauptkontakt'} ).first
   end
 
 end
