@@ -109,7 +109,7 @@ module RedmineMedelexis
                     next if endOfLicense < Date.today
                   end
       licenses<< {  "endOfLicense"    => endOfLicense.strftime(Zeitformat),
-                    "id"              => RedmineMedelexis.shortenSubject(issue.subject),
+                    "id"              => issue.subject,
                     "licenseType"     => issue.custom_field_values[0].to_s,
                     "startOfLicense"  => issue.start_date.strftime(Zeitformat),
       }
