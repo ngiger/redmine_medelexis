@@ -47,6 +47,8 @@ def correctStartdate(ausgabe = File.open('problems.txt', 'w+'))
   ausgabe.puts "correctStartdate corrected #{nrProblems} problems"
 end
 
+# Das ist eine schlechte Idee, da das WFE sonst nicht mehr läuft
+# Es gibt diverse Benutzer wie Rico Henzen, welche keine Praxis haben!
 def deleteProjectsWithoutIssues(ausgabe = File.open('problems.txt', 'w+'))
   nrDeletes = 0
   ActiveRecord::Base.transaction do
@@ -72,10 +74,10 @@ def deleteDuplicatedServiceIssues(ausgabe = File.open('duplicates.txt', 'w+'))
                                   {:tracker_id => 4, :closed_on => nil,
                                   :project_id => issue.project_id, :subject => issue.subject})
         next if sameIssues.size == 1 
-        ausgabe.puts "issue #{issue.id} found #{sameIssues.size} times"
+        ausgabe.puts "issue #{issue.id} #{issue.subject} found #{sameIssues.size} times in project #{issue.project_id}"
         sameIssues.sort! { |a,b| a.created_on <=> b.created_on }
         sameIssues.each{ |x| ausgabe.puts "#{x.id} #{x.created_on}"}
-        sameIssues[1..-1].each{ 
+        sameIssues[0..-2].each{
                               |x| 
                               ausgabe.puts "Deleting #{x.id} #{x.created_on}"
                               x.delete
@@ -88,7 +90,6 @@ def deleteDuplicatedServiceIssues(ausgabe = File.open('duplicates.txt', 'w+'))
 end
 
 ausgabe = File.open("cleanup_#{Time.now.strftime('%Y%m%d-%H%M')}.txt", 'w+')
-deleteProjectsWithoutIssues(ausgabe)
 deleteDuplicatedServiceIssues(ausgabe)
 correctStartdate(ausgabe)
 showProblems(ausgabe)
