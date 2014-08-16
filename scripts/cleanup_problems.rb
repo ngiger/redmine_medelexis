@@ -45,7 +45,7 @@ def correctStartdate(ausgabe = File.open('problems.txt', 'w+'))
         ausgabe.puts "Issue #{issue.id}: #{msg}"
         RedmineMedelexis.addJournal('Issue', issue.id, msg)
         issue.custom_field_values.first.value == 'LICENSED'
-    else
+        issue.save_custom_field_values
       end
       issue.save!               
     }
