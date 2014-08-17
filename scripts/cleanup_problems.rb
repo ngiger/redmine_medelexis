@@ -35,13 +35,13 @@ def correctStartdate(ausgabe = File.open('problems.txt', 'w+'))
     startTime = Time.now
     issues.each{ 
       |issue|
-      msg = "Changed start_date from #{issue.start_date} => #{januaryFirst} for #{issue.id} #{issue.custom_field_values.first.value} #{issue.subject}"
+      msg = "*Beginn* wurde von #{issue.start_date} auf #{januaryFirst} geändert"
       RedmineMedelexis.addJournal('Issue', issue.id, msg)
       ausgabe.puts "Issue #{issue.id}: #{msg}"
       nrProblems += 1
       issue.start_date = januaryFirst
       if (issue.custom_field_values.first.value == 'TRIAL')
-        msg = "   Changed status from #{issue.custom_field_values.first.value} => #{'LICENSED'}"
+        msg = "*Abostatus* wurde von #{issue.custom_field_values.first.value} auf #{'LICENSED'} geändert"
         ausgabe.puts "Issue #{issue.id}: #{msg}"
         RedmineMedelexis.addJournal('Issue', issue.id, msg)
         issue.custom_field_values.first.value = 'LICENSED'
