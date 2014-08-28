@@ -1,8 +1,40 @@
 #!/usr/bin/env ruby
+# encoding: utf-8
 dir = File.expand_path('../../lib', __FILE__)
 $: << dir unless $:.index(dir)
 require 'medelexis_helpers'
 require 'active_record'
+
+OpenBase        = 'ch.elexis.base.ch.feature'
+MedelexisBase   = 'ch.medelexis.base.ch.feature'
+
+def avoidUseOfSwissOpenBase(ausgabe = File.open('problems.txt', 'w+'))
+  nrProblems = 0
+  ausgabe.puts "Here is a list where we remove the SwissBaseOpenSource feature and/or added the Medelexis Base feature"
+  ausgabe.puts "Created by #{__FILE__} at #{Time.now}"
+  installedBasedFeatures = {}
+  Issue.find(:all, :conditions => {:tracker_id => 4, :closed_on => nil}).each{
+     |issue|
+    next unless issue.tracker_id == 4
+    baseFeatures = []
+    nrProducts   = 0
+    [ OpenBase, MedelexisBase].each {
+      |name|
+      # nrProducts = Product.find(:all, :conditions => { :code => 'ch.elexis.base.ch.feature' }).size
+      nrProducts = Product.find(:all, :conditions => { :code => name }).size
+      baseFeatures << name if nrProducts > 0
+    }
+    next if baseFeatures == [MedelexisBase] 
+    nrProblems += 1
+    ausgabe.puts  msg
+    msg = "*Ende* wurde von #{issue.closed_on} auf #{Date.today} geändert"
+    issue.closed_on = Date.today
+    RedmineMedelexis.addJournal('Issue', issue.id, msg)
+    ausgabe.puts "Issue #{issue.id}: #{msg}"
+  }
+  msg = "Found #{nrProblems} problems when looking for abos of #{OpenBase}"
+  ausgabe.puts msg
+end
 
 def showProblems(ausgabe = File.open('problems.txt', 'w+'))
   nrProblems = 0
@@ -100,3 +132,4 @@ ausgabe = File.open("cleanup_#{Time.now.strftime('%Y%m%d-%H%M')}.txt", 'w+')
 deleteDuplicatedServiceIssues(ausgabe)
 correctStartdate(ausgabe)
 showProblems(ausgabe)
+avoidUseOfSwissOpenBase(ausgabe)
