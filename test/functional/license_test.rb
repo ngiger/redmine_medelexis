@@ -80,7 +80,17 @@ class Redmine::ApiTest::LicenseTest < ActionController::TestCase
     assert_not_nil res
     assert_nil ( /"ch.elexis.base.textplugin.feature"/.match(res.inspect.to_s) )
   end
-  
+
+  test "verify cancelled trial in license" do
+    username = 'mustermann'
+    user = User.find_by_login(username)
+    res = RedmineMedelexis.license_info_for_user(user)
+    assert_not_nil res
+    cancelled_licenses =  res['license'].select{ |license| license['id'].match(/ch.elexis.cancelled.feature/) }
+    assert_equal(1, cancelled_licenses.size)
+    assert_equal('CANCELLED', cancelled_licenses.first['licenseType'])
+  end
+
   test "verify license valid user" do
     username = 'mustermann'
     user = User.find_by_login(username)
@@ -93,5 +103,5 @@ class Redmine::ApiTest::LicenseTest < ActionController::TestCase
     assert     ( /"id"=>"ch.medelexis.application.feature", "licenseType"=>"LICENSED",/ .match(content) ) # 'Must find ch.medelexis.application.feature'
     assert     ( /"id"=>"ch.elexis.fop_wrapper.feature.feature.group", "licenseType"=>"LICENSED",/ .match(content) ) # 'Must find eternal license for fop'
   end
-  
+
 end

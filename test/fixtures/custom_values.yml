@@ -107,3 +107,9 @@ custom_values_018:
   customized_id: 3
   custom_field_id: 2
   value: LICENSED
+custom_values_019:
+  id: 19
+  customized_type: Issue
+  customized_id: 4
+  custom_field_id: 2
+  value: CANCELLED

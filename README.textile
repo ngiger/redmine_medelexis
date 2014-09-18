@@ -78,12 +78,12 @@ h2. Start rails for development
 h2. Running the tests
 
 Now you should be able to login under
-To run the tests call
+To run the tests, you must rake all plugins (as above) with RAILS_ENV=test. Then you may use calls like
 * @bundle exec rake redmine:plugins:test NAME=redmine_medelexis@, which runs the test for all installed plugins.
 Run tests for redmine_medelexis-plugins using
 * @bundle exec rake redmine:plugins:test NAME=redmine_medelexis@
-* @ruby test/functional/license_test.rb@
-* @ruby test/integration/license_test.rb@
+* @bundle exec ruby plugins/redmine_medelexis/test/functional/license_test.rb@
+* @bundle exec ruby plugins/redmine_medelexis/test/integration/license_test.rbb@
 
 h2. Scripts for the production server
 
