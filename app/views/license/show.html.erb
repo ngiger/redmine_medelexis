@@ -9,18 +9,20 @@
     <li>numberOfStations: <%= ownerdata['numberOfStations'] %> </li>
     <li>numberOfPractitioners: <%= ownerdata['numberOfPractitioners'] %> </li>
   </ul>
-  <% info['license'].each{ |item| %>
   <ol>
-    license:<%= item.inspect %>
-    <li>Lizenz for <h3><%= item['id'] %></h3></li>
-    <ul>
-      <li>licenseType: <%= item['licenseType'] %> </li>
-      <li>startOfLicense: <%= item['startOfLicense'] %> </li>
-      <li>endOfLicense: <%= item['endOfLicense'] %> </li>
-    </ul>
-  </ol>
+  <% info['license'].each{ |item| %>
+    <li><h3><%= item['id'] %></h3>
+      <ul>
+          <li>licenseType: <%= item['licenseType'] %> </li>
+          <li>startOfLicense: <%= item['startOfLicense'] %> </li>
+          <li>endOfLicense: <%= item['endOfLicense'] %> </li>
+          <li>raw data: <%= item.inspect %>
+      </ul>
+    </li>
   <% } %>
-  Info (raw data): <%= @info.inspect %>
+  </ol>
+  <h2>Info (raw data)</h2>
+  <%= @info.inspect %>
 <% else %>
   <h3>Invalid license for user <%= @user ? @user.login : 'no valid user' %></h3>
 <% end %>
