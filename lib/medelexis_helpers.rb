@@ -14,9 +14,14 @@
 # along with redmine_medelexis.  If not, see <http://www.gnu.org/licenses/>.
 
 # Some helper for scripts and other stuff
+require 'logger'
+require 'uri'
+require 'socket'
 
 module RedmineMedelexis
   @@idFromTials2License ||= []
+  LogName  = File.join(FileTest.writable?('/var/log') ? '/var/log' : Dir.pwd, `hostname -f`.strip + '.log')
+  @@logger = Logger.new(LogName) # for more options see http://www.ruby-doc.org/stdlib-2.1.3/libdoc/logger/rdoc/Logger.html#method-c-new
 
   def self.debug(msg)
     return unless defined?(Setting) and Setting.plugin_redmine_medelexis['debug'].to_i == 1
@@ -25,7 +30,7 @@ module RedmineMedelexis
 
   def self.log_to_system(msg, debug=false)
     return if debug and defined?(Setting) and Setting.plugin_redmine_medelexis['debug'].to_i == 0
-    system("logger '#{File.basename(__FILE__)}: #{msg.gsub(/[\n'"]/,'')}'")
+    @@logger.info "#{Time.now.utc.strftime('%Y-%m-%dT%H:%M:%S')}: #{msg.gsub(/[\n'"]/,'')}"
   end
 
   def self.shortenSubject(subject)
