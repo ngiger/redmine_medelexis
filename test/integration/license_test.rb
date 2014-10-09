@@ -98,11 +98,20 @@ class Redmine::ApiTest::LicenseTest < ActionController::IntegrationTest
     get "/mustermann/license"
     assert_response :success
   end
-  
+
+  test "GET /my/license as non non-admin for myself" do
+    username = 'mustermann'
+    login_as(username)
+    get "/my/license"
+    assert_response :success
+    puts response.to_s
+    puts 888
+  end
+
   test "GET /mustermann/license as admin" do
     username = 'admin'  
     login_as(username)
-    get "/mustermann/license"
+    res = get "/mustermann/license"
     assert_response :success
     assert_template 'license/show'
   end
@@ -118,6 +127,7 @@ class Redmine::ApiTest::LicenseTest < ActionController::IntegrationTest
     content = IO.read(signed_xml)
     assert     ( /id="ch.medelexis.application.feature"/ .match(content) )
     assert_nil ( /id="ch.elexis.base.textplugin.feature"/.match(content) )
+    assert ( /id="ch.elexis.cancelled.feature" licenseType="CANCELLED"/.match(content) )
   end
   
   test "admin calls /my/license" do
