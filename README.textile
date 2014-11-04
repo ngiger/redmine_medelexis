@@ -83,7 +83,7 @@ To run the tests, you must rake all plugins (as above) with RAILS_ENV=test. Then
 Run tests for redmine_medelexis-plugins using
 * @bundle exec rake redmine:plugins:test NAME=redmine_medelexis@
 * @bundle exec ruby plugins/redmine_medelexis/test/functional/license_test.rb@
-* @bundle exec ruby plugins/redmine_medelexis/test/integration/license_test.rbb@
+* @bundle exec ruby plugins/redmine_medelexis/test/integration/license_test.rb@
 
 h2. Scripts for the production server
 
