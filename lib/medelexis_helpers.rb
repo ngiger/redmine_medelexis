@@ -20,8 +20,12 @@ require 'socket'
 
 module RedmineMedelexis
   @@idFromTials2License ||= []
-  LogBase  = '/var/log/redmine'
-  LogName  = File.join( (FileTest.directory?(LogBase) && FileTest.writable?(LogBase)) ? LogBase : Dir.pwd, `hostname -f`.strip + '.log')
+  if ENV['LOG_FILE_NAME']
+    LogName = ENV['LOG_FILE_NAME']
+  else
+    LogBase  = '/var/log/redmine'
+    LogName  = File.join( (FileTest.directory?(LogBase) && FileTest.writable?(LogBase)) ? LogBase : Dir.pwd, `hostname -f`.strip + '.log')
+  end
   @@logger = Logger.new(LogName) # for more options see http://www.ruby-doc.org/stdlib-2.1.3/libdoc/logger/rdoc/Logger.html#method-c-new
 
   def self.debug(msg)
