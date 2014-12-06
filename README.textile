@@ -14,11 +14,11 @@ h2. installation
 bc. cd /path/to/redmine/plugins
 git clone git@github.com:ngiger/redmine_medelexis.github
 service restart redmine
-[09:51:04] Marco Descher: Für Admin user https://mis-beta.medelexis.ch/mmustermann/license.xml
-[09:52:15] Marco Descher:  https://mis-beta.medelexis.ch/my/license - list of all service tickets
-[09:52:23] Marco Descher:  https://mis-beta.medelexis.ch/my/license.xml - encrypted and signed license
-[09:52:35] Marco Descher: https://mis-beta.medelexis.ch/mmustermann/license - list of all service tickets
-[09:52:42] Marco Descher: https://mis-beta.medelexis.ch/mmustermann/license.xml -encrypted and signed license
+[09:51:04] Marco Descher: Für Admin user https://mis.foo.org/mustermann/license.xml
+[09:52:15] Marco Descher:  https://mis.foo.org/my/license - list of all service tickets
+[09:52:23] Marco Descher:  https://mis.foo.org/my/license.xml - encrypted and signed license
+[09:52:35] Marco Descher: https://mis.foo.org/mustermann/license - list of all service tickets
+[09:52:42] Marco Descher: https://mis.foo.org/mustermann/license.xml -encrypted and signed license
 Im logger IP-Adresse des Aufrufes abspeichern.
 
 h2. configuration
@@ -27,7 +27,7 @@ Under http://foo.org/settings/plugin/redmine_medelexis you can add more debuggin
 
 h2. Installation from scratch for development
 
-Get the needed zip files. Used versions are found under https://mis-beta.medelexis.ch/admin/info
+Get the needed zip files. Used versions are found under https://mis.foo.org/admin/info
 * redmine-2.4.2.zip
 * redmine_contacts-3_2_13-pro.zip
 * redmine_contacts_helpdesk-2_2_8.zip
@@ -73,7 +73,7 @@ If you know the login of you might also use something like @:conditions => {:log
 
 h2. Start rails for development
 
-@bundle exec rake RAILS_ENV=development script/rails server webrick --port=30001@
+@bundle exec ruby script/rails server webrick RAILS_ENV=development --port=30001@
 
 h2. Running the tests
 
