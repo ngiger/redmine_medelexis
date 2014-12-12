@@ -30,13 +30,11 @@ class LicenseController < ApplicationController
     # @order_status = OrderStatus.new(params[:order_status])
     if request.post?
       # redirect_to :controller => "license", :action => 'rechnungen_erstellt'
-      puts "params are #{params} "
       data =params['rechnungslauf_form']
       string = "#{data['release_date(1i)']}-#{data['release_date(2i)']}-#{data['release_date(3i)']}"
       @stichtag = Date.parse(string)
-      puts "project_to_invoice are #{params['project_to_invoice'].inspect} "
       if params['project_to_invoice'] and params['project_to_invoice'].length > 0
-        puts "Nothing invoiced at the moment"
+        MedelexisInvoices.invoice_for_project(params['project_to_invoice'], DateTime.now.end_of_year.to_date, BigDecimal.new('0.05'))
       else
         MedelexisInvoices.startInvoicing(@stichtag)
       end
