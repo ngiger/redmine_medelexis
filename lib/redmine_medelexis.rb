@@ -15,10 +15,38 @@
 require 'xmlsimple'
 require 'medelexis_helpers'
 
+Rails.configuration.to_prepare do
+  require 'redmine_products/hooks/views_issues_hook'
+  require 'redmine_products/patches/issue_query_patch'
+  require 'redmine_products/hooks/views_custom_fields_hook'
+  require 'redmine_products/patches/issue_patch'
+  require 'redmine_products/patches/custom_fields_helper_patch'
+  require 'redmine_products/patches/invoices_controller_patch'
+  require 'redmine_products/hooks/views_invoices_hook'
+  require 'redmine_products/hooks/views_contacts_hook'
+  require 'redmine_products/patches/add_helpers_for_products_patch'
+  require 'redmine_products/patches/contact_patch'
+  require 'redmine_products/patches/project_patch'
+  require 'redmine_products/patches/contacts_helper_patch'
+  require 'redmine_products/patches/queries_helper_patch'
+  require 'redmine_products/patches/notifiable_patch'
+  require 'redmine_products/patches/auto_completes_controller_patch'
+  require 'redmine_products/hooks/views_layouts_hook'
+  require 'redmine_products/hooks/controller_contacts_duplicates_hook'
+end
+
+module RedmineMedelexisSettings
+
+  def self.invoices_plugin_installed?
+    @@invoices_plugin_installed ||= (Redmine::Plugin.installed?(:redmine_contacts_invoices) && Redmine::Plugin.find(:redmine_contacts_invoices).version >= "2.2.3" )
+  end
+
+end
+
 module RedmineMedelexis  
   Keystore          = '/srv/distribution-keys'
   LicenseStore      = File.join(Dir.tmpdir, 'redmine_medelexis')
-                       
+
   def self.get_api_key(username)
     user = User.find_by_login(username)    
     token = Token.find_by_user_id_and_action(user.id, :api)

@@ -7,3 +7,9 @@
   match ':login/license', :to => 'license#show', :via => 'get', :render => :api
 
   get 'Rechnungslauf', :to => 'license#rechnungslauf'
+  get '/license/rechnungen_erstellt', :to => 'license#rechnungen_erstellt'
+  get 'Rechnungslauf', :to => 'license#rechnungslauf'
+  post '/Rechnungslauf', :to => 'license#rechnungen_erstellt'
+Redmine::Plugin.register :licenses do
+  permission :rechnungslauf, :license => :rechnungslauf
+end

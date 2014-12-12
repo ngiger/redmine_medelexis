@@ -1,12 +1,18 @@
+<h2>Rechnungslauf für Medelexis-Abonnemente </h2>
+
+<p id="rechnung"><%= link_to 'Abo Rechnungen erstellen', '/Rechnungslauf' %></p>
+
+<h2>Einstellungen</h2>
+
 <p>
   <label><%= "Output debugging info" %></label>
   <%= check_box_tag 'settings[debug]', 1, @settings["debug"] %>
-  Output goes to the standard logger.
+  Output goes to the standard logger
   <br>
 </p>
 <p>
   <label> <%= "Keep generated temporary files." %></label>
   <%= check_box_tag 'settings[keep_temp_license_files]', 1, @settings["keep_temp_license_files"] %>
-  The license files are stored under: <%= RedmineMedelexis::LicenseStore %>  
+  The license files are stored under: <%= RedmineMedelexis::LicenseStore %>
 </p>
 

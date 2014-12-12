@@ -55,7 +55,6 @@ class Redmine::ApiTest::LicenseTest < ActionController::IntegrationTest
   test "verify convertExpiredTrial2License" do
     assert_equal('LICENSED', Issue.find(1).custom_field_values.first.value)
     assert_equal('TRIAL', Issue.find(2).custom_field_values.first.value)
-    assert_equal(3, Issue.all.size)
     res = RedmineMedelexis.convertExpiredTrial2License
     assert_equal 1, res.size
     assert_equal 1, Journal.all.size
