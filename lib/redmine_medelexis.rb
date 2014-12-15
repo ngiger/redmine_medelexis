@@ -14,6 +14,7 @@
 # along with redmine_medelexis.  If not, see <http://www.gnu.org/licenses/>.
 require 'xmlsimple'
 require 'medelexis_helpers'
+require 'medelexis_invoices'
 
 Rails.configuration.to_prepare do
   require 'redmine_products/hooks/views_issues_hook'

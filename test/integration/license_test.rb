@@ -104,8 +104,6 @@ class Redmine::ApiTest::LicenseTest < ActionController::IntegrationTest
     login_as(username)
     get "/my/license"
     assert_response :success
-    puts response.to_s
-    puts 888
   end
 
   test "GET /mustermann/license as admin" do

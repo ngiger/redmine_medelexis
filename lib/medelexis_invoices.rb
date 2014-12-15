@@ -3,24 +3,15 @@
 
 File.expand_path('../redmine_medelexis', __FILE__)
 require 'medelexis_helpers'
-require 'redmine_medelexis'
 
 class Project
-  CustomFieldIdKundenstatus = CustomField.find(:first, :conditions => { :name => 'Kundenstatus'} ).id
-  CustomFieldIdNrDoctors    = CustomField.find(:first, :conditions => { :name => '# Ärzte'} ).id
   def nrDoctors
-    custom_value_for(CustomFieldIdNrDoctors).value.to_i
+    custom_value_for(CustomField.find(:first, :conditions => { :name => '# Ärzte'} ).id).value.to_i
   end
   def kundenstatus
     custom_field_values # forces evaluation. Avoids an error in test/functional
-    custom_value_for(CustomFieldIdKundenstatus).value
-  end
-end
-
-class Invoice
-  CustomFieldIdStichtag     = CustomField.find(:first, :conditions => { :name => 'Stichtag'} ).id
-  def stichtag
-    Date.parse(custom_value_for(CustomFieldIdStichtag).value)
+    value = custom_value_for(CustomField.find(:first, :conditions => { :name => 'Kundenstatus'} ).id)
+    value ? value.value : nil
   end
 end
 
@@ -32,8 +23,13 @@ module MedelexisInvoices
                   5 => 3.5,
                   6 => 4}
   MaxDiscount = 0.5
-  # DatumsFormat = '%d.%m.%Y'
   DatumsFormat = '%Y-%m-%d'
+
+  def self.stichtag(invoice)
+    field = invoice.custom_value_for(CustomField.find(:first, :conditions => { :name => 'Stichtag'} ).id)
+    return nil unless field
+    Date.parse(field.value)
+  end
 
   def self.findAllOpenServicesForProjectID(project_id)
     Issue.find(:all, :conditions => { :project_id => project_id, :tracker_id => 4 } )
@@ -42,20 +38,20 @@ module MedelexisInvoices
   def self.findLastInvoice(project_id)
     project = Project.find(project_id)
     invoices = Invoice.find(:all, :conditions => {:project_id => project.id})
-    invoices.max {|a,b| a.stichtag <=> b.stichtag }
+    invoices.max {|a,b| stichtag(a) <=> stichtag(b) }
   end
 
-  def self.getDaysOfYearFactor(issue_id, stichtag = Date.today.to_datetime.end_of_year)
+  def self.getDaysOfYearFactor(issue_id, day2invoice = Date.today.to_datetime.end_of_year)
     issue = Issue.find(:first, :conditions => {:id => issue_id})
     status = issue.custom_field_values.first.value
-    daysThisYear = (stichtag.end_of_year.to_date - stichtag.beginning_of_year + 1).to_i
+    daysThisYear = (day2invoice.end_of_year.to_date - day2invoice.beginning_of_year + 1).to_i
     return 0, 31 if status == 'TRIAL'
     return 1, daysThisYear if issue.start_date == Date.today.beginning_of_year and status == 'LICENSED'
-    nrDays = (stichtag.end_of_year.to_date - issue.start_date).to_i
+    nrDays = (day2invoice.end_of_year.to_date - issue.start_date).to_i
     return nrDays.to_f/daysThisYear, nrDays if status == 'LICENSED'
     nrDays = issue.updated_on.utc.yday - issue.start_date.yday
     return nrDays.to_f/daysThisYear, nrDays if status == 'CANCELLED' or status == 'EXPIRED'
-    puts "What TODO with status #{status} stichtag #{stichtag} and issue.start_date #{issue.start_date}"
+    puts "What TODO with status #{status} day2invoice #{day2invoice} and issue.start_date #{issue.start_date}"
     puts issue.inspect
     100000 # Damit dieser Fall auch wirklich auffällt und kein Kunde dies bezahlt
   end
@@ -65,15 +61,17 @@ module MedelexisInvoices
     # or invoice.lines.collect{ |x| x.description.split('. ')[0] if x.description.match(/feature/) }.compact
   end
 
-  def self.findProjects2invoice(stichtag = Date.today.end_of_year)
+  def self.findProjects2invoice(day2invoice = Date.today.end_of_year)
     idx = 0
     project_ids2invoice = []
     Project.all.each{
       | project|
-        next unless ['Neukunde', 'Kunde'].index(project.kundenstatus)
+        status = project.custom_value_for(CustomField.find(:first, :conditions => { :name => 'Kundenstatus'} ).id)
+        status = status.value if status
+        next unless status and ['Neukunde', 'Kunde'].index(status)
         lastInvoice = findLastInvoice(project.id)
         puts "Invoicing #{idx} project #{project.id}. #{lastInvoice ? "Last invoice was #{lastInvoice.id} of #{lastInvoice.custom_field_values}" : 'No last invoice'} " if $VERBOSE
-        next if lastInvoice and lastInvoice.stichtag >= stichtag
+        next unless lastInvoice and stichtag(lastInvoice)
         project_ids2invoice << project.id
         idx += 1
         # break if idx > 5

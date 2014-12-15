@@ -1,0 +1,57 @@
+---
+products_001:
+  id: 1
+  code: ch.medelexis.application.feature
+  name: Medelexis 3
+  description: Medelexis Kern Feature
+  status_id: 1
+  currency: CHF
+  price: 910
+  amount:
+  author_id: 4
+  project_id: 1
+  created_at: 2014-04-03 15:46:32.000000000 +02:00
+  updated_at: 2014-04-03 15:46:32.000000000 +02:00
+
+products_002:
+  id: 2
+  code: ch.elexis.base.textplugin.feature
+  name: Textplugin
+  description: description
+  status_id: 1
+  currency: CHF
+  price: 100
+  amount:
+  author_id: 4
+  project_id: 1
+  created_at: 2014-04-03 15:46:32.000000000 +02:00
+  updated_at: 2014-04-03 15:46:32.000000000 +02:00
+
+products_003:
+  id: 3
+  code: ch.elexis.fop_wrapper.feature
+  name: fop
+  description: fop Feature gratis
+  status_id: 1
+  currency: CHF
+  price: 0
+  amount:
+  author_id: 4
+  project_id: 1
+  created_at: 2014-04-03 15:46:32.000000000 +02:00
+  updated_at: 2014-04-03 15:46:32.000000000 +02:00
+
+products_004:
+  id: 4
+  code: ch.elexis.cancelled.feature
+  name: cancelled
+  description: cancelled desc
+  status_id: 1
+  currency: CHF
+  price: 300
+  amount:
+  author_id: 4
+  project_id: 1
+  created_at: 2014-04-03 15:46:32.000000000 +02:00
+  updated_at: 2014-04-03 15:46:32.000000000 +02:00
+
