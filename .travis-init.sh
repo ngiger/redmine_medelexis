@@ -92,11 +92,24 @@ run_install() {
     export TRACE=--trace
   fi
 
+  cd $PATH_TO_PLUGINS
+  if [ ! -d redmine_contacts ]; then
+    wget http://redminecrm.com/license_manager/15889/redmine_contacts-3_4_4-light.zip
+    unzip -qredmine_contacts-3_4_4-light.zip
+  fi
+  if [ ! -d redmine_contacts_invoices ]; then
+    wget http://redminecrm.com/license_manager/15892/redmine_contacts_invoices-3_2_3-light.zip
+    unzip -q redmine_contacts_invoices-3_2_3-light.zip
+  fi
+  if [ ! -d redmine_products ]; then
+    wget http://redminecrm.com/license_manager/15717/redmine_products-1_1_0-light.zip
+    unzip -q redmine_products-1_1_0-light.zip
+  fi
   cp $PATH_TO_PLUGINS/$PLUGIN/.travis-database.yml config/database.yml
 
   # install gems
   mkdir -p vendor/bundle
-  bundle install --path vendor/bundle
+  bundle install --path vendor/bundle --without rmagick
 
   bundle exec rake db:migrate $TRACE
   bundle exec rake redmine:load_default_data REDMINE_LANG=en $TRACE

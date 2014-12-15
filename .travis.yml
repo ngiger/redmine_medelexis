@@ -5,6 +5,8 @@ script: bundle exec rake spec
 rvm:
   - 1.9.3
 
+cache: bundler
+
 notifications:
   email:
     recipients:
