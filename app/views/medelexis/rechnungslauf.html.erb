@@ -1,0 +1,24 @@
+<h2>Rechnungslauf für Medelexis-Abonnemente </h2>
+
+
+<%= form_for 'rechnungslauf_form'  do |f| %>
+  <%= f.label :stichtag, 'Stichtag' %>
+  <%= f.date_select :release_date %>
+  <br>
+  <br>
+  <%= f.label :label_1, "Projekt (ID, z.B. 4 oder Kürzel. z.B. 'pesc')" %>
+  <%= f.text_field :project_to_invoice %>
+  <br>
+  <%= f.label :label_2, 'Bei leerem Projektfeld werden alle Projekte geholt' %>
+  <br>
+  <br>
+  <%= f.submit 'Rechnungslauf starten' %>
+
+<% end %>
+
+<% content_for :header_tags do %>
+  <%= javascript_include_tag :contacts, :plugin => 'redmine_contacts'  %>
+  <%= stylesheet_link_tag :products, :plugin => 'redmine_products' %>
+  <meta name = "format-detection" content = "telephone=no">
+<% end %>
+

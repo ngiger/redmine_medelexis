@@ -8,6 +8,10 @@ class MedelexisController < ApplicationController
   accept_rss_auth :rechnungen_erstellt
   accept_api_auth :rechnungen_erstellt
 
+  def rechnungslauf
+    render :action => 'rechnungslauf'
+  end
+
   def rechnungen_erstellt
     RedmineMedelexis.log_to_system("show from IP #{request.remote_ip} via #{request.protocol}#{request.host_with_port}#{request.fullpath} user #{User.current} : rechnungen_erstellt #{params['key']} action_name #{action_name}")
     # @order_status = OrderStatus.new(params[:order_status])
