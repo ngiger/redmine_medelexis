@@ -1,5 +1,7 @@
 h1. redmine_medelexis
 
+Build status on tracis-ci: !https://travis-ci.org/ngiger/redmine_medelexis.svg?branch=master!:https://travis-ci.org/ngiger/redmine_medelexis
+
 A few goodies for the Medelexis MIS
 
 * admin-users see the api_key of all users

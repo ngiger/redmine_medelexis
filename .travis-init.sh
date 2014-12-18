@@ -95,7 +95,7 @@ run_install() {
   cd $PATH_TO_PLUGINS
   if [ ! -d redmine_contacts ]; then
     wget http://redminecrm.com/license_manager/15889/redmine_contacts-3_4_4-light.zip
-    unzip -qredmine_contacts-3_4_4-light.zip
+    unzip -q redmine_contacts-3_4_4-light.zip
   fi
   if [ ! -d redmine_contacts_invoices ]; then
     wget http://redminecrm.com/license_manager/15892/redmine_contacts_invoices-3_2_3-light.zip
