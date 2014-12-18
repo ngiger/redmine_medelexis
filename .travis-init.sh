@@ -105,6 +105,7 @@ run_install() {
     wget http://redminecrm.com/license_manager/15717/redmine_products-1_1_0-light.zip
     unzip -q redmine_products-1_1_0-light.zip
   fi
+  cd $PATH_TO_REDMINE
   cp $PATH_TO_PLUGINS/$PLUGIN/.travis-database.yml config/database.yml
 
   # install gems
