@@ -23,7 +23,7 @@ require File.expand_path('../../test_helper', __FILE__)
 class Redmine::ApiTest::LicenseTest < ActionController::IntegrationTest
     ActiveRecord::Fixtures.create_fixtures(Redmine::Plugin.find(:redmine_medelexis).directory + '/test/fixtures/',
                             [:settings,
-                             :issues,
+                             :invoices,
                              :users,
                              :contacts,
                              :contacts_projects,
@@ -43,6 +43,24 @@ class Redmine::ApiTest::LicenseTest < ActionController::IntegrationTest
     User.current = nil
     RedmineMedelexis::TestCase.prepare
     RedmineMedelexis::TestCase.plugin_fixtures :redmine_medelexis, :all
+  end
+
+  test "should route to post" do
+    assert_routing '/medelexis/rechnungslauf', {controller: "medelexis", action: "rechnungslauf"}
+  end
+
+  test "login and go to rechnungslauf" do
+    # login via https
+    https!
+    get "/login"
+    assert_response :success
+    get "/admin"
+    assert_equal "/admin", path
+    get "/settings/plugin/redmine_medelexis"
+    assert_response 302
+    assert_equal "/settings/plugin/redmine_medelexis", path
+    get '/medelexis/rechnungslauf'
+    skip "don't know how to test the form to start a rechnungslauf"
   end
 
   def teardown

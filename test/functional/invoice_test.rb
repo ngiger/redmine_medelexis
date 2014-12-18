@@ -59,7 +59,7 @@ class LicenseControllerTest < ActionController::TestCase
   end
 
   def dump_invoice(inv)
-    puts "invoice #{inv.id} #{inv.number}. total #{inv.calculate_amount.to_f.round(2)}"
+    puts "invoice #{inv.id} #{inv.number}. total #{inv.calculate_amount.to_f.round(2)} from #{inv.custom_field_values}"
     puts "   dumpling lines"
     inv.lines.each{
       |line|
@@ -109,4 +109,51 @@ class LicenseControllerTest < ActionController::TestCase
     assert ( inv.lines.size == 3 ),            "Invoice must have 3 lines. Not #{inv.lines.size}" # one item is TRIAL
     assert ( inv.calculate_amount < 10000.0 ), "Amount must be smaller than 10kFr. But is #{inv.calculate_amount.to_f.round(2)}"
   end
+
+  test "second invoicing may not produce a new invoice" do
+    mustermann = Project.find(3)
+    oldSize= Invoice.all.size
+    stichtag = Date.today
+    res = MedelexisInvoices.startInvoicing(stichtag)
+    assert_not_nil res
+    sizeAfterFirstRun= Invoice.all.size
+    nrCreated = sizeAfterFirstRun -oldSize
+    content = res.inspect.to_s
+    assert (nrCreated == 1 ), "Must have created exactyl one. Not #{nrCreated}"
+    inv = Invoice.last
+    assert ( inv.due_date == stichtag+30),   "Due date must be today + 30. But is #{inv.due_date} instead of #{stichtag+30}"
+    assert ( inv.lines.size == 3 ),            "Invoice must have 3 lines. Not #{inv.lines.size}" # one item is TRIAL
+    assert ( inv.calculate_amount < 10000.0 ), "Amount must be smaller than 10kFr. But is #{inv.calculate_amount.to_f.round(2)}"
+    res = MedelexisInvoices.startInvoicing(stichtag)
+    assert_not_nil res
+    sizeAfterSecondRun= Invoice.all.size
+    assert_equal(sizeAfterFirstRun, sizeAfterSecondRun)
+  end
+
+  test "test findLastInvoiceDate" do
+    assert_equal(nil, MedelexisInvoices.getDateOfLastInvoice(-1), 'an invalid project_id must return nil')
+    assert_equal(Date.new(2014,11,15), MedelexisInvoices.getDateOfLastInvoice(Invoice.first.project_id))
+  end
+
+  test "check amount for invoicing again after 3 months" do
+    mustermann = Project.find(3)
+    Invoice.all.each{|x| x.delete}
+    oldSize= Invoice.all.size
+    stichtag = Date.today
+    res = MedelexisInvoices.startInvoicing(stichtag)
+    assert_not_nil res
+    sizeAfterFirstRun= Invoice.all.size
+    nrCreated = sizeAfterFirstRun -oldSize
+    content = res.inspect.to_s
+    assert (nrCreated == 1 ), "Must have created exactyl one. Not #{nrCreated}"
+    inv = Invoice.last
+    res = MedelexisInvoices.startInvoicing(stichtag + 3*31)
+    assert_not_nil res
+    sizeAfterSecondRun= Invoice.all.size
+    assert_equal(sizeAfterFirstRun + 1, sizeAfterSecondRun)
+    inv2 = Invoice.last
+    msg =  "Amount of second invoice of #{inv2.calculate_amount.to_i} (#{stichtag + 3*31}) must be smaller than first invoice #{inv.calculate_amount.to_i} from (#{stichtag})"
+    assert(inv2.calculate_amount.to_i < inv.calculate_amount.to_i, msg)
+  end
+
 end

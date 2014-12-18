@@ -16,6 +16,7 @@ class Project
 end
 
 module MedelexisInvoices
+  OnlyFirst   = false # for debugging purposes
   DiscountMap = { 1 => 1,
                   2 => 1.7,
                   3 => 2.3,
@@ -27,7 +28,7 @@ module MedelexisInvoices
 
   def self.stichtag(invoice)
     field = invoice.custom_value_for(CustomField.find(:first, :conditions => { :name => 'Stichtag'} ).id)
-    return nil unless field
+    return Date.new(invoice.invoice_date) unless field
     Date.parse(field.value)
   end
 
@@ -35,19 +36,27 @@ module MedelexisInvoices
     Issue.find(:all, :conditions => { :project_id => project_id, :tracker_id => 4 } )
   end
 
-  def self.findLastInvoice(project_id)
-    project = Project.find(project_id)
+  def self.getDateOfLastInvoice(project_id)
+    projects = Project.find(:all, :conditions => { :id => project_id } )
+    return nil unless projects.size > 0
+    project = projects.first
     invoices = Invoice.find(:all, :conditions => {:project_id => project.id})
-    invoices.max {|a,b| stichtag(a) <=> stichtag(b) }
+    return nil unless invoices.size > 0
+    last = invoices.max {|a,b| stichtag(a) <=> stichtag(b) }
+    stichtag(last)
   end
 
-  def self.getDaysOfYearFactor(issue_id, day2invoice = Date.today.to_datetime.end_of_year)
+  def self.getDaysOfYearFactor(issue_id, date_last_invoice, day2invoice = Date.today.to_datetime.end_of_year)
     issue = Issue.find(:first, :conditions => {:id => issue_id})
     status = issue.custom_field_values.first.value
     daysThisYear = (day2invoice.end_of_year.to_date - day2invoice.beginning_of_year + 1).to_i
     return 0, 31 if status == 'TRIAL'
     return 1, daysThisYear if issue.start_date == Date.today.beginning_of_year and status == 'LICENSED'
-    nrDays = (day2invoice.end_of_year.to_date - issue.start_date).to_i
+    if date_last_invoice
+      nrDays = (day2invoice.end_of_year.to_date - date_last_invoice).to_i
+    else
+      nrDays = (day2invoice.end_of_year.to_date - issue.start_date).to_i
+    end
     return nrDays.to_f/daysThisYear, nrDays if status == 'LICENSED'
     nrDays = issue.updated_on.utc.yday - issue.start_date.yday
     return nrDays.to_f/daysThisYear, nrDays if status == 'CANCELLED' or status == 'EXPIRED'
@@ -69,12 +78,12 @@ module MedelexisInvoices
         status = project.custom_value_for(CustomField.find(:first, :conditions => { :name => 'Kundenstatus'} ).id)
         status = status.value if status
         next unless status and ['Neukunde', 'Kunde'].index(status)
-        lastInvoice = findLastInvoice(project.id)
-        puts "Invoicing #{idx} project #{project.id}. #{lastInvoice ? "Last invoice was #{lastInvoice.id} of #{lastInvoice.custom_field_values}" : 'No last invoice'} " if $VERBOSE
-        next unless lastInvoice and stichtag(lastInvoice)
+        dateLastInvoice = getDateOfLastInvoice(project.id)
+        puts "Invoicing #{idx} project #{project.id}. #{dateLastInvoice ? 'No invoice found' : 'dateLastInvoice ' + dateLastInvoice.to_s}" if $VERBOSE
+        next if dateLastInvoice and dateLastInvoice >= day2invoice
         project_ids2invoice << project.id
         idx += 1
-        # break if idx > 5
+        break if OnlyFirst
     }
     project_ids2invoice
   end
@@ -115,16 +124,17 @@ module MedelexisInvoices
     invoice.status_id  = Invoice::DRAFT_INVOICE
     invoice.currency ||= ContactsSetting.default_currency
     invoice.id = (Invoice.last.try(:id).to_i + 1).to_s
-
+    date_last_invoice = getDateOfLastInvoice(project.id)
     issues.each{
       |issue|
         subject = issue.subject.sub('feature.group', 'feature').sub('feature.feature', 'feature')
         product = Product.find(:first, :conditions => {:code => subject})
         next unless product
+        line_description = product.name # + ". Wiki: http://wiki.elexis.info/#{subject}.feature.group"
         price = product.price.to_f
-        factor, days = getDaysOfYearFactor(issue)
+        factor, days = getDaysOfYearFactor(issue, date_last_invoice, stich_tag)
         if factor == 0
-          description += "\n#{subject} gratis da noch im ersten Monat"
+          line_description += "\n#{subject} gratis da noch im ersten Monat"
           next
         elsif factor != 1
           factor = factor.round(2)
@@ -132,7 +142,8 @@ module MedelexisInvoices
           price = price * factor
         end
         puts "found product #{product} for issue #{issue} price is #{price}" if $VERBOSE
-        invoice.lines << InvoiceLine.new(:description => subject, :quantity => multiplier, :price => price, :units => "Feature")
+        invoice.lines << InvoiceLine.new(:description => line_description, :quantity => multiplier, :price => price, :units => "Feature")
+        break if OnlyFirst
     }
     invoice.lines.sort! { |a,b| b.price <=> a.price } # by price descending
     puts "Added #{invoice.lines.size} lines (of #{issues.size} service tickets). Stich_tag #{stich_tag.strftime(DatumsFormat)} due #{invoice.due_date.strftime(DatumsFormat)} description is now #{description}" if $VERBOSE
@@ -156,6 +167,7 @@ module MedelexisInvoices
       startTime = Time.now
       oldSize = Invoice.all.size
       projects = findProjects2invoice(stich_tag)
+      RedmineMedelexis.log_to_system "Found #{projects.size} projects. #{projects}"
       projects.each{ |id| invoice_for_project(id, stich_tag, round_to) }
       duration = (Time.now-startTime).to_i
       RedmineMedelexis.log_to_system("startInvoicing created #{Invoice.all.size - oldSize} invoices for #{projects.size} of #{Project.all.size} projects. Ids were #{projects}")
