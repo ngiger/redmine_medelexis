@@ -7,7 +7,7 @@ require 'active_record'
 
 OpenBase        = 'ch.elexis.base.ch.feature'
 MedelexisBase   = 'ch.medelexis.base.ch.feature'
-
+DateFormat      = '%d.%m.%Y'
 def avoidUseOfSwissOpenBase(ausgabe = File.open('problems.txt', 'w+'))
   nrProblems = 0
   ausgabe.puts "Here is a list where we remove the SwissBaseOpenSource feature and/or added the Medelexis Base feature"
@@ -67,7 +67,7 @@ def correctStartdate(ausgabe = File.open('problems.txt', 'w+'))
     startTime = Time.now
     issues.each{ 
       |issue|
-      msg = "*Beginn* wurde von #{issue.start_date} auf #{januaryFirst} geändert"
+      msg = "*Beginn* wurde von #{issue.start_date.strftime(DateFormat)} auf #{januaryFirst.strftime(DateFormat)} geändert"
       RedmineMedelexis.addJournal('Issue', issue.id, msg)
       ausgabe.puts "Issue #{issue.id}: #{msg}"
       nrProblems += 1
