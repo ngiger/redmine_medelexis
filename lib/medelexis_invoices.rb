@@ -115,7 +115,7 @@ module MedelexisInvoices
     invoice.invoice_date = Time.now
     description = "Rechnung mit Stichtag vom #{stich_tag_string} für #{nrDoctors == 1 ? 'einen Arzt' : nrDoctors.to_s + ' Ärzte'}."
     description += "\nMultiplikator für abonnierte Features ist #{multiplier}." if multiplier != 1
-    invoice.subject = "Rechnung für Abonnment Medelexis"
+    invoice.subject = "Rechnung für Abonnement Medelexis"
     invoice.project = project
     invoice.contact_id = contact.id
     invoice.due_date = (stich_tag + 30).to_datetime # to_datetime needed or we would get local time!
@@ -138,7 +138,7 @@ module MedelexisInvoices
           next
         elsif factor != 1
           factor = factor.round(2)
-          subject += ". Grundpreis von #{price} wird für #{days} Tage verrechnet (Faktor #{factor})."
+          line_description += ". Grundpreis von #{price} wird für #{days} Tage verrechnet (Faktor #{factor})."
           price = price * factor
         end
         puts "found product #{product} for issue #{issue} price is #{price}" if $VERBOSE

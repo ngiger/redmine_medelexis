@@ -151,6 +151,19 @@ class LicenseControllerTest < ActionController::TestCase
     assert_not_nil res
     sizeAfterSecondRun= Invoice.all.size
     assert_equal(sizeAfterFirstRun + 1, sizeAfterSecondRun)
+    # dump_issues(mustermann); dump_invoice(inv)
+
+    # Insure that we find the description of the product, not it's code
+    nrFounds = inv.lines.find_all{|line| line.description.match(/Medelexis 3/i)}
+    assert_equal(1, nrFounds.size)
+    nrFounds = inv.lines.find_all{|line| line.description.match(/feature/)}
+    assert_equal(0, nrFounds.size)
+
+    # Insure that we find a partial payment
+    nrFounds = inv.lines.find_all{|line| line.description.match(/ wird für 434 Tage verrechnet/i)}
+    assert_equal(1, nrFounds.size)
+    nrFounds = inv.lines.find_all{|line| line.description.match(/ wird für 280 Tage verrechnet/i)}
+    assert_equal(1, nrFounds.size)
     inv2 = Invoice.last
     msg =  "Amount of second invoice of #{inv2.calculate_amount.to_i} (#{stichtag + 3*31}) must be smaller than first invoice #{inv.calculate_amount.to_i} from (#{stichtag})"
     assert(inv2.calculate_amount.to_i < inv.calculate_amount.to_i, msg)
