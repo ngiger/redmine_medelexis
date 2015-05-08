@@ -128,7 +128,7 @@ module RedmineMedelexis
     return nil unless project
     condition = "project_id = #{project.id}"
     issues = Issue.where(condition, Date.today)
-    eternal = Issue.find(:all, :conditions => {:project_id => 1, :tracker_id => 4, :closed_on => nil})
+    eternal = Issue.find(:all, :conditions => {:project_id => 1, :tracker_id => RedmineMedelexis::Tracker_Is_Service, :closed_on => nil})
     licenses = []
     (issues+eternal).each{ |issue|  #>"2013-12-12+01:00",
                   endOfLicense = issue.due_date ? issue.due_date : Time.new(2099, 12, 31)

@@ -1,5 +1,6 @@
 <h2>Rechnungen für Medelexis-Abonnemente erstellen</h2>
 
+<%= label :invoice_since, "Rechnung erstellen ab: #{Date.today.beginning_of_year.strftime('%Y-%M-%d')}"  %>
 <%= label :stichtag, "Stichtag: #{Date.today.strftime('%Y-%M-%d')}"  %>
 
 <%= link_to "Refresh" %>.

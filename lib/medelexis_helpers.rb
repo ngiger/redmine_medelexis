@@ -20,6 +20,8 @@ require 'socket'
 
 module RedmineMedelexis
   @@idFromTials2License ||= []
+  Tracker_Is_Service      = 4
+
   if ENV['LOG_FILE_NAME']
     LogName = ENV['LOG_FILE_NAME']
   else
@@ -51,7 +53,7 @@ module RedmineMedelexis
   end
 
   def self.getExpiredTrialIssues
-    unclosed_issues = Issue.find(:all, :conditions => {:tracker_id => 4, :closed_on => nil})
+    unclosed_issues = Issue.find(:all, :conditions => {:tracker_id => Tracker_Is_Service, :closed_on => nil})
     trial2order = unclosed_issues.find_all{|x| x.valid? and x.start_date < -1.month.from_now.to_date and x.custom_field_values.first.value == 'TRIAL'}
   end
 
@@ -74,7 +76,7 @@ module RedmineMedelexis
     @@idFromTials2License
   end
 
-  def getHauptkontakt(project_id)
+  def self.getHauptkontakt(project_id)
     Project.find(project_id).contacts.find(:all, :conditions => { :cached_tag_list => 'Hauptkontakt'} ).first
   end
 

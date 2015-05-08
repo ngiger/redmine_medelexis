@@ -35,10 +35,14 @@ Get the needed zip files. Used versions are found under https://mis.foo.org/admi
 * redmine_contacts_helpdesk-2_2_8.zip
 * redmine_contacts_invoices-3_1_0-pro.zip
 * redmine_products-1_0_1-pro.zip
+* redmine_questions-0_0_5-light.zip
+* redmine_issue_checklist-2_0_5.zip
+
 
 Afterwards execute and verify these steps (assuming a bash shell). Using ruby 1.9.3p547 was fine for me. Ruby 2.1.2 had some problems
 
 bc. unzip redmine-*.zip
+export RAILS_ENV=development
 cd redmine-2.4.2
 cd plugins
 unzip redmine_contacts-*-pro.zip
@@ -47,20 +51,28 @@ unzip redmine_contacts_invoices-*.zip
 unzip redmine_products-*.zip
 # (Skip unless production) git clone https://github.com/thorin/redmine_ldap_sync
 git clone git@github.com:ngiger/redmine_medelexis.git # or https://github.com/ngiger/redmine_medelexis.git
+git clone git@github.com:paginagmbh/redmine_silencer.git
 cd ..
 bundle install
 bundle exec rake db:migrate RAILS_ENV=development
-bundle exec rake RAILS_ENV=development redmine:plugins NAME=redmine_contacts
-bundle exec rake RAILS_ENV=development redmine:plugins NAME=redmine_contacts_helpdesk
-bundle exec rake RAILS_ENV=development redmine:plugins NAME=redmine_contacts_invoices
-bundle exec rake RAILS_ENV=development redmine:plugins NAME=redmine_products
-# bundle exec rake RAILS_ENV=development redmine:plugins NAME=redmine_ldap_sync
-bundle exec rake RAILS_ENV=development redmine:plugins NAME=redmine_medelexis
+bundle exec rake redmine:plugins NAME=redmine_contacts
+bundle exec rake redmine:plugins NAME=redmine_contacts_helpdesk
+bundle exec rake redmine:plugins NAME=redmine_contacts_invoices
+bundle exec rake redmine:plugins NAME=redmine_products
+bundle exec rake redmine:plugins NAME=redmine_questions
+bundle exec rake redmine:plugins NAME=redmine_silencer
+# bundle exec rake redmine:plugins NAME=redmine_ldap_sync
+bundle exec rake redmine:plugins NAME=redmine_medelexis
 
 
 h2. development: Loading a dump
 
 @bundle exec rake RAILS_ENV=development db:data:load@ # loads db/data.yml
+
+Afterwards you may examine the data as following
+
+bc. bundle exec rails console RAILS_ENV=development
+Project.all.first
 
 h2. Creating a dump from the production server
 
@@ -81,20 +93,20 @@ h2. Running the tests
 
 Now you should be able to login under
 To run the tests, you must rake all plugins (as above) with RAILS_ENV=test. Then you may use calls like
-* @bundle exec rake redmine:plugins:test NAME=redmine_medelexis@, which runs the test for all installed plugins.
+* @bundle exec rake RAILS_ENV=test redmine:plugins:test NAME=redmine_medelexis@, which runs the test for all installed plugins.
 
 Prepare for running tests (assuming a bash shell) for redmine_medelexis-plugins using
 
 bc. bundle exec rake db:migrate RAILS_ENV=test
-bundle exec rake RAILS_ENV=c redmine:plugins NAME=redmine_contacts
-bundle exec rake RAILS_ENV=test redmine:plugins NAME=redmine_contacts_helpdesk
-bundle exec rake RAILS_ENV=test redmine:plugins NAME=redmine_products
-bundle exec rake RAILS_ENV=test redmine:plugins NAME=redmine_contacts_invoices
+bundle exec rake redmine:plugins NAME=redmine_contacts           RAILS_ENV=test
+bundle exec rake redmine:plugins NAME=redmine_contacts_helpdesk  RAILS_ENV=test
+bundle exec rake redmine:plugins NAME=redmine_products           RAILS_ENV=test
+bundle exec rake redmine:plugins NAME=redmine_contacts_invoices  RAILS_ENV=test
 
 Run tests
 
-* @RAILS_ENV=test bundle exec rake redmine:plugins:test NAME=redmine_medelexis@ # runs all tests
-* @RAILS_ENV=test bundle exec ruby script/rails runner plugins/redmine_medelexis/test/functional/license_test.rb@ # runs a single test
+* @bundle exec rake redmine:plugins:test NAME=redmine_medelexis RAILS_ENV=test@ # runs all tests
+* @bundle exec ruby script/rails runner plugins/redmine_medelexis/test/functional/license_test.rb  RAILS_ENV=test@ # runs a single test
 
 h2. Scripts for the production server
 

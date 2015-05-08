@@ -2,7 +2,13 @@
 
 
 <%= form_for 'rechnungslauf_form'  do |f| %>
-  <%= f.label :stichtag, 'Stichtag' %>
+  <br>
+  <%#  <%= f.date_select(:invoice_since, :dummy, :selected => Date.today.beginning_of_year) %>
+  <%= f.label :invoice_since, "läuft vom:"  %>
+  <%= f.date_select :invoice_since, { :start_year => 2010,  :end_year => Date.today.year,
+  :default => Date.today.beginning_of_year.to_date } %>
+  <br>
+  <%= f.label :stichtag, 'bis Stichtag' %>
   <%= f.date_select :release_date %>
   <br>
   <br>

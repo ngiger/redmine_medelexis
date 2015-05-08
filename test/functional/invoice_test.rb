@@ -59,9 +59,9 @@ class LicenseControllerTest < ActionController::TestCase
   end
 
   def dump_invoice(inv)
-    puts "invoice #{inv.id} #{inv.number}. total #{inv.calculate_amount.to_f.round(2)} from #{inv.custom_field_values}"
+    puts "invoice #{last_invoice.id} #{last_invoice.number}. total #{last_invoice.calculate_amount.to_f.round(2)} from #{last_invoice.custom_field_values}"
     puts "   dumpling lines"
-    inv.lines.each{
+    last_invoice.lines.each{
       |line|
       puts "#{line.description} #{line.quantity.to_f.round(2)} #{line.price.to_f.round(2)}"
     }
@@ -76,6 +76,24 @@ class LicenseControllerTest < ActionController::TestCase
     }
   end
 
+  test "after invoicing getDateOfLastInvoice must bill correct number of days" do
+    mustermann = Project.find(3)
+    oldSize= Invoice.all.size
+    invoice_since = Date.new(2099, 1, 1)
+    stichtag = Date.new(2099, 2, 15)
+    nrDay =  (stichtag - invoice_since).to_i # 45
+
+    res = MedelexisInvoices.startInvoicing(stichtag, invoice_since)
+    assert_not_nil res
+    sizeAfterFirstRun= Invoice.all.size
+    nrCreated = sizeAfterFirstRun -oldSize
+    content = res.inspect.to_s
+    assert (nrCreated == 1 ), "Must have created exactyl one. Not #{nrCreated}"
+    assert_equal(stichtag, MedelexisInvoices.getDateOfLastInvoice(Invoice.first.project_id))
+    Invoice.all.last.lines.each{ |line| puts line.description }
+    assert_match(/wird für\s+45\s+Tage verrechnet/, Invoice.all.last.lines.first.description)
+  end
+
   test "verify invoicing with mustermann issues" do
     mustermann = Project.find(3)
     xxxSize= Project.all.size
@@ -87,11 +105,12 @@ class LicenseControllerTest < ActionController::TestCase
     nrCreated = newSize -oldSize
     content = res.inspect.to_s
     assert (nrCreated == 1 ), "Must have created exactyl one. Not #{nrCreated}"
-    inv = Invoice.last
+    last_invoice = Invoice.last
     # dump_invoice(inv); dump_issues(res.first)
-    assert ( inv.due_date == stichtag+30),   "Due date must be today + 30. But is #{inv.due_date} instead of #{stichtag+30} #{xxxSize}"
-    assert ( inv.lines.size == 3 ),            "Invoice must have 3 lines. Not #{inv.lines.size}" # one item is TRIAL
-    assert ( inv.calculate_amount < 10000.0 ), "Amount must be smaller than 10kFr. But is #{inv.calculate_amount.to_f.round(2)}"
+    assert ( last_invoice.due_date == stichtag+30),   "Due date must be today + 30. But is #{last_invoice.due_date} instead of #{stichtag+30} #{xxxSize}"
+    trial_issue = last_invoice.lines.find_all{|x| x.description if /gratis/i.match(x.description) }
+    assert_equal 1, trial_issue.size,       "Invoice must have 1 free product. Not #{trial_issue.size}" # one item is TRIAL
+    assert ( last_invoice.calculate_amount < 10000.0 ), "Amount must be smaller than 10kFr. But is #{last_invoice.calculate_amount.to_f.round(2)}"
   end
 
   test "verify invoicing today" do
@@ -104,10 +123,11 @@ class LicenseControllerTest < ActionController::TestCase
     nrCreated = newSize -oldSize
     content = res.inspect.to_s
     assert (nrCreated == 1 ), "Must have created exactyl one. Not #{nrCreated}"
-    inv = Invoice.last
-    assert ( inv.due_date == stichtag+30),   "Due date must be today + 30. But is #{inv.due_date} instead of #{stichtag+30}"
-    assert ( inv.lines.size == 3 ),            "Invoice must have 3 lines. Not #{inv.lines.size}" # one item is TRIAL
-    assert ( inv.calculate_amount < 10000.0 ), "Amount must be smaller than 10kFr. But is #{inv.calculate_amount.to_f.round(2)}"
+    last_invoice = Invoice.last
+    assert ( last_invoice.due_date == stichtag+30),   "Due date must be today + 30. But is #{last_invoice.due_date} instead of #{stichtag+30}"
+    trial_issue = last_invoice.lines.find_all{|x| x.description if /gratis/i.match(x.description) }
+    assert_equal 1, trial_issue.size,       "Invoice must have 1 free product. Not #{trial_issue.size}" # one item is TRIAL
+    assert ( last_invoice.calculate_amount < 10000.0 ), "Amount must be smaller than 10kFr. But is #{last_invoice.calculate_amount.to_f.round(2)}"
   end
 
   test "second invoicing may not produce a new invoice" do
@@ -120,14 +140,28 @@ class LicenseControllerTest < ActionController::TestCase
     nrCreated = sizeAfterFirstRun -oldSize
     content = res.inspect.to_s
     assert (nrCreated == 1 ), "Must have created exactyl one. Not #{nrCreated}"
-    inv = Invoice.last
-    assert ( inv.due_date == stichtag+30),   "Due date must be today + 30. But is #{inv.due_date} instead of #{stichtag+30}"
-    assert ( inv.lines.size == 3 ),            "Invoice must have 3 lines. Not #{inv.lines.size}" # one item is TRIAL
-    assert ( inv.calculate_amount < 10000.0 ), "Amount must be smaller than 10kFr. But is #{inv.calculate_amount.to_f.round(2)}"
+    last_invoice = Invoice.last
+    assert ( last_invoice.due_date == stichtag+30),   "Due date must be today + 30. But is #{last_invoice.due_date} instead of #{stichtag+30}"
+    trial_issue = last_invoice.lines.find_all{|x| x.description if /gratis/i.match(x.description) }
+    assert_equal 1, trial_issue.size,       "Invoice must have 1 free product. Not #{trial_issue.size}" # one item is TRIAL
+    assert ( last_invoice.calculate_amount < 10000.0 ), "Amount must be smaller than 10kFr. But is #{last_invoice.calculate_amount.to_f.round(2)}"
     res = MedelexisInvoices.startInvoicing(stichtag)
     assert_not_nil res
     sizeAfterSecondRun= Invoice.all.size
     assert_equal(sizeAfterFirstRun, sizeAfterSecondRun)
+  end
+
+  test "after invoicing getDateOfLastInvoice must return correct date" do
+    mustermann = Project.find(3)
+    oldSize= Invoice.all.size
+    stichtag = Date.today - 5
+    res = MedelexisInvoices.startInvoicing(stichtag)
+    assert_not_nil res
+    sizeAfterFirstRun= Invoice.all.size
+    nrCreated = sizeAfterFirstRun -oldSize
+    content = res.inspect.to_s
+    assert (nrCreated == 1 ), "Must have created exactyl one. Not #{nrCreated}"
+    assert_equal(stichtag, MedelexisInvoices.getDateOfLastInvoice(Invoice.first.project_id))
   end
 
   test "test findLastInvoiceDate" do
@@ -139,41 +173,39 @@ class LicenseControllerTest < ActionController::TestCase
     mustermann = Project.find(3)
     Invoice.all.each{|x| x.delete}
     oldSize= Invoice.all.size
-    stichtag = Date.today
-    res = MedelexisInvoices.startInvoicing(stichtag)
+    abo_start = Date.new(2014, 1, 1)
+    date_first_invoice = Date.new(2014, 12, 15)
+    res = MedelexisInvoices.startInvoicing(date_first_invoice, abo_start)
     assert_not_nil res
     sizeAfterFirstRun= Invoice.all.size
     nrCreated = sizeAfterFirstRun -oldSize
     content = res.inspect.to_s
     assert (nrCreated == 1 ), "Must have created exactyl one. Not #{nrCreated}"
-    inv = Invoice.last
-    res = MedelexisInvoices.startInvoicing(stichtag + 3*31)
+    first_invoice = Invoice.first
+    nr_days = 3*31
+    date_second_invoice = date_first_invoice + nr_days
+    res = MedelexisInvoices.startInvoicing(date_second_invoice, date_first_invoice)
     assert_not_nil res
     sizeAfterSecondRun= Invoice.all.size
     assert_equal(sizeAfterFirstRun + 1, sizeAfterSecondRun)
-    # dump_issues(mustermann); dump_invoice(inv)
+
     # Insure that we find the description of the product, not it's code
-    nrFounds = inv.lines.find_all{|line| line.description.match(/Medelexis 3/i)}
+    last_invoice = Invoice.last
+    nrFounds = last_invoice.lines.find_all{|line| line.description.match(/Medelexis 3/i)}
     assert_equal(1, nrFounds.size)
-    nrFounds = inv.lines.find_all{|line| line.description.match(/feature/)}
-    assert_equal(0, nrFounds.size)
+    nrFounds = last_invoice.lines.find_all{|line| line.description.match(/feature/)}
+    assert_equal(1, nrFounds.size)
 
-    # Insure that we find a partial payment
-    nrFounds = inv.lines.find_all{|line| line.description.match(/ wird für 434 Tage verrechnet/i)}
-    assert_equal(1, nrFounds.size)
-    nrFounds = inv.lines.find_all{|line| line.description.match(/Faktor 1.19/i)}
-    assert_equal(1, nrFounds.size)
-    nrFounds = inv.lines.find_all{|line| line.description.match(/Faktor 0.77/i)}
-    assert_equal(1, nrFounds.size)
-    nrFounds = inv.lines.find_all{|line| line.description.match(/ wird für 280 Tage verrechnet/i)}
-    assert_equal(1, nrFounds.size)
-    nrFounds = inv.lines.find_all{|line| line.description.match(/ wird für 160 Tage verrechnet/i)}
-    assert_equal(1, nrFounds.size)
-    nrFounds = inv.lines.find_all{|line| line.description.match(/Faktor 0.44/i)}
-    assert_equal(1, nrFounds.size)
-    inv2 = Invoice.last
-    msg =  "Amount of second invoice of #{inv2.calculate_amount.to_i} (#{stichtag + 3*31}) must be smaller than first invoice #{inv.calculate_amount.to_i} from (#{stichtag})"
-    assert(inv2.calculate_amount.to_i < inv.calculate_amount.to_i, msg)
+    assert( first_invoice.lines.find{|line| line.description.match(/Medelexis.+ wird für 348 Tage verrechnet/i) }, 'correct day for Medelexis')
+    assert( first_invoice.lines.find{|line| line.description.match(/cancelled.+ wird für 280 Tage verrechnet/i) }, 'correct days for cancelled item')
+    assert( first_invoice.lines.find{|line| line.description.match(/gratis/i) }, 'TRIAL must be gratis')
+
+    assert( last_invoice.lines.find{|line| line.description.match(/Medelexis.+ wird für #{nr_days} Tage verrechnet/i) }, 'correct day for Medelexis')
+    assert_nil( last_invoice.lines.find{|line| line.description.match(/cancelled.+ wird für 280 Tage verrechnet/i) }, 'cancelled item may not appear again')
+    assert( last_invoice.lines.find{|line| line.description.match(/gratis/i) }, 'TRIAL must be gratis')
+    assert_nil( last_invoice.lines.find{|line| line.description.match(/Grundpreis von 0.0/i) }, 'prices with 0 should not appear')
+
+    msg =  "Amount of second invoice of #{last_invoice.calculate_amount.to_i} (#{date_second_invoice}) must be smaller than first invoice #{first_invoice.calculate_amount.to_i} from (#{date_first_invoice})"
+    assert(last_invoice.calculate_amount.to_i < first_invoice.calculate_amount.to_i, msg)
   end
-
 end
