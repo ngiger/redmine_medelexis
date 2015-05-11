@@ -107,7 +107,6 @@ class LicenseControllerTest < ActionController::TestCase
     assert (nrCreated == 1 ), "Must have created exactyl one. Not #{nrCreated}"
     last_invoice = Invoice.last
     # dump_invoice(inv); dump_issues(res.first)
-    assert ( last_invoice.due_date == stichtag+30),   "Due date must be today + 30. But is #{last_invoice.due_date} instead of #{stichtag+30} #{xxxSize}"
     trial_issue = last_invoice.lines.find_all{|x| x.description if /gratis/i.match(x.description) }
     assert_equal 1, trial_issue.size,       "Invoice must have 1 free product. Not #{trial_issue.size}" # one item is TRIAL
     assert ( last_invoice.calculate_amount < 10000.0 ), "Amount must be smaller than 10kFr. But is #{last_invoice.calculate_amount.to_f.round(2)}"
@@ -124,7 +123,6 @@ class LicenseControllerTest < ActionController::TestCase
     content = res.inspect.to_s
     assert (nrCreated == 1 ), "Must have created exactyl one. Not #{nrCreated}"
     last_invoice = Invoice.last
-    assert ( last_invoice.due_date == stichtag+30),   "Due date must be today + 30. But is #{last_invoice.due_date} instead of #{stichtag+30}"
     trial_issue = last_invoice.lines.find_all{|x| x.description if /gratis/i.match(x.description) }
     assert_equal 1, trial_issue.size,       "Invoice must have 1 free product. Not #{trial_issue.size}" # one item is TRIAL
     assert ( last_invoice.calculate_amount < 10000.0 ), "Amount must be smaller than 10kFr. But is #{last_invoice.calculate_amount.to_f.round(2)}"
@@ -141,7 +139,8 @@ class LicenseControllerTest < ActionController::TestCase
     content = res.inspect.to_s
     assert (nrCreated == 1 ), "Must have created exactyl one. Not #{nrCreated}"
     last_invoice = Invoice.last
-    assert ( last_invoice.due_date == stichtag+30),   "Due date must be today + 30. But is #{last_invoice.due_date} instead of #{stichtag+30}"
+    required_due_date = ((Time.now.to_date) + 31).to_time
+    assert (last_invoice.due_date == required_due_date),   "Due date must be today + 31. But is #{last_invoice.due_date} instead of #{required_due_date}"
     trial_issue = last_invoice.lines.find_all{|x| x.description if /gratis/i.match(x.description) }
     assert_equal 1, trial_issue.size,       "Invoice must have 1 free product. Not #{trial_issue.size}" # one item is TRIAL
     assert ( last_invoice.calculate_amount < 10000.0 ), "Amount must be smaller than 10kFr. But is #{last_invoice.calculate_amount.to_f.round(2)}"

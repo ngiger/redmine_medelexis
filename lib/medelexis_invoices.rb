@@ -147,7 +147,7 @@ module MedelexisInvoices
     invoice.subject = "Rechnung für Abonnement Medelexis"
     invoice.project = project
     invoice.contact_id = contact.id
-    invoice.due_date = (stich_tag + 30).to_datetime # to_datetime needed or we would get local time!
+    invoice.due_date = (Time.now.utc.to_date) + 31
     invoice.assigned_to = admin
     invoice.language = "DE"
     invoice.status_id  = Invoice::DRAFT_INVOICE
