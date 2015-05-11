@@ -148,7 +148,7 @@ custom_fields_007:
   visible: true
   multiple: false
 custom_fields_008:
-  id: 9
+  id: 8
   type: ContactCustomField
   name: Rechnungsadresse
   field_format: text
@@ -162,6 +162,24 @@ custom_fields_008:
   position: 1
   searchable: false
   default_value: ''
+  editable: true
+  visible: true
+  multiple: false
+custom_fields_009:
+  id: 9
+  type: ProjectCustomField
+  name: "Keine Verrechnung"
+  field_format: bool
+  possible_values:
+  regexp: ''
+  min_length: 0
+  max_length: 0
+  is_required: false
+  is_for_all: false
+  is_filter: false
+  position: 6
+  searchable: false
+  default_value:
   editable: true
   visible: true
   multiple: false

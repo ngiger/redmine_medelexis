@@ -30,14 +30,27 @@ projects_002:
 projects_003:
   id: 3
   name: Praxis Dr. Mustermann
-  description: ! '*Testprojekt* Praxis Dr. Mustermann - nur zur Systementwicklung
-    bzw. Demonstrationen'
+  description: ! 'Testprojekt* Praxis Dr. Mustermann - nur zur Systementwicklung'
   homepage: ''
   is_public: false
   parent_id: 2
   created_on: 2013-10-23 08:28:25.000000000 +02:00
   updated_on: 2013-10-25 11:32:25.000000000 +02:00
   identifier: mustermann
+  status: 1
+  lft: 2
+  rgt: 3
+  inherit_members: false
+projects_004:
+  id: 4
+  name: Praxis Ohne Verrechnung
+  description: ! 'Testprojekt mausarmer Hausarzt'
+  homepage: ''
+  is_public: false
+  parent_id: 2
+  created_on: 2013-10-23 08:28:25.000000000 +02:00
+  updated_on: 2013-10-25 11:32:25.000000000 +02:00
+  identifier: no_invoice
   status: 1
   lft: 2
   rgt: 3

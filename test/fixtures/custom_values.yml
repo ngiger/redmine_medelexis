@@ -113,3 +113,21 @@ custom_values_019:
   customized_id: 4
   custom_field_id: 2
   value: CANCELLED
+custom_values_020:
+  id: 20
+  customized_type: Project
+  customized_id: 3
+  custom_field_id: 9
+  value: '0'
+custom_values_021:
+  id: 21
+  customized_type: Project
+  customized_id: 4
+  custom_field_id: 9
+  value: '1'
+custom_values_022:
+  id: 22
+  customized_type: Project
+  customized_id: 4
+  custom_field_id: 5
+  value: '3'

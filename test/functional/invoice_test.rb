@@ -207,4 +207,15 @@ class LicenseControllerTest < ActionController::TestCase
     msg =  "Amount of second invoice of #{last_invoice.calculate_amount.to_i} (#{date_second_invoice}) must be smaller than first invoice #{first_invoice.calculate_amount.to_i} from (#{date_first_invoice})"
     assert(last_invoice.calculate_amount.to_i < first_invoice.calculate_amount.to_i, msg)
   end
+
+  test "verify that project KeinVerrechnung does not get an invoicing" do
+    project = Project.find(4)
+    oldSize= Invoice.all.size
+    stichtag = Date.today.end_of_year
+    assert_equal(nil, MedelexisInvoices.invoice_for_project(project.id, stichtag))
+    newSize= Invoice.all.size
+    nrCreated = newSize -oldSize
+    assert_equal 0, nrCreated, "May not create an invoice #{nrCreated} newSize #{newSize} #{oldSize}"
+  end
+
 end

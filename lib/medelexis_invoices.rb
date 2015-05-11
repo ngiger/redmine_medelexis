@@ -5,6 +5,11 @@ File.expand_path('../redmine_medelexis', __FILE__)
 require 'medelexis_helpers'
 
 class Project
+  def keineVerrechnung
+    return false unless field = CustomField.find(:first, :conditions => { :name => 'Keine Verrechnung'} )
+    return false unless custom = custom_value_for(field.id)
+    custom.value.to_i > 0 ? true : false
+  end
   def nrDoctors
     custom_value_for(CustomField.find(:first, :conditions => { :name => '# Ärzte'} ).id).value.to_i
   end
@@ -102,8 +107,8 @@ module MedelexisInvoices
     project_ids2invoice = []
     Project.all.each{
       | project|
-        status = project.custom_value_for(CustomField.find(:first, :conditions => { :name => 'Kundenstatus'} ).id)
-        status = status.value if status
+        status = project.kundenstatus
+        next if project.keineVerrechnung
         next unless status and ['Neukunde', 'Kunde'].index(status)
         last_invoiced = getDateOfLastInvoice(project.id)
         puts "Invoicing #{idx} project #{project.id}. last  #{last_invoiced} invoice_since #{invoice_since} >= #{day2invoice}? #{invoice_since ? 'No invoice found' : 'invoice_since ' + invoice_since.to_s}" if $VERBOSE
@@ -125,8 +130,8 @@ module MedelexisInvoices
     admin = User.find(:first, :conditions => {:admin => true})
     nrDoctors = project.nrDoctors
     multiplier = nrDoctors <= 6 ? DiscountMap[nrDoctors] : DiscountMap[6] + (nrDoctors-6)*MaxDiscount
-    puts "project identifier #{identifier} with #{nrDoctors} doctors multiplier #{multiplier} is #{project}" if $VERBOSE
-
+    puts "project identifier #{identifier} with #{nrDoctors} doctors multiplier #{multiplier} keineVerrechnung #{project.keineVerrechnung} is: #{project}" if $VERBOSE
+    return nil if project.keineVerrechnung
     issues = findAllOpenServicesForProjectID(project.id)
     issues.flatten!
     stich_tag_string = stich_tag.strftime(DatumsFormat)
