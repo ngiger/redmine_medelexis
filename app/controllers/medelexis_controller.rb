@@ -12,7 +12,13 @@ class MedelexisController < ApplicationController
     if request.post?
       data =params['rechnungslauf_form']
       string = "#{data['release_date(1i)']}-#{data['release_date(2i)']}-#{data['release_date(3i)']}"
-      @stichtag = Date.parse(string)
+      begin
+        @stichtag = Date.parse(string)
+      rescue ArgumentError => e
+        msg = "Konnte Datum #{string} nicht umwandeln #{e}"
+        redirect_to home_path,
+          error: msg
+      end
       project_to_invoice = data['project_to_invoice']
 
       if project_to_invoice and project_to_invoice.length > 0

@@ -30,14 +30,12 @@ Under http://foo.org/settings/plugin/redmine_medelexis you can add more debuggin
 h2. Installation from scratch for development
 
 Get the needed zip files. Used versions are found under https://mis.foo.org/admin/info
-* redmine-2.4.2.zip
+* rails-3.2.17
+* redmine-2.4.5.zip
 * redmine_contacts-3_2_13-pro.zip
-* redmine_contacts_helpdesk-2_2_8.zip
-* redmine_contacts_invoices-3_1_0-pro.zip
-* redmine_products-1_0_1-pro.zip
-* redmine_questions-0_0_5-light.zip
-* redmine_issue_checklist-2_0_5.zip
-
+* redmine_contacts_helpdesk-2.2.9-pro.zip
+* redmine_contacts_invoices-3.2.3.zip
+* redmine_products-1_0_3-pro.zip
 
 Afterwards execute and verify these steps (assuming a bash shell). Using ruby 1.9.3p547 was fine for me. Ruby 2.1.2 had some problems
 
@@ -76,7 +74,7 @@ Project.all.first
 
 h2. Creating a dump from the production server
 
-@bundle exec rake RAILS_ENV=production db:data:dump@ # loads db/data.yml
+@bundle exec rake RAILS_ENV=production db:data:dump@ # creates db/data.yml
 
 h2. Reset admin login, password and skip ldap
 
