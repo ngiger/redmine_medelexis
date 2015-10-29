@@ -146,8 +146,11 @@ module MedelexisInvoices
     invoice = Invoice.new
     invoice.number = rechnungs_nummer
     invoice.invoice_date = Time.now
+    invoice_since ||= getDateOfLastInvoice(project.id)
+    invoice_since ||= Date.today.beginning_of_year.to_date
     description = "Rechnung mit Stichtag vom #{stich_tag_string} für #{nrDoctors == 1 ? 'einen Arzt' : nrDoctors.to_s + ' Ärzte'}."
     description += "\nMultiplikator für abonnierte Features ist #{multiplier}." if multiplier != 1
+    description += "\nVerrechnet werden Leistungen vom #{invoice_since.to_s} bis #{stich_tag.to_s}."
     invoice.subject = "Rechnung für Abonnement Medelexis"
     invoice.project = project
     invoice.contact_id = contact.id
@@ -157,8 +160,6 @@ module MedelexisInvoices
     invoice.status_id  = Invoice::DRAFT_INVOICE
     invoice.currency ||= ContactsSetting.default_currency
     invoice.id = (Invoice.last.try(:id).to_i + 1).to_s
-    invoice_since ||= getDateOfLastInvoice(project.id)
-    invoice_since ||= Date.today.beginning_of_year.to_date
     issues.each{
       |issue|
         subject = issue.subject.sub('feature.group', 'feature').sub('feature.feature', 'feature')
@@ -169,6 +170,7 @@ module MedelexisInvoices
         grund_price = product.price.to_f
         next if grund_price.to_i == 0
         factor, days = getDaysOfYearFactor(issue, invoice_since, stich_tag)
+        price = grund_price
         if factor == 0
           next unless status.eql?('TRIAL')
           line_description += "\n#{subject} gratis da noch im ersten Monat"
@@ -179,11 +181,11 @@ module MedelexisInvoices
           line_description += ". Grundpreis von #{grund_price} wird für #{days} Tage verrechnet (Faktor #{factor})."
           price = grund_price * factor
         end
-        puts "found product #{product} for issue #{issue} price is #{price}" if $VERBOSE
+        puts "found product #{product} #{product.code} #{product.price.to_f} for issue #{issue} price is #{price}" if $VERBOSE
         invoice.lines << InvoiceLine.new(:description => line_description, :quantity => multiplier, :price => price, :units => "Feature")
         break if OnlyFirst
     }
-    invoice.lines.sort! { |a,b| b.price <=> a.price } # by price descending
+    invoice.lines.sort! { |a,b| b.price.to_i <=> a.price.to_i } # by price descending
     puts "Added #{invoice.lines.size} lines (of #{issues.size} service tickets). Stich_tag #{stich_tag.strftime(DatumsFormat)} due #{invoice.due_date.strftime(DatumsFormat)} description is now #{description}" if $VERBOSE
     invoice.description  = description
     invoice.custom_field_values.first.value = stich_tag_string

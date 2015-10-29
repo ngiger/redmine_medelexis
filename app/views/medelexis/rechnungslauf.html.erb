@@ -9,7 +9,8 @@
   :default => Date.today.beginning_of_year.to_date } %>
   <br>
   <%= f.label :stichtag, 'bis Stichtag' %>
-  <%= f.date_select :release_date %>
+  <%= f.date_select :release_date, { :start_year => 2010,  :end_year => Date.today.year+5,
+  :default => Date.today.end_of_year.to_date } %>
   <br>
   <br>
   <%= f.label :label_1, "Projekt (ID, z.B. 4 oder Kürzel. z.B. 'pesc')" %>
