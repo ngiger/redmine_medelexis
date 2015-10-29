@@ -91,7 +91,6 @@ module MedelexisInvoices
       end
       return nrDays.to_f/daysThisYear, nrDays
     end
-    binding.pry
     puts "What TODO with status #{status} day2invoice #{day2invoice} and issue.start_date #{issue.start_date}"
     puts issue.inspect
     100000 # Damit dieser Fall auch wirklich auffällt und kein Kunde dies bezahlt
