@@ -21,6 +21,7 @@ class Project
 end
 
 module MedelexisInvoices
+  ENV['TZ'] = 'UTC' # Display and use always UTC-times to avoid wrappping dates when invoicing
   OnlyFirst   = false # for debugging purposes
   DiscountMap = { 1 => 1,
                   2 => 1.7,
@@ -31,7 +32,7 @@ module MedelexisInvoices
   MaxDiscount = 0.5
   DatumsFormat = '%Y-%m-%d'
 
-  def self.stichtag(invoice)
+  def self.invoice_til(invoice)
     field = invoice.custom_value_for(CustomField.find(:first, :conditions => { :name => 'Stichtag'} ).id)
     return Date.new(invoice.invoice_date) unless field
     puts "invoice #{invoice.id} had invoice_date #{field} for #{invoice.subject}" if $VERBOSE
@@ -54,8 +55,8 @@ module MedelexisInvoices
       puts "getDateOfLastInvoice no invoices found for #{project_id}" if $VERBOSE
       return nil
     end
-    last = invoices.max {|a,b| stichtag(a) <=> stichtag(b) }
-    lastDate = stichtag(last)
+    last = invoices.max {|a,b| invoice_til(a) <=> invoice_til(b) }
+    lastDate = invoice_til(last)
     puts "getDateOfLastInvoice lastDate for #{project_id} was #{lastDate}" if $VERBOSE
     lastDate
   end
@@ -126,14 +127,21 @@ module MedelexisInvoices
     else
       project= Project.find(:first,  :conditions => {:identifier => identifier})
     end
+    unless project
+      msg = "Could not find a project for #{identifier}"
+      RedmineMedelexis.log_to_system(msg)
+      puts(msg)
+      return
+    end
     admin = User.find(:first, :conditions => {:admin => true})
     nrDoctors = project.nrDoctors
     multiplier = nrDoctors <= 6 ? DiscountMap[nrDoctors] : DiscountMap[6] + (nrDoctors-6)*MaxDiscount
-    puts "project identifier #{identifier} with #{nrDoctors} doctors multiplier #{multiplier} keineVerrechnung #{project.keineVerrechnung} is: #{project}" if $VERBOSE
+    since_string = invoice_since ? invoice_since.strftime(DatumsFormat) : 'nil'
+    till_string = stich_tag.strftime(DatumsFormat)
+    puts "project identifier #{identifier} #{since_string}-#{till_string} with #{nrDoctors} doctors multiplier #{multiplier} keineVerrechnung #{project.keineVerrechnung} is: #{project}" if $VERBOSE
     return nil if project.keineVerrechnung
     issues = findAllOpenServicesForProjectID(project.id)
     issues.flatten!
-    stich_tag_string = stich_tag.strftime(DatumsFormat)
     contact = RedmineMedelexis.getHauptkontakt(project.id)
     unless contact
       msg = "Could not find a contact for #{project.name} #{project.id}"
@@ -141,16 +149,17 @@ module MedelexisInvoices
       puts(msg)
       return
     end
-    puts "Invoicing for #{identifier} contact #{contact} til #{stich_tag_string}" if $VERBOSE
+    puts "Invoicing for #{identifier} contact #{contact} til #{till_string}" if $VERBOSE
     rechnungs_nummer = "Rechnung #{Time.now.strftime(DatumsFormat)}-#{Invoice.last ? Invoice.last.id+1 : 1}"
     invoice = Invoice.new
     invoice.number = rechnungs_nummer
     invoice.invoice_date = Time.now
     invoice_since ||= getDateOfLastInvoice(project.id)
     invoice_since ||= Date.today.beginning_of_year.to_date
-    description = "Rechnung mit Stichtag vom #{stich_tag_string} für #{nrDoctors == 1 ? 'einen Arzt' : nrDoctors.to_s + ' Ärzte'}."
+    since_string = invoice_since.strftime(DatumsFormat)
+    description = "Rechnung mit Stichtag vom #{till_string} für #{nrDoctors == 1 ? 'einen Arzt' : nrDoctors.to_s + ' Ärzte'}."
     description += "\nMultiplikator für abonnierte Features ist #{multiplier}." if multiplier != 1
-    description += "\nVerrechnet werden Leistungen vom #{invoice_since.to_s} bis #{stich_tag.to_s}."
+    description += "\nVerrechnet werden Leistungen vom #{since_string} bis #{till_string}."
     invoice.subject = "Rechnung für Abonnement Medelexis"
     invoice.project = project
     invoice.contact_id = contact.id
@@ -186,9 +195,9 @@ module MedelexisInvoices
         break if OnlyFirst
     }
     invoice.lines.sort! { |a,b| b.price.to_i <=> a.price.to_i } # by price descending
-    puts "Added #{invoice.lines.size} lines (of #{issues.size} service tickets). Stich_tag #{stich_tag.strftime(DatumsFormat)} due #{invoice.due_date.strftime(DatumsFormat)} description is now #{description}" if $VERBOSE
+    puts "Added #{invoice.lines.size} lines (of #{issues.size} service tickets). #{since_string}-#{till_string} due #{invoice.due_date.strftime(DatumsFormat)} description is now #{description}" if $VERBOSE
     invoice.description  = description
-    invoice.custom_field_values.first.value = stich_tag_string
+    invoice.custom_field_values.first.value = till_string
     invoice.save_custom_field_values
     amount = BigDecimal.new(invoice.calculate_amount.to_d)
     rounding_difference  = (amount % round_to)
@@ -200,14 +209,14 @@ module MedelexisInvoices
       invoice.delete
       return nil
     end
-    RedmineMedelexis.log_to_system "Invoicing for #{identifier} #{project.name} amount #{invoice.calculate_amount.round(2)}. Has #{invoice.lines.size} lines "
+    RedmineMedelexis.log_to_system "Invoicing for #{identifier} #{project.name} #{till_string}-#{since_string} amount #{invoice.calculate_amount.round(2)}. Has #{invoice.lines.size} lines "
     invoice.save
     invoice
   end
 
   def self.startInvoicing(stich_tag = Date.today.end_of_year.to_date, invoice_since = nil)
     projects = []
-    RedmineMedelexis.log_to_system("startInvoicing: stichtag #{stich_tag.strftime(DatumsFormat)}")
+    RedmineMedelexis.log_to_system("startInvoicing: invoice_til #{stich_tag.strftime(DatumsFormat)} invoice_since #{invoice_since ? invoice_since.strftime(DatumsFormat): 'nil'}")
     ActiveRecord::Base.transaction do
       startTime = Time.now
       oldSize = Invoice.all.size

@@ -61,7 +61,7 @@ class Redmine::ApiTest::LicenseTest < ActionController::IntegrationTest
     assert_equal "/settings/plugin/redmine_medelexis", path
     assert_response 302
     get '/medelexis/rechnungslauf'
-    skip "don't know how to test the form to start a rechnungslauf"
+    omit "don't know how to test the form to start a rechnungslauf"
   end
 
   def teardown

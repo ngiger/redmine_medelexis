@@ -11,24 +11,29 @@ class MedelexisController < ApplicationController
     RedmineMedelexis.log_to_system("rechnungslauf from IP #{request.remote_ip} via #{request.protocol}#{request.host_with_port}#{request.fullpath} user #{User.current} : rechnungen_erstellt #{params['key']} action_name #{action_name}")
     if request.post?
       data =params['rechnungslauf_form']
-      string = "#{data['release_date(1i)']}-#{data['release_date(2i)']}-#{data['release_date(3i)']}"
-      begin
-        @stichtag = Date.parse(string)
-      rescue ArgumentError => e
-        msg = "Konnte Datum #{string} nicht umwandeln #{e}"
-        redirect_to home_path,
-          error: msg
-      end
+      @invoice_since= verify_date(data, 'invoice_since')
+      @invoice_til = verify_date(data, 'release_date')
       project_to_invoice = data['project_to_invoice']
 
       if project_to_invoice and project_to_invoice.length > 0
-        MedelexisInvoices.invoice_for_project(project_to_invoice, @stichtag)
+        MedelexisInvoices.invoice_for_project(project_to_invoice, @invoice_til, @invoice_since)
       else
-        MedelexisInvoices.startInvoicing(@stichtag)
+        MedelexisInvoices.startInvoicing(@invoice_til)
       end
       redirect_to :controller => 'invoices' # , :action => '/invoices'
     else
       render :action => 'rechnungslauf'
+    end
+  end
+  private
+  def verify_date(data, name)
+    string = "#{data[name + '(1i)']}-#{data[name + '(2i)']}-#{data[name + '(3i)']}"
+    begin
+      return Date.parse(string)
+    rescue ArgumentError => e
+      msg = "Konnte Datum #{string} nicht umwandeln #{e}"
+      redirect_to home_path,
+        error: msg
     end
   end
 end

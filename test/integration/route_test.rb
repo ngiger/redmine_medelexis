@@ -27,8 +27,6 @@ class RoutingTest < ActionController::IntegrationTest
   end
   test "invoices" do
     assert_routing({ :path => "/medelexis/rechnungslauf", :method => :get }, { :controller => "medelexis", :action => "rechnungslauf" })
-#    assert_routing({ :path => "/invoices/1.xml", :method => :put }, { :controller => "invoices", :action => "update", :format => 'xml', :id => "1" })
-
   end
 
 

@@ -80,16 +80,16 @@ class LicenseControllerTest < ActionController::TestCase
     mustermann = Project.find(3)
     oldSize= Invoice.all.size
     invoice_since = Date.new(2099, 1, 1)
-    stichtag = Date.new(2099, 2, 15)
-    nrDay =  (stichtag - invoice_since).to_i # 45
+    invoice_til = Date.new(2099, 2, 15)
+    nrDay =  (invoice_til - invoice_since).to_i # 45
 
-    res = MedelexisInvoices.startInvoicing(stichtag, invoice_since)
+    res = MedelexisInvoices.startInvoicing(invoice_til, invoice_since)
     assert_not_nil res
     sizeAfterFirstRun= Invoice.all.size
     nrCreated = sizeAfterFirstRun -oldSize
     content = res.inspect.to_s
     assert (nrCreated == 1 ), "Must have created exactyl one. Not #{nrCreated}"
-    assert_equal(stichtag, MedelexisInvoices.getDateOfLastInvoice(Invoice.first.project_id))
+    assert_equal(invoice_til, MedelexisInvoices.getDateOfLastInvoice(Invoice.first.project_id))
     Invoice.all.last.lines.each{ |line| puts line.description }
     assert_match(/wird für\s+45\s+Tage verrechnet/, Invoice.all.last.lines.first.description)
   end
@@ -98,8 +98,8 @@ class LicenseControllerTest < ActionController::TestCase
     mustermann = Project.find(3)
     xxxSize= Project.all.size
     oldSize= Invoice.all.size
-    stichtag = Date.today.end_of_year
-    res = MedelexisInvoices.startInvoicing(stichtag)
+    invoice_til = Date.today.end_of_year
+    res = MedelexisInvoices.startInvoicing(invoice_til)
     assert_not_nil res
     newSize= Invoice.all.size
     nrCreated = newSize -oldSize
@@ -115,8 +115,8 @@ class LicenseControllerTest < ActionController::TestCase
   test "verify invoicing today" do
     mustermann = Project.find(3)
     oldSize= Invoice.all.size
-    stichtag = Date.today
-    res = MedelexisInvoices.startInvoicing(stichtag)
+    invoice_til = Date.today
+    res = MedelexisInvoices.startInvoicing(invoice_til)
     assert_not_nil res
     newSize= Invoice.all.size
     nrCreated = newSize -oldSize
@@ -131,8 +131,8 @@ class LicenseControllerTest < ActionController::TestCase
   test "second invoicing may not produce a new invoice" do
     mustermann = Project.find(3)
     oldSize= Invoice.all.size
-    stichtag = Date.today
-    res = MedelexisInvoices.startInvoicing(stichtag)
+    invoice_til = Date.today
+    res = MedelexisInvoices.startInvoicing(invoice_til)
     assert_not_nil res
     sizeAfterFirstRun= Invoice.all.size
     nrCreated = sizeAfterFirstRun -oldSize
@@ -144,7 +144,7 @@ class LicenseControllerTest < ActionController::TestCase
     trial_issue = last_invoice.lines.find_all{|x| x.description if /gratis/i.match(x.description) }
     assert_equal 1, trial_issue.size,       "Invoice must have 1 free product. Not #{trial_issue.size}" # one item is TRIAL
     assert ( last_invoice.calculate_amount < 10000.0 ), "Amount must be smaller than 10kFr. But is #{last_invoice.calculate_amount.to_f.round(2)}"
-    res = MedelexisInvoices.startInvoicing(stichtag)
+    res = MedelexisInvoices.startInvoicing(invoice_til)
     assert_not_nil res
     sizeAfterSecondRun= Invoice.all.size
     assert_equal(sizeAfterFirstRun, sizeAfterSecondRun)
@@ -153,14 +153,14 @@ class LicenseControllerTest < ActionController::TestCase
   test "after invoicing getDateOfLastInvoice must return correct date" do
     mustermann = Project.find(3)
     oldSize= Invoice.all.size
-    stichtag = Date.today - 5
-    res = MedelexisInvoices.startInvoicing(stichtag)
+    invoice_til = Date.today - 5
+    res = MedelexisInvoices.startInvoicing(invoice_til)
     assert_not_nil res
     sizeAfterFirstRun= Invoice.all.size
     nrCreated = sizeAfterFirstRun -oldSize
     content = res.inspect.to_s
     assert (nrCreated == 1 ), "Must have created exactyl one. Not #{nrCreated}"
-    assert_equal(stichtag, MedelexisInvoices.getDateOfLastInvoice(Invoice.first.project_id))
+    assert_equal(invoice_til, MedelexisInvoices.getDateOfLastInvoice(Invoice.first.project_id))
   end
 
   test "test findLastInvoiceDate" do
@@ -211,8 +211,8 @@ class LicenseControllerTest < ActionController::TestCase
   test "verify that project KeinVerrechnung does not get an invoicing" do
     project = Project.find(4)
     oldSize= Invoice.all.size
-    stichtag = Date.today.end_of_year
-    assert_equal(nil, MedelexisInvoices.invoice_for_project(project.id, stichtag))
+    invoice_til = Date.today.end_of_year
+    assert_equal(nil, MedelexisInvoices.invoice_for_project(project.id, invoice_til))
     newSize= Invoice.all.size
     nrCreated = newSize -oldSize
     assert_equal 0, nrCreated, "May not create an invoice #{nrCreated} newSize #{newSize} #{oldSize}"
