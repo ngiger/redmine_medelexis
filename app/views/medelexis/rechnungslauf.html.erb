@@ -8,7 +8,7 @@
   <%= f.date_select :invoice_since, { :start_year => 2010,  :end_year => Date.today.year+5,
   :default => Date.today.beginning_of_year.to_date } %>
   <br>
-  <%= f.label :invoice_til, 'bis Stichtag' %>
+  <%= f.label :stichtag, 'bis Stichtag' %>
   <%= f.date_select :release_date, { :start_year => 2010,  :end_year => Date.today.year+5,
   :default => Date.today.end_of_year.to_date } %>
   <br>
