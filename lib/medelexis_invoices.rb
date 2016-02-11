@@ -131,7 +131,10 @@ module MedelexisInvoices
     nrDoctors = project.nrDoctors
     multiplier = nrDoctors <= 6 ? DiscountMap[nrDoctors] : DiscountMap[6] + (nrDoctors-6)*MaxDiscount
     puts "project identifier #{identifier} with #{nrDoctors} doctors multiplier #{multiplier} keineVerrechnung #{project.keineVerrechnung} is: #{project}" if $VERBOSE
-    raise "project '#{identifier}' soll nicht verrechnet werden" if project.keineVerrechnung
+    if project.keineVerrechnung
+      RedmineMedelexis.log_to_system "project '#{identifier}' #{project.name} soll nicht verrechnet werden"
+      return nil
+    end
     issues = findAllOpenServicesForProjectID(project.id)
     issues.flatten!
     stich_tag_string = stich_tag.strftime(DatumsFormat)
@@ -191,12 +194,13 @@ module MedelexisInvoices
     unless rounding_difference == 0
       invoice.lines << InvoiceLine.new(:description => "Gerundet zugunsten Kunde", :quantity => 1, :price => -rounding_difference)
     end
-    if invoice.calculate_amount < 5
-      RedmineMedelexis.log_to_system "Invoicing for #{identifier} #{project.name} skipped as amount #{invoice.calculate_amount.round(2)} is < 5 Fr."
+    if amount < 5
+      RedmineMedelexis.log_to_system "Invoicing for #{identifier} #{project.name} skipped as amount #{amount.round(2)} is < 5 Fr."
       invoice.delete
-      raise "Würde weniger als 5 Franken (#{invoice.calculate_amount}) für '#{identifier}' verrechnen"
+      RedmineMedelexis.log_to_system "Würde mit  (#{amount}) weniger als 5 Franken für '#{identifier}'  #{project.name} verrechnen"
+      return nil
     end
-    RedmineMedelexis.log_to_system "Invoicing for #{identifier} #{project.name} amount #{invoice.calculate_amount.round(2)}. Has #{invoice.lines.size} lines "
+    RedmineMedelexis.log_to_system "Invoicing for #{identifier} #{project.name} amount #{amount.round(2)}. Has #{invoice.lines.size} lines "
     invoice.save
     invoice
   end
