@@ -8,6 +8,9 @@
 
   get  '/medelexis/rechnungslauf', :to => 'medelexis#rechnungslauf'
   post '/medelexis/rechnungslauf', :to => 'medelexis#rechnungslauf'
-Redmine::Plugin.register :medelexis do
-  permission :rechnungslauf, :medelexis => :rechnungslauf
-end if false
+
+  get  '/medelexis/alle_rechnungen', :to => 'medelexis#alle_rechnungen'
+
+  Redmine::Plugin.register :medelexis do
+    permission :rechnungslauf, :medelexis => :rechnungslauf
+  end if false

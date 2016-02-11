@@ -1,0 +1,22 @@
+<%= link_to "Refresh" %>
+
+<h2>Alle erstellten Rechnungen (CSV-Format)</h2>
+
+Project-Id, Project-Name, Rechnungs-Id, Status, Betrag, Fällig am, Titel, Zeile 1, Zeile 2, Zeile 3
+<br>
+<% @invoices.sort_by{|x| x.project_id }.each do |invoice| %>
+  "<%= invoice.project_id %>",
+  "<%= Project.find(invoice.project_id).name %>",
+  "<%= invoice.id %>",
+  "<%= invoice.status_id %>",
+  "<%= invoice.amount %>",
+  "<%= [Invoice::PAID_INVOICE, Invoice::CANCELED_INVOICE].index(invoice.status_id) ? '' : invoice.due_date.strftime('%Y.%m.%d') %>",
+  "<%= invoice.number %>",
+  "<%= invoice.subject %>",
+  "<%= /\d{4}-\d{2}-\d{2}/.match(invoice.description.split("\n")[-1]) %>",
+  "<%= invoice.description.split("\n").join('","') %>"
+  <br>
+<% end if @invoices %>
+
+
+
