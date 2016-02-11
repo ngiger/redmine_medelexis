@@ -19,14 +19,26 @@ class MedelexisController < ApplicationController
         redirect_to home_path,
           error: msg
       end
-      project_to_invoice = data['project_to_invoice']
-
-      if project_to_invoice and project_to_invoice.length > 0
-        MedelexisInvoices.invoice_for_project(project_to_invoice, @stichtag)
-      else
-        MedelexisInvoices.startInvoicing(@stichtag)
+      since = "#{data['invoice_since(1i)']}-#{data['invoice_since(2i)']}-#{data['invoice_since(3i)']}"
+      begin
+        @since = Date.parse(since)
+      rescue ArgumentError => e
+        msg = "Konnte Datum #{since} nicht umwandeln #{e}"
+        redirect_to home_path,
+          error: msg
       end
-      redirect_to :controller => 'invoices' # , :action => '/invoices'
+      begin
+        project_to_invoice = data['project_to_invoice']
+        if project_to_invoice and project_to_invoice.length > 0
+          MedelexisInvoices.invoice_for_project(project_to_invoice, @stichtag, @since)
+        else
+          MedelexisInvoices.startInvoicing(@stichtag, @since)
+        end
+        redirect_to :controller => 'invoices' # , :action => '/invoices'
+      rescue => exception
+        flash[:notice] = exception.to_s
+        redirect_to "/medelexis/rechnungslauf"
+      end
     else
       render :action => 'rechnungslauf'
     end

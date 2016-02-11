@@ -126,21 +126,17 @@ module MedelexisInvoices
     else
       project= Project.find(:first,  :conditions => {:identifier => identifier})
     end
+    raise "Projekt '#{identifier}' konnte weder als Zahl noch als Name gefunden werden" unless project
     admin = User.find(:first, :conditions => {:admin => true})
     nrDoctors = project.nrDoctors
     multiplier = nrDoctors <= 6 ? DiscountMap[nrDoctors] : DiscountMap[6] + (nrDoctors-6)*MaxDiscount
     puts "project identifier #{identifier} with #{nrDoctors} doctors multiplier #{multiplier} keineVerrechnung #{project.keineVerrechnung} is: #{project}" if $VERBOSE
-    return nil if project.keineVerrechnung
+    raise "project '#{identifier}' soll nicht verrechnet werden" if project.keineVerrechnung
     issues = findAllOpenServicesForProjectID(project.id)
     issues.flatten!
     stich_tag_string = stich_tag.strftime(DatumsFormat)
     contact = RedmineMedelexis.getHauptkontakt(project.id)
-    unless contact
-      msg = "Could not find a contact for #{project.name} #{project.id}"
-      RedmineMedelexis.log_to_system(msg)
-      puts(msg)
-      return
-    end
+    raise "Konnte keinen Hauptkontakt für Projekt '#{identifier}' finden"  unless contact
     puts "Invoicing for #{identifier} contact #{contact} til #{stich_tag_string}" if $VERBOSE
     rechnungs_nummer = "Rechnung #{Time.now.strftime(DatumsFormat)}-#{Invoice.last ? Invoice.last.id+1 : 1}"
     invoice = Invoice.new
@@ -198,7 +194,7 @@ module MedelexisInvoices
     if invoice.calculate_amount < 5
       RedmineMedelexis.log_to_system "Invoicing for #{identifier} #{project.name} skipped as amount #{invoice.calculate_amount.round(2)} is < 5 Fr."
       invoice.delete
-      return nil
+      raise "Würde weniger als 5 Franken (#{invoice.calculate_amount}) für '#{identifier}' verrechnen"
     end
     RedmineMedelexis.log_to_system "Invoicing for #{identifier} #{project.name} amount #{invoice.calculate_amount.round(2)}. Has #{invoice.lines.size} lines "
     invoice.save

@@ -202,6 +202,7 @@ module RedmineMedelexis
     # RedmineMedelexis.log_to_system("unencrypted  #{license} #{File.size(license)} bytes #{File.ctime(license)}")
     okay = system(cmd_1) and system(cmd_2) and
     RedmineMedelexis.log_to_system("signed  #{crypted} #{File.size(crypted)} bytes #{File.ctime(crypted)}")
+    return "" unless File.exist?(crypted)
     content = IO.read(crypted)
     FileUtils.rm_f([signed, crypted, license]) unless defined?(MiniTest) or Setting.plugin_redmine_medelexis['keep_temp_license_files'].to_i == 1
     content
