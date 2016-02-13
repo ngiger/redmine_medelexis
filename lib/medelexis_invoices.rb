@@ -22,6 +22,7 @@ end
 
 module MedelexisInvoices
   OnlyFirst   = false # for debugging purposes
+  AboSubject  = "Rechnung für Abonnement Medelexis"
   DiscountMap = { 1 => 1,
                   2 => 1.7,
                   3 => 2.3,
@@ -32,10 +33,12 @@ module MedelexisInvoices
   DatumsFormat = '%Y-%m-%d'
 
   def self.stichtag(invoice)
-    field = invoice.custom_value_for(CustomField.find(:first, :conditions => { :name => 'Stichtag'} ).id)
-    return Date.new(invoice.invoice_date) unless field
-    puts "invoice #{invoice.id} had invoice_date #{field} for #{invoice.subject}" if $VERBOSE
-    Date.parse(field.value)
+    return nil unless invoice.subject.eql?(AboSubject)
+    last_line = invoice.description.split("\n").last
+    m = /bis (\d{4}-\d{2}-\d{2})/.match(last_line)
+    raise "Last line #{last_line} of inovice #{invoice.id} does not match 'bis <stichtag>'" unless m
+    puts "invoice #{invoice.id} had invoice_date #{m[1]} for #{invoice.subject}" if $VERBOSE
+    Date.parse(m[1])
   end
 
   def self.findAllOpenServicesForProjectID(project_id)
@@ -49,7 +52,7 @@ module MedelexisInvoices
       return nil
     end
     project = projects.first
-    invoices = Invoice.find(:all, :conditions => {:project_id => project.id})
+    invoices = Invoice.find(:all, :conditions => {:project_id => project.id}).reject{ |invoice| stichtag(invoice) == nil }
     unless invoices.size > 0
       puts "getDateOfLastInvoice no invoices found for #{project_id}" if $VERBOSE
       return nil
@@ -103,6 +106,7 @@ module MedelexisInvoices
 
   def self.findProjects2invoice(day2invoice = Date.today.end_of_year, invoice_since = nil)
     idx = 0
+    invoice_since ||= Date.today.beginning_of_year
     project_ids2invoice = []
     Project.all.each{
       | project|
@@ -111,7 +115,8 @@ module MedelexisInvoices
         next unless status and ['Neukunde', 'Kunde'].index(status)
         last_invoiced = getDateOfLastInvoice(project.id)
         puts "Invoicing #{idx} project #{project.id}. last  #{last_invoiced} invoice_since #{invoice_since} >= #{day2invoice}? #{invoice_since ? 'No invoice found' : 'invoice_since ' + invoice_since.to_s}" if $VERBOSE
-        next if last_invoiced and last_invoiced > day2invoice
+        next if last_invoiced && last_invoiced > day2invoice
+        next if last_invoiced && invoice_since < last_invoiced
         project_ids2invoice << project.id
         idx += 1
         break if OnlyFirst
@@ -119,7 +124,7 @@ module MedelexisInvoices
     project_ids2invoice
   end
 
-  def self.invoice_for_project(identifier, stich_tag = Date.today.end_of_year.to_date, invoice_since = nil)
+  def self.invoice_for_project(identifier, stich_tag = Date.today.end_of_year.to_date, invoice_since = Date.today.beginning_of_year)
     round_to = BigDecimal.new('0.05')
     if identifier.to_i >0
       project= Project.find(identifier.to_i)
@@ -143,6 +148,7 @@ module MedelexisInvoices
     puts "Invoicing for #{identifier} contact #{contact} til #{stich_tag_string}" if $VERBOSE
     rechnungs_nummer = "Rechnung #{Time.now.strftime(DatumsFormat)}-#{Invoice.last ? Invoice.last.id+1 : 1}"
     invoice = Invoice.new
+    last_invoiced = getDateOfLastInvoice(project.id)
     invoice.number = rechnungs_nummer
     invoice.invoice_date = Time.now
     invoice_since ||= getDateOfLastInvoice(project.id)
@@ -150,7 +156,7 @@ module MedelexisInvoices
     description = "Rechnung mit Stichtag vom #{stich_tag_string} für #{nrDoctors == 1 ? 'einen Arzt' : nrDoctors.to_s + ' Ärzte'}."
     description += "\nMultiplikator für abonnierte Features ist #{multiplier}." if multiplier != 1
     description += "\nVerrechnet werden Leistungen vom #{invoice_since.to_s} bis #{stich_tag.to_s}."
-    invoice.subject = "Rechnung für Abonnement Medelexis"
+    invoice.subject = AboSubject
     invoice.project = project
     invoice.contact_id = contact.id
     invoice.due_date = (Time.now.utc.to_date) + 31

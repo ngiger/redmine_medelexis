@@ -20,7 +20,7 @@
 # along with redmine_contacts.  If not, see <http://www.gnu.org/licenses/>.
 require File.expand_path(File.dirname(__FILE__) + '/../test_helper')
 
-class LicenseControllerTest < ActionController::TestCase
+class InvoiceControllerTest < ActionController::TestCase
     ActiveRecord::Fixtures.create_fixtures(Redmine::Plugin.find(:redmine_medelexis).directory + '/test/fixtures/',
                             [
                              :contacts,
@@ -165,7 +165,7 @@ class LicenseControllerTest < ActionController::TestCase
 
   test "test findLastInvoiceDate" do
     assert_equal(nil, MedelexisInvoices.getDateOfLastInvoice(-1), 'an invalid project_id must return nil')
-    assert_equal(Date.new(2014,11,15), MedelexisInvoices.getDateOfLastInvoice(Invoice.first.project_id))
+    assert_equal(nil, MedelexisInvoices.getDateOfLastInvoice(Invoice.first.project_id))
   end
 
   test "check amount for invoicing again after 3 months" do
@@ -216,6 +216,28 @@ class LicenseControllerTest < ActionController::TestCase
     newSize= Invoice.all.size
     nrCreated = newSize -oldSize
     assert_equal 0, nrCreated, "May not create an invoice #{nrCreated} newSize #{newSize} #{oldSize}"
+  end
+
+  test "second invoicing may not produce a new invoice even if since given" do
+    mustermann = Project.find(3)
+    oldSize= Invoice.all.size
+    stichtag = Date.today
+    res = MedelexisInvoices.startInvoicing(stichtag)
+    assert_not_nil res
+    sizeAfterFirstRun= Invoice.all.size
+    nrCreated = sizeAfterFirstRun -oldSize
+    content = res.inspect.to_s
+    assert (nrCreated == 1 ), "Must have created exactyl one. Not #{nrCreated}"
+    last_invoice = Invoice.last
+    required_due_date = ((Time.now.to_date) + 31).to_time
+    assert (last_invoice.due_date == required_due_date),   "Due date must be today + 31. But is #{last_invoice.due_date} instead of #{required_due_date}"
+    trial_issue = last_invoice.lines.find_all{|x| x.description if /gratis/i.match(x.description) }
+    assert_equal 1, trial_issue.size,       "Invoice must have 1 free product. Not #{trial_issue.size}" # one item is TRIAL
+    assert ( last_invoice.calculate_amount < 10000.0 ), "Amount must be smaller than 10kFr. But is #{last_invoice.calculate_amount.to_f.round(2)}"
+    res = MedelexisInvoices.startInvoicing(stichtag, stichtag-365)
+    assert_not_nil res
+    sizeAfterSecondRun= Invoice.all.size
+    assert_equal(sizeAfterFirstRun, sizeAfterSecondRun)
   end
 
 end
