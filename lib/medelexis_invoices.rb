@@ -153,6 +153,10 @@ module MedelexisInvoices
     invoice.invoice_date = Time.now
     invoice_since ||= getDateOfLastInvoice(project.id)
     invoice_since ||= Date.today.beginning_of_year.to_date
+    if last_invoiced && last_invoiced > invoice_since
+      RedmineMedelexis.log_to_system "Skip invoicing project '#{identifier}' #{project.name} as last_invoiced #{last_invoiced} > #{invoice_since}"
+      return nil
+    end
     description = "Rechnung mit Stichtag vom #{stich_tag_string} für #{nrDoctors == 1 ? 'einen Arzt' : nrDoctors.to_s + ' Ärzte'}."
     description += "\nMultiplikator für abonnierte Features ist #{multiplier}." if multiplier != 1
     description += "\nVerrechnet werden Leistungen vom #{invoice_since.to_s} bis #{stich_tag.to_s}."
