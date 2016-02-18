@@ -23,6 +23,15 @@ end
 module MedelexisInvoices
   OnlyFirst   = false # for debugging purposes
   AboSubject  = "Rechnung für Abonnement Medelexis"
+  # Before we had Rechnung mit Stichtag vom 2015-12-31 für 2 Ärzte.
+  Example_2015_1 = "Rechnung mit Stichtag vom 2015-12-31 für 2 Ärzte.
+Multiplikator für abonnierte Features ist 1.7."
+  Example_2016_1 = "Rechnung mit Stichtag vom 2016-12-31 für 2 Ärzte.
+Multiplikator für abonnierte Features ist 1.7.
+Verrechnet werden Leistungen vom 2016-01-01 bis 2016-12-31."
+  Duration = "Verrechnet werden Leistungen vom %s bis %s."
+  DurationMatcher = /Stichtag vom (\d{4}-\d{2}-\d{2})/ # This must always match all old examples!
+  # urse
   DiscountMap = { 1 => 1,
                   2 => 1.7,
                   3 => 2.3,
@@ -34,11 +43,15 @@ module MedelexisInvoices
 
   def self.stichtag(invoice)
     return nil unless invoice.subject.eql?(AboSubject)
-    last_line = invoice.description.split("\n").last
-    m = /bis (\d{4}-\d{2}-\d{2})/.match(last_line)
-    raise "Last line #{last_line} of inovice #{invoice.id} does not match 'bis <stichtag>'" unless m
-    puts "invoice #{invoice.id} had invoice_date #{m[1]} for #{invoice.subject}" if $VERBOSE
-    Date.parse(m[1])
+    m = DurationMatcher.match(invoice.description)
+    string_date = m[1] if m
+    unless m && string_date
+      RedmineMedelexis.log_to_system "Unable to get stictag for invoice #{invoice.id} had invoice_date #{m} for #{invoice.subject}"
+      raise "#{invoice.description} of invoice #{invoice.id} does not match 'Stichtag vom|bis <stichtag>'" unless m && string_date
+      return nil
+    end
+    puts "invoice #{invoice.id} had invoice_date #{string_date} for #{invoice.subject}" if $VERBOSE
+    Date.parse(string_date)
   end
 
   def self.findAllOpenServicesForProjectID(project_id)
@@ -159,7 +172,7 @@ module MedelexisInvoices
     end
     description = "Rechnung mit Stichtag vom #{stich_tag_string} für #{nrDoctors == 1 ? 'einen Arzt' : nrDoctors.to_s + ' Ärzte'}."
     description += "\nMultiplikator für abonnierte Features ist #{multiplier}." if multiplier != 1
-    description += "\nVerrechnet werden Leistungen vom #{invoice_since.to_s} bis #{stich_tag.to_s}."
+    description += "\n" + sprintf(Duration, invoice_since.to_s, stich_tag.to_s)
     invoice.subject = AboSubject
     invoice.project = project
     invoice.contact_id = contact.id

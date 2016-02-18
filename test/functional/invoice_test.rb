@@ -240,4 +240,9 @@ class InvoiceControllerTest < ActionController::TestCase
     assert_equal(sizeAfterFirstRun, sizeAfterSecondRun)
   end
 
+  test "Must match correct invoice stichtag" do
+    assert_equal('2015-12-31', MedelexisInvoices::DurationMatcher.match(MedelexisInvoices::Example_2015_1)[1])
+    assert_equal('2016-12-31', MedelexisInvoices::DurationMatcher.match(MedelexisInvoices::Example_2016_1)[1])
+  end
+
 end
