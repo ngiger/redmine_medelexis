@@ -65,6 +65,10 @@ bundle exec rake redmine:plugins NAME=redmine_medelexis
 
 h2. development: Loading a dump
 
+# remove color (twice in deal_statuses ), remove auth_sources from data.yml
+# remove color, crea
+
+
 @bundle exec rake RAILS_ENV=development db:data:load@ # loads db/data.yml
 
 Afterwards you may examine the data as following
@@ -78,8 +82,8 @@ h2. Creating a dump from the production server
 
 h2. Reset admin login, password and skip ldap
 
-bc. RAILS_ENV=development bundle exec script/rails runner 'user = User.find(:first, :conditions => {:admin => true}) ; \
-user.login = "admin"; user.auth_source_id = nil; user.password, user.password_confirmation = "my_password"; user.save!'
+bc. RAILS_ENV=development bundle exec script/rails runner 'user = User.find(:first, :conditions => {:admin => true, :name => 'admin'}) ; \
+user.auth_source_id = nil; user.password, user.password_confirmation = "my_password"; user.save!'
 
 If you know the login of you might also use something like @:conditions => {:login => "myLogin"}@
 
@@ -126,3 +130,4 @@ h3. create_invoices (alpha)
 The script scripts/create_invoices.rb creates 6 (test) invoices using the last day of this year.
 
 bc. bundle exec ruby script/rails runner plugins/redmine_medelexis/scripts/create_invoices.rb
+

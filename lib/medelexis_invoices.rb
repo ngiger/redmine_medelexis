@@ -54,11 +54,60 @@ Verrechnet werden Leistungen vom 2016-01-01 bis 2016-12-31."
     Date.parse(string_date)
   end
 
-  def self.findAllOpenServicesForProjectID(project_id)
-    Issue.find(:all, :conditions => { :project_id => project_id, :tracker_id => RedmineMedelexis::Tracker_Is_Service } )
+  def self.issueDateInRange?(issue, stich_tag, invoice_since)
+    raise "Stichtag #{stichtag} muss > sein als #{invoice_since} (Startag) " if (stich_tag <= invoice_since)
+    status = issue.custom_field_values.first.value
+    info = "#{issue.id} #{status}: #{invoice_since}-#{stich_tag} for issue #{issue.start_date} - #{issue.updated_on}"
+    if status == 'CANCELLED' || status == 'EXPIRED'
+       if (issue.updated_on < invoice_since) || (issue.start_date > stich_tag)
+         return false
+       end
+    end
+    if (issue.start_date < stich_tag)
+      return true
+    else
+      return false
+    end
   end
 
-  def self.getDateOfLastInvoice(project_id)
+  def self.findAllOpenServicesForProjectID(project_id,  stich_tag = Date.today.end_of_year.to_date, invoice_since = nil)
+    invoice_since  ||= Date.today.beginning_of_year
+    puts "findAllOpenServicesForProjectID #{stich_tag.inspect} #{invoice_since.inspect}" if $VERBOSE
+    return [] if (stich_tag.to_date - invoice_since.to_date).to_i < 0
+    all_project_issues = Issue.find(:all, :conditions => { :project_id => project_id, :tracker_id => RedmineMedelexis::Tracker_Is_Service} )
+    invoices = Invoice.find(:all, :conditions => {:project_id => project_id}).reject{ |invoice| stichtag(invoice) == nil || stichtag(invoice) < invoice_since }
+    last_invoice = getLastInvoiceForProject(project_id)
+    return all_project_issues unless last_invoice
+    open_issues = []
+    core_name = Product.first.name
+    # binding.pry if $VERBOSE
+    return all_project_issues if (last_invoice &&  (stichtag(last_invoice) < stich_tag))
+    all_project_issues.each do |issue|
+      # binding.pry if /gcal/.match(issue.subject)
+      if !issueDateInRange?(issue, stich_tag, invoice_since)
+        puts "Skipping #{issue.id} #{issue.subject} with #{issue.start_date}" if $VERBOSE
+      else
+        product = getProduct(issue)
+        if !product
+          puts "Skip no product for #{issue.id} #{issue.subject}" if $VERBOSE
+        elsif product.price.to_f.to_i == 0
+          puts "Skip price #{issue.id} #{issue.subject}" if $VERBOSE
+        elsif last_invoice &&
+            product.name.eql?(core_name) &&
+            last_invoice.lines.find_all{|line| /#{core_name}/i.match(line.description)  }.size > 0
+            puts "Skip #{core_name} line #{issue.id}" if $VERBOSE
+        elsif last_invoice && last_invoice.lines.find_all{|line| /#{product.name}/i.match(line.description)  }.size > 0
+          puts "Skip matched product #{issue.id} #{product.name}" if $VERBOSE
+        else
+          puts "Adding #{issue.id} #{product.name}" if $VERBOSE
+          open_issues << issue
+        end
+      end
+    end
+    open_issues
+  end
+
+  def self.getLastInvoiceForProject(project_id)
     projects = Project.find(:all, :conditions => { :id => project_id } )
     unless projects.size > 0
       puts "getDateOfLastInvoice no projects found for #{project_id}" if $VERBOSE
@@ -71,6 +120,11 @@ Verrechnet werden Leistungen vom 2016-01-01 bis 2016-12-31."
       return nil
     end
     last = invoices.max {|a,b| stichtag(a) <=> stichtag(b) }
+  end
+
+  def self.getDateOfLastInvoice(project_id)
+    last = getLastInvoiceForProject(project_id)
+    return nil unless last
     lastDate = stichtag(last)
     puts "getDateOfLastInvoice lastDate for #{project_id} was #{lastDate}" if $VERBOSE
     lastDate
@@ -108,7 +162,9 @@ Verrechnet werden Leistungen vom 2016-01-01 bis 2016-12-31."
       return nrDays.to_f/daysThisYear, nrDays
     end
     puts "What TODO with status #{status} day2invoice #{day2invoice} and issue.start_date #{issue.start_date}"
-    puts issue.inspect
+    binding.pry if defined?(Pry)
+    # Passiert, wenn kein custom_field status vorhanden ist
+    # If you are running a test, add it via test/fixtures/custom_values
     100000 # Damit dieser Fall auch wirklich auffällt und kein Kunde dies bezahlt
   end
 
@@ -117,10 +173,15 @@ Verrechnet werden Leistungen vom 2016-01-01 bis 2016-12-31."
     # or invoice.lines.collect{ |x| x.description.split('. ')[0] if x.description.match(/feature/) }.compact
   end
 
+  def self.getProduct(issue)
+    subject = issue.subject.sub('feature.group', 'feature').sub('feature.feature', 'feature')
+    Product.find(:first, :conditions => {:code => subject})
+  end
+
   def self.findProjects2invoice(day2invoice = Date.today.end_of_year, invoice_since = nil)
     idx = 0
     invoice_since ||= Date.today.beginning_of_year
-    project_ids2invoice = []
+    project_ids2invoice = {}
     Project.all.each{
       | project|
         status = project.kundenstatus
@@ -128,16 +189,16 @@ Verrechnet werden Leistungen vom 2016-01-01 bis 2016-12-31."
         next unless status and ['Neukunde', 'Kunde'].index(status)
         last_invoiced = getDateOfLastInvoice(project.id)
         puts "Invoicing #{idx} project #{project.id}. last  #{last_invoiced} invoice_since #{invoice_since} >= #{day2invoice}? #{invoice_since ? 'No invoice found' : 'invoice_since ' + invoice_since.to_s}" if $VERBOSE
-        next if last_invoiced && last_invoiced > day2invoice
-        next if last_invoiced && invoice_since < last_invoiced
-        project_ids2invoice << project.id
+        issues = findAllOpenServicesForProjectID(project.id, day2invoice, invoice_since)
+        next if issues.size == 0
+        project_ids2invoice[project.id] = issues
         idx += 1
         break if OnlyFirst
     }
     project_ids2invoice
   end
 
-  def self.invoice_for_project(identifier, stich_tag = Date.today.end_of_year.to_date, invoice_since = Date.today.beginning_of_year)
+  def self.invoice_for_project(identifier, stich_tag = Date.today.end_of_year.to_date, invoice_since = Date.today.beginning_of_year, issues = nil)
     round_to = BigDecimal.new('0.05')
     if identifier.to_i >0
       project= Project.find(identifier.to_i)
@@ -153,8 +214,8 @@ Verrechnet werden Leistungen vom 2016-01-01 bis 2016-12-31."
       RedmineMedelexis.log_to_system "project '#{identifier}' #{project.name} soll nicht verrechnet werden"
       return nil
     end
-    issues = findAllOpenServicesForProjectID(project.id)
-    issues.flatten!
+    issues ||= findAllOpenServicesForProjectID(project.id, stich_tag, invoice_since)
+    return if issues.size == 0
     stich_tag_string = stich_tag.strftime(DatumsFormat)
     contact = RedmineMedelexis.getHauptkontakt(project.id)
     raise "Konnte keinen Hauptkontakt für Projekt '#{identifier}' finden"  unless contact
@@ -166,17 +227,13 @@ Verrechnet werden Leistungen vom 2016-01-01 bis 2016-12-31."
     invoice.invoice_date = Time.now
     invoice_since ||= getDateOfLastInvoice(project.id)
     invoice_since ||= Date.today.beginning_of_year.to_date
-    if last_invoiced && last_invoiced > invoice_since
-      RedmineMedelexis.log_to_system "Skip invoicing project '#{identifier}' #{project.name} as last_invoiced #{last_invoiced} > #{invoice_since}"
-      return nil
-    end
     description = "Rechnung mit Stichtag vom #{stich_tag_string} für #{nrDoctors == 1 ? 'einen Arzt' : nrDoctors.to_s + ' Ärzte'}."
     description += "\nMultiplikator für abonnierte Features ist #{multiplier}." if multiplier != 1
     description += "\n" + sprintf(Duration, invoice_since.to_s, stich_tag.to_s)
     invoice.subject = AboSubject
     invoice.project = project
     invoice.contact_id = contact.id
-    invoice.due_date = (Time.now.utc.to_date) + 31
+    invoice.due_date = (Date.today.next_month + 1)
     invoice.assigned_to = admin
     invoice.language = "DE"
     invoice.status_id  = Invoice::DRAFT_INVOICE
@@ -184,18 +241,17 @@ Verrechnet werden Leistungen vom 2016-01-01 bis 2016-12-31."
     invoice.id = (Invoice.last.try(:id).to_i + 1).to_s
     issues.each{
       |issue|
-        subject = issue.subject.sub('feature.group', 'feature').sub('feature.feature', 'feature')
-        product = Product.find(:first, :conditions => {:code => subject})
-        next unless product
         status = issue.custom_field_values.first.value
+        product = getProduct(issue)
+        next unless product
         line_description = product.name # + ". Wiki: http://wiki.elexis.info/#{subject}.feature.group"
         grund_price = product.price.to_f
-        next if grund_price.to_i == 0
-        factor, days = getDaysOfYearFactor(issue, invoice_since, stich_tag)
+        factor, days = getDaysOfYearFactor(issue.id, invoice_since, stich_tag)
+        next if days < 0
         price = grund_price
         if factor == 0
           next unless status.eql?('TRIAL')
-          line_description += "\n#{subject} gratis da noch im ersten Monat"
+          line_description += "\n#{product.name} gratis da noch im ersten Monat"
           invoice.lines << InvoiceLine.new(:description => line_description, :quantity => multiplier, :price => 0, :units => "Feature")
           next
         elsif factor != 1
@@ -236,7 +292,7 @@ Verrechnet werden Leistungen vom 2016-01-01 bis 2016-12-31."
       oldSize = Invoice.all.size
       projects = findProjects2invoice(stich_tag, invoice_since)
       RedmineMedelexis.log_to_system "Found #{projects.size} projects. #{projects}"
-      projects.each{ |id| invoice_for_project(id, stich_tag, invoice_since) }
+      projects.each{ |id, issues| invoice_for_project(id, stich_tag, invoice_since, issues) }
       duration = (Time.now-startTime).to_i
       RedmineMedelexis.log_to_system("startInvoicing created #{Invoice.all.size - oldSize} invoices for #{projects.size} of #{Project.all.size} projects. Ids were #{projects}")
     end
