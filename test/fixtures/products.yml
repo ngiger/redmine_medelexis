@@ -16,7 +16,7 @@ products_001:
 products_002:
   id: 2
   code: ch.elexis.base.textplugin.feature
-  name: Textplugin
+  name: Textplugin With (Parentheses)
   description: description
   status_id: 1
   currency: CHF

@@ -55,7 +55,8 @@ Verrechnet werden Leistungen vom 2016-01-01 bis 2016-12-31."
   end
 
   def self.issueDateInRange?(issue, stich_tag, invoice_since)
-    raise "Stichtag #{stichtag} muss > sein als #{invoice_since} (Startag) " if (stich_tag <= invoice_since)
+    return false if (stich_tag <= invoice_since)
+    # raise "Stichtag #{stichtag} muss > sein als #{invoice_since} (Startag) " if (stich_tag <= invoice_since)
     status = issue.custom_field_values.first.value
     info = "#{issue.id} #{status}: #{invoice_since}-#{stich_tag} for issue #{issue.start_date} - #{issue.updated_on}"
     if status == 'CANCELLED' || status == 'EXPIRED'
@@ -96,7 +97,7 @@ Verrechnet werden Leistungen vom 2016-01-01 bis 2016-12-31."
             product.name.eql?(core_name) &&
             last_invoice.lines.find_all{|line| /#{core_name}/i.match(line.description)  }.size > 0
             puts "Skip #{core_name} line #{issue.id}" if $VERBOSE
-        elsif last_invoice && last_invoice.lines.find_all{|line| /#{product.name}/i.match(line.description)  }.size > 0
+        elsif last_invoice && last_invoice.lines.find_all{|line| line.description.index(product.name) }.size > 0
           puts "Skip matched product #{issue.id} #{product.name}" if $VERBOSE
         else
           puts "Adding #{issue.id} #{product.name}" if $VERBOSE

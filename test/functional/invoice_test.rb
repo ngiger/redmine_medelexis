@@ -317,12 +317,9 @@ class InvoiceControllerTest < ActionController::TestCase
 
     assert_equal(false, MedelexisInvoices.issueDateInRange?(cancelled, days_before, month_before), 'cancelled start_date is between two days')
 
-    if false
-      assert_raises(ArgumentError, MedelexisInvoices.issueDateInRange?(cancelled, month_before, days_before), 'cancelled start_date is between two days')
-      assert_equal(ArgumentError,  MedelexisInvoices.issueDateInRange?(licensed, month_before, days_before), 'start_date is between to days')
-      assert_raises(ArgumentError, MedelexisInvoices.issueDateInRange?(licensed, days_after, month_after), 'start_date is between two days')
-    end
-
+    assert_equal(false, MedelexisInvoices.issueDateInRange?(cancelled, month_before, days_before), 'cancelled start_date is between two days')
+    assert_equal(false, MedelexisInvoices.issueDateInRange?(licensed, month_before, days_before), 'start_date is between to days')
+    assert_equal(false, MedelexisInvoices.issueDateInRange?(licensed, days_after, month_after), 'start_date is between two days')
   end
 
   test "check invoice issues added after first invoice" do
