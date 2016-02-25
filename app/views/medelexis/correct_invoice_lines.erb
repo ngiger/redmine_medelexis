@@ -1,0 +1,32 @@
+<%= link_to "Refresh" %>
+
+<h2>Korrigieren der Namen von verrechneten Tickets</h2>
+
+<h3>Suchbegriff eingeben</h3>
+
+
+<%= form_for 'search_invoice_lines' do |f| %>
+  <%= f.label :label_1, "Name des verrechneten Produkts. Z.B. 'Roche'" %>
+  <%= f.text_field :name_to_search %>
+  <br>
+  <%= f.submit 'Suche ausführen' %>
+<% end %>
+
+<% if @found_lines && @found_lines.size > 0  %>
+<p>
+  <b>Es wurde mehr als 1 Zeile mit dem Suchbegriff <%= '@name_to_search' %> gefunden. Bitte grenzen Sie die Suche ein</b>
+  </p>
+  <% @found_lines.uniq.sort.each do |line| %>
+  <p> "<%= line %>" </p>
+  <% end %>
+<% else %>
+  Mit dem Suchbegriff '<%= @name_to_search %>' wurden keine Rechnungszeilen gefunden.
+<% end %>
+
+
+<% content_for :header_tags do %>
+  <%= javascript_include_tag :contacts, :plugin => 'redmine_contacts'  %>
+  <%= stylesheet_link_tag :products, :plugin => 'redmine_products' %>
+  <meta name = "format-detection" content = "telephone=no">
+<% end %>
+

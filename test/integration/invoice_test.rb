@@ -20,7 +20,7 @@
 # along with redmine_contacts.  If not, see <http://www.gnu.org/licenses/>.
 require File.expand_path('../../test_helper', __FILE__)
 
-class Redmine::ApiTest::LicenseTest < ActionController::IntegrationTest
+class Redmine::InvoiceTest < ActionController::IntegrationTest
     ActiveRecord::Fixtures.create_fixtures(Redmine::Plugin.find(:redmine_medelexis).directory + '/test/fixtures/',
                             [:settings,
                              :invoices,
@@ -37,6 +37,8 @@ class Redmine::ApiTest::LicenseTest < ActionController::IntegrationTest
                              :custom_values,
                              ])
   def setup
+    user = User.find(:first, :conditions => {:admin => true, :login => 'admin'})
+    user.password, user.password_confirmation = "my_password"; user.save!
     Setting.rest_api_enabled = '1'
     Setting.login_required = '1'
     FileUtils.rm_rf(File.join(Dir.tmpdir, 'redmine_medelexis'))
@@ -45,14 +47,54 @@ class Redmine::ApiTest::LicenseTest < ActionController::IntegrationTest
     RedmineMedelexis::TestCase.plugin_fixtures :redmine_medelexis, :all
   end
 
-  test "should route to post" do
+  test "should route to rechnungslauf" do
     assert_routing '/medelexis/rechnungslauf', {controller: "medelexis", action: "rechnungslauf"}
+  end
+
+  def test_should_rename_invoice_lines
+    login_as_admin
+ x =%(
+  get  '/medelexis/correct_invoice_lines', :to => 'medelexis#correct_invoice_lines'
+  post '/medelexis/correct_invoice_lines', :to => 'medelexis#correct_invoice_lines'
+  get  '/medelexis/confirm_invoice_lines', :to => 'medelexis#confirm_invoice_lines'
+  post '/medelexis/confirm_invoice_lines', :to => 'medelexis#confirm_invoice_lines'
+  get  '/medelexis/changed_invoice_lines', :to => 'medelexis#changed_invoice_lines'
+)
+    get "/medelexis/correct_invoice_lines"
+    abo_start = Date.new(2014, 1, 1)
+    invoice_stichtag = Date.new(2014, 12, 31)
+
+    binding.pry
+    assert_response :success
+    post "/medelexis/correct_invoice_lines", :search_invoice_lines => { :invoice_since => abo_start, :release_date => invoice_stichtag, :project_to_invoice => 3}
+
+    post"/medelexis/correct_invoice_lines", :create => { :invoice_since => abo_start, :release_date => invoice_stichtag, :project_to_invoice => 'abba'}
+  end
+
+  def test_should_create_invoice2
+    assert_difference('Invoice.count') do
+      get "/medelexis/rechnungslauf"
+      assert_response :success
+      assert_template ["medelexis/rechnungslauf", 'layouts/base']
+      # okay till here
+      post :rechnungslauf, {:invoice_since => abo_start, :release_date => invoice_stichtag, :project_to_invoice => 'abba'}
+    end
+  end
+
+  def login_as_admin
+    https!
+    get "/login"
+    assert_response :success
+    post "/login", :login => 'admin', :password => 'my_password'
+    assert_response :success
   end
 
   test "login and go to rechnungslauf" do
     # login via https
     https!
     get "/login"
+    assert_response :success
+    post "/login", :login => 'admin', :password => 'my_password'
     assert_response :success
     get "/admin"
     assert_equal "/admin", path

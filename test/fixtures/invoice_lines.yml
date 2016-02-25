@@ -7,7 +7,19 @@ invoice_lines_001:
   description: Servicebezug Medelexis Basis Applikation
   tax: 6.0
   price: 800.0
-  units: 
+  units:
   created_at: 2013-11-15 14:42:50.000000000 +01:00
   updated_at: 2013-11-15 14:42:50.000000000 +01:00
-  discount: 
+  discount:
+invoice_lines_002:
+  id: 2
+  invoice_id: 2
+  position: 2
+  quantity: 1.0
+  description: ADDED buchhaltung FEATURE. Grundpreis von 160.0 wird für 364 Tage verrechnet (Faktor 1.0).
+  tax: 6.0
+  price: 800.0
+  units: Feature
+  created_at: 2013-11-15 14:42:50.000000000 +01:00
+  updated_at: 2013-11-15 14:42:50.000000000 +01:00
+  discount:

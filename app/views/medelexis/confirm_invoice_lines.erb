@@ -1,0 +1,19 @@
+<%= link_to "Refresh" %>
+
+<%= form_for 'change_invoice_lines'  do |f| %>
+  <br>
+  <h2>Wollen Sie wirklich alle Rechnungszeile mit '<%= params[:name_to_search] %>' umbennen?</h2>
+  <%= f.hidden_field :task_id,       :value => 999 %>
+  <%= f.hidden_field :name_to_search, :value => "#{params[:name_to_search]}"  %>
+  <%= f.label :label_1, "Neuen Namen eingeben:" %>
+  <%= f.text_field :change_name_to %>
+  <br>
+  <%= f.submit "Ersetzen von '#{params[:name_to_search]}' ausführen" %>
+<% end %>
+
+<% content_for :header_tags do %>
+  <%= javascript_include_tag :contacts, :plugin => 'redmine_contacts'  %>
+  <%= stylesheet_link_tag :products, :plugin => 'redmine_products' %>
+  <meta name = "format-detection" content = "telephone=no">
+<% end %>
+

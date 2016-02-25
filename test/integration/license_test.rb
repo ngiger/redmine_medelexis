@@ -118,7 +118,7 @@ class Redmine::ApiTest::LicenseTest < ActionController::IntegrationTest
     username = 'mustermann'    
     login_as(username)
     signed_xml = get_signed_xml_path(username)
-    FileUtils.rm_f(signed_xml)               
+    FileUtils.rm_f(signed_xml)
     get "/my/license.xml?key=#{User.find_by_login(username).api_key}"
     assert_response :success
     verify_license_file(username)
@@ -132,7 +132,7 @@ class Redmine::ApiTest::LicenseTest < ActionController::IntegrationTest
     username = 'admin'
     login_as(username)
     signed_xml = get_signed_xml_path(username)
-    FileUtils.rm_f(signed_xml)               
+    FileUtils.rm_f(signed_xml)
     res = get "/my/license.xml"
     assert res != :success
   end

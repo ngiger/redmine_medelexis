@@ -23,11 +23,24 @@ require File.expand_path('../../test_helper', __FILE__)
 
 class RoutingTest < ActionController::IntegrationTest
 
-  test "license" do
-  end
   test "invoices" do
-    assert_routing({ :path => "/medelexis/rechnungslauf", :method => :get }, { :controller => "medelexis", :action => "rechnungslauf" })
+    assert_routing({ :path => "/medelexis/rechnungslauf", :method => :get },
+                   { :controller => "medelexis", :action => "rechnungslauf" })
   end
 
+  test "invoices_lines" do
+    assert_routing({ :path => "/medelexis/correct_invoice_lines", :method => :get },
+                   { :controller => "medelexis", :action => "correct_invoice_lines" })
+  end
+
+  test "invoices_lines_confirm" do
+    assert_routing({ :path => "/medelexis/confirm_invoice_lines", :method => :get },
+                   { :controller => "medelexis", :action => "confirm_invoice_lines" })
+  end
+
+  test "invoices_lines_changed" do
+    assert_routing({ :path => "/medelexis/changed_invoice_lines", :method => :get },
+                   { :controller => "medelexis", :action => "changed_invoice_lines" })
+  end
 
 end

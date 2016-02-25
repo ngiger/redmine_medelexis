@@ -1,0 +1,30 @@
+<%= link_to "Refresh" %>
+
+<h2><%= "#{params[:changed_lines].size}" %> Zeilen wurden korrigiert</h2>
+
+<ul>
+  <li>Gesucht nach <%= "#{params[:name_to_search]}" %> </li>
+  <li>Ersetzt durch <%= "#{params[:change_name_to]}" %> </li>
+  <ol>
+    <% params[:changed_lines].each do |id|
+      line = InvoiceLine.find(id)
+      invoice = Invoice.find(line.invoice_id)
+      project = Project.find(invoice.project_id)
+    %>
+    <li>
+      <a href='/invoices/<%= invoice.id %>' />Rechnung
+      <%= "#{invoice.id} #{invoice.invoice_date.strftime(MedelexisInvoices::DatumsFormat)}" %>
+      </a>
+      <%= "Project #{project.id}: #{project.identifier} #{project.name}" %>
+      <%= " InvoiceLine #{id %[4]}" %>
+    </li>
+    <% end %>
+  </ol>
+</ul>
+)
+<% content_for :header_tags do %>
+  <%= javascript_include_tag :contacts, :plugin => 'redmine_contacts'  %>
+  <%= stylesheet_link_tag :products, :plugin => 'redmine_products' %>
+  <meta name = "format-detection" content = "telephone=no">
+<% end %>
+

@@ -31,6 +31,7 @@ Multiplikator für abonnierte Features ist 1.7.
 Verrechnet werden Leistungen vom 2016-01-01 bis 2016-12-31."
   Duration = "Verrechnet werden Leistungen vom %s bis %s."
   DurationMatcher = /Stichtag vom (\d{4}-\d{2}-\d{2})/ # This must always match all old examples!
+  START_COMMON_LINE_INFO = '. Grundpreis'
   # urse
   DiscountMap = { 1 => 1,
                   2 => 1.7,
@@ -257,7 +258,7 @@ Verrechnet werden Leistungen vom 2016-01-01 bis 2016-12-31."
           next
         elsif factor != 1
           factor = factor.round(2)
-          line_description += ". Grundpreis von #{grund_price} wird für #{days} Tage verrechnet (Faktor #{factor})."
+          line_description += "#{START_COMMON_LINE_INFO} von #{grund_price} wird für #{days} Tage verrechnet (Faktor #{factor})."
           price = grund_price * factor
         end
         puts "found product #{product} #{product.code} #{product.price.to_f} for issue #{issue} price is #{price}" if $VERBOSE
@@ -300,4 +301,23 @@ Verrechnet werden Leistungen vom 2016-01-01 bis 2016-12-31."
     projects
   end
 
+  def self.get_line_items(name_to_search)
+    InvoiceLine.where("description like ?", "%#{name_to_search}%#{START_COMMON_LINE_INFO}%")
+  end
+
+  def self.change_line_items(from, to)
+    changed_lines = []
+    ActiveRecord::Base.transaction do
+      get_line_items(from).sort{|x,y| x.invoice_id <=> y.invoice_id}.reverse.each do |invoice_line|
+        invoice_line.description = invoice_line.description.sub(from, to)
+        invoice_line.save!
+        changed_lines << invoice_line.id
+      end
+    end
+    changed_lines
+  end
+
+  def self.get_lines(name_to_search)
+    get_line_items(name_to_search).collect{|x| /(.+)#{START_COMMON_LINE_INFO}/.match(x.description)[1]}
+  end
 end

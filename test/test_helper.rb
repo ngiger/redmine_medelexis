@@ -39,22 +39,22 @@ class RedmineMedelexis::TestCase
     Role.find(1, 2, 3).each do |r| 
       r.permissions << :view_contacts
       r.permissions << :view_invoices
-      r.permissions << :view_expenses      
+      r.permissions << :view_expenses
       r.save
     end
     Role.find(1, 2).each do |r| 
       r.permissions << :edit_contacts
       r.permissions << :edit_invoices
-      r.permissions << :edit_expenses      
+      r.permissions << :edit_expenses
       r.permissions << :delete_invoices
-      r.permissions << :delete_expenses      
+      r.permissions << :delete_expenses
       r.save
     end
 
     Project.find(1, 2, 3).each do |project| 
       EnabledModule.create(:project => project, :name => 'contacts_module')
       EnabledModule.create(:project => project, :name => 'contacts_invoices')
-      EnabledModule.create(:project => project, :name => 'contacts_expenses')      
+      EnabledModule.create(:project => project, :name => 'contacts_expenses')
     end
   end
   
