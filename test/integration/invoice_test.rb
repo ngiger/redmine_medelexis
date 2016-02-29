@@ -64,7 +64,6 @@ class Redmine::InvoiceTest < ActionController::IntegrationTest
     abo_start = Date.new(2014, 1, 1)
     invoice_stichtag = Date.new(2014, 12, 31)
 
-    binding.pry
     assert_response :success
     post "/medelexis/correct_invoice_lines", :search_invoice_lines => { :invoice_since => abo_start, :release_date => invoice_stichtag, :project_to_invoice => 3}
 

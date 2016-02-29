@@ -164,7 +164,6 @@ Verrechnet werden Leistungen vom 2016-01-01 bis 2016-12-31."
       return nrDays.to_f/daysThisYear, nrDays
     end
     puts "What TODO with status #{status} day2invoice #{day2invoice} and issue.start_date #{issue.start_date}"
-    binding.pry if defined?(Pry)
     # Passiert, wenn kein custom_field status vorhanden ist
     # If you are running a test, add it via test/fixtures/custom_values
     100000 # Damit dieser Fall auch wirklich auffällt und kein Kunde dies bezahlt

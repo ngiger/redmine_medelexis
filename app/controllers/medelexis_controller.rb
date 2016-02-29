@@ -7,6 +7,12 @@ class MedelexisController < ApplicationController
   layout 'base'
   accept_rss_auth :rechnungen_erstellt
   accept_api_auth :rechnungen_erstellt
+  accept_rss_auth :correct_invoice_lines
+  accept_api_auth :correct_invoice_lines
+  accept_rss_auth :confirm_invoice_lines
+  accept_api_auth :confirm_invoice_lines
+  accept_rss_auth :alle_rechnungen
+  accept_api_auth :alle_rechnungen
 
   MEDELEXIS_SETTINGS = '/settings/plugin/redmine_medelexis'
 
@@ -55,7 +61,6 @@ class MedelexisController < ApplicationController
   def correct_invoice_lines
     RedmineMedelexis.log_to_system("correct_invoice_lines from IP #{request.remote_ip} via #{request.protocol}#{request.host_with_port}#{request.fullpath} user #{User.current} : rechnungen_erstellt #{params['key']} action_name #{action_name}")
     @name_to_search = params[:name_to_search]
-    binding.pry
     if request.post?
       @name_to_search = params['search_invoice_lines']['name_to_search']
       begin
