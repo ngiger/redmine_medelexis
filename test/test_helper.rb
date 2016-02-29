@@ -19,7 +19,6 @@
 # You should have received a copy of the GNU General Public License
 # along with redmine_contacts.  If not, see <http://www.gnu.org/licenses/>.
 require File.expand_path(File.dirname(__FILE__) + '/../../../test/test_helper')
-
 Medelexis_License_Regexp = /<license endOfLicense="([0-9\-\+:]*)"\s*id="([\w\.]*)"\s*licenseType="(\w*)"\s*startOfLicense="([0-9\-\+:]*)"/
 
 def fixture_files_path

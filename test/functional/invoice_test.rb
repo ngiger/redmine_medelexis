@@ -83,6 +83,13 @@ class InvoiceControllerTest < ActionController::TestCase
     nil
   end
 
+
+  def change_start_date(issue, date)
+    issue.start_date = date
+    issue.save
+    puts "Saved #{issue.id} #{issue.start_date}"
+  end
+
   test "verify invoicing today" do
     mustermann = Project.find(ID_mustermann)
     oldSize= Invoice.all.size
@@ -147,7 +154,6 @@ class InvoiceControllerTest < ActionController::TestCase
     assert (nrCreated == 1 ), "Must have created exactyl one. Not #{nrCreated}"
     last_invoice = Invoice.last
     required_due_date = (Date.today.next_month + 1)
-#    binding.pry
     stichtag = Date.today
     assert( (required_due_date.to_date - last_invoice.due_date.to_date).to_i <= 1, 'Date must be about a month from now')
     trial_issue = last_invoice.lines.find_all{|x| x.description if /gratis/i.match(x.description) }
@@ -285,13 +291,6 @@ class InvoiceControllerTest < ActionController::TestCase
     buchhaltung.custom_field_values = { IssueCustomField.first.id.to_s => 'LICENSED'}
     buchhaltung.save!
   end
-
-  def change_start_date(issue, date)
-    issue.start_date = date
-    issue.save
-    puts "Saved #{issue.id} #{issue.start_date}"
-  end
-
   test 'check issue ranges' do
     licensed = Issue.find(6)
     test_day = Date.new(2014, 6, 15)
@@ -373,4 +372,19 @@ class InvoiceControllerTest < ActionController::TestCase
     changed_lines =  MedelexisInvoices.change_line_items('NOT_TO_BE_FOUND', changed)
     assert_equal([], changed_lines)
   end
+
+  test "check invoice don't add a line when cancelled after less than a month" do
+    mustermann = Project.find(ID_mustermann)
+    abo_start = Date.today - 90
+    issue = Issue.find_by_subject('ch.elexis.cancelled.feature')
+    cancelled_date = Date.today - 25
+    change_start_date(issue, cancelled_date)
+    oldSize= Invoice.all.size
+    res = MedelexisInvoices.startInvoicing(Date.today + 120, abo_start)
+    invoice = Invoice.last
+    assert_not_nil res
+    dump_invoice(invoice)
+    assert_nil( invoice.lines.find{|line| line.description.match(/cancelled/i) }, 'cancelled item may not appear')
+  end
+
 end

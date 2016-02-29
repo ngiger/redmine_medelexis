@@ -38,13 +38,15 @@ custom_fields_002:
   field_format: list
   possible_values: ! '---
 
-    - TRIAL
+      - TRIAL
 
-    - LICENSED
+      - LICENSED
 
-    - EXPIRED
+      - EXPIRED
 
-'
+      - CANCELLED
+
+      '
   regexp: ''
   min_length: 0
   max_length: 0

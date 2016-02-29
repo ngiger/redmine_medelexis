@@ -60,7 +60,8 @@ Verrechnet werden Leistungen vom 2016-01-01 bis 2016-12-31."
     # raise "Stichtag #{stichtag} muss > sein als #{invoice_since} (Startag) " if (stich_tag <= invoice_since)
     status = issue.custom_field_values.first.value
     info = "#{issue.id} #{status}: #{invoice_since}-#{stich_tag} for issue #{issue.start_date} - #{issue.updated_on}"
-    if status == 'CANCELLED' || status == 'EXPIRED'
+    return false if status.eql?('CANCELLED') && (issue.updated_on.to_date - issue.start_date.to_date).to_i <= 31
+    if status.eql?('CANCELLED') || status.eql?('EXPIRED')
        if (issue.updated_on < invoice_since) || (issue.start_date > stich_tag)
          return false
        end
@@ -85,7 +86,6 @@ Verrechnet werden Leistungen vom 2016-01-01 bis 2016-12-31."
     # binding.pry if $VERBOSE
     return all_project_issues if (last_invoice &&  (stichtag(last_invoice) < stich_tag))
     all_project_issues.each do |issue|
-      # binding.pry if /gcal/.match(issue.subject)
       if !issueDateInRange?(issue, stich_tag, invoice_since)
         puts "Skipping #{issue.id} #{issue.subject} with #{issue.start_date}" if $VERBOSE
       else
@@ -251,6 +251,7 @@ Verrechnet werden Leistungen vom 2016-01-01 bis 2016-12-31."
         next if days < 0
         price = grund_price
         if factor == 0
+          next if status.eql?('CANCELLED')
           next unless status.eql?('TRIAL')
           line_description += "\n#{product.name} gratis da noch im ersten Monat"
           invoice.lines << InvoiceLine.new(:description => line_description, :quantity => multiplier, :price => 0, :units => "Feature")
@@ -270,15 +271,15 @@ Verrechnet werden Leistungen vom 2016-01-01 bis 2016-12-31."
     invoice.custom_field_values.first.value = stich_tag_string
     invoice.save_custom_field_values
     amount = BigDecimal.new(invoice.calculate_amount.to_d)
-    rounding_difference  = (amount % round_to)
-    unless rounding_difference == 0
-      invoice.lines << InvoiceLine.new(:description => "Gerundet zugunsten Kunde", :quantity => 1, :price => -rounding_difference)
-    end
     if amount < 5
       RedmineMedelexis.log_to_system "Invoicing for #{identifier} #{project.name} skipped as amount #{amount.round(2)} is < 5 Fr."
       invoice.delete
       RedmineMedelexis.log_to_system "Würde mit  (#{amount}) weniger als 5 Franken für '#{identifier}'  #{project.name} verrechnen"
       return nil
+    end
+    rounding_difference  = (amount % round_to)
+    unless (rounding_difference*100) == 0
+      invoice.lines << InvoiceLine.new(:description => "Gerundet zugunsten Kunde", :quantity => 1, :price => -rounding_difference)
     end
     RedmineMedelexis.log_to_system "Invoicing for #{identifier} #{project.name} amount #{amount.round(2)}. Has #{invoice.lines.size} lines "
     invoice.save
