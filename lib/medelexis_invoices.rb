@@ -254,16 +254,22 @@ Verrechnet werden Leistungen vom 2016-01-01 bis 2016-12-31."
           next if status.eql?('CANCELLED')
           next unless status.eql?('TRIAL')
           line_description += "\n#{product.name} gratis da noch im ersten Monat"
-          invoice.lines << InvoiceLine.new(:description => line_description, :quantity => multiplier, :price => 0, :units => "Feature")
+          invoice.lines << InvoiceLine.new(:description => line_description, :quantity => multiplier, :price => 0,
+                                           :units => "Feature",
+                                           :tax => ContactsSetting.default_tax
+                                          )
           next
         elsif factor != 1
           factor = factor.round(2)
           line_description += "#{START_COMMON_LINE_INFO} von #{grund_price} wird für #{days} Tage verrechnet (Faktor #{factor})."
           price = grund_price * factor
         end
+        price = price * 100 / (100 + ContactsSetting.default_tax)
         puts "found product #{product} #{product.code} #{product.price.to_f} for issue #{issue} price is #{price}" if $VERBOSE
-        invoice.lines << InvoiceLine.new(:description => line_description, :quantity => multiplier, :price => price, :units => "Feature")
-        break if OnlyFirst
+        invoice.lines << InvoiceLine.new(:description => line_description, :quantity => multiplier, :price => price,
+                                         :units => "Feature",
+                                         :tax => ContactsSetting.default_tax
+                                        )
     }
     invoice.lines.sort! { |a,b| b.price.to_i <=> a.price.to_i } # by price descending
     puts "Added #{invoice.lines.size} lines (of #{issues.size} service tickets). Stich_tag #{stich_tag.strftime(DatumsFormat)} due #{invoice.due_date.strftime(DatumsFormat)} description is now #{description}" if $VERBOSE
@@ -276,10 +282,6 @@ Verrechnet werden Leistungen vom 2016-01-01 bis 2016-12-31."
       invoice.delete
       RedmineMedelexis.log_to_system "Würde mit  (#{amount}) weniger als 5 Franken für '#{identifier}'  #{project.name} verrechnen"
       return nil
-    end
-    rounding_difference  = (amount % round_to)
-    unless (rounding_difference*100) == 0
-      invoice.lines << InvoiceLine.new(:description => "Gerundet zugunsten Kunde", :quantity => 1, :price => -rounding_difference)
     end
     RedmineMedelexis.log_to_system "Invoicing for #{identifier} #{project.name} amount #{amount.round(2)}. Has #{invoice.lines.size} lines "
     invoice.save

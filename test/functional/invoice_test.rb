@@ -387,4 +387,20 @@ class InvoiceControllerTest < ActionController::TestCase
     assert_nil( invoice.lines.find{|line| line.description.match(/cancelled/i) }, 'cancelled item may not appear')
   end
 
+  test "check invoice is taxed" do
+    Setting.plugin_redmine_contacts["default_tax"] = 8.0
+    mustermann = Project.find(ID_mustermann)
+    Invoice.all.each{|x| x.delete}
+    oldSize= Invoice.all.size
+    abo_start = Date.new(2014, 1, 1)
+    invoice_stichtag = Date.new(2014, 12, 31)
+    res = MedelexisInvoices.startInvoicing(invoice_stichtag, abo_start)
+    first_invoice = Invoice.first
+    dump_invoice(first_invoice);
+    assert_not_nil res
+    assert_equal(5, first_invoice.lines.size, 'must have 5 line')
+    assert_not_equal(910, first_invoice.lines.find{|line| /Medelexis 3/.match line.description}.price.to_i, 'Medelexis 3 price must be != 910')
+    assert_equal(first_invoice.lines.size, first_invoice.lines.collect{|line| line.tax}.size, 'each line must be taxed')
+  end
+
 end
