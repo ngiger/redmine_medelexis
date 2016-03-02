@@ -283,6 +283,10 @@ Verrechnet werden Leistungen vom 2016-01-01 bis 2016-12-31."
       RedmineMedelexis.log_to_system "Würde mit  (#{amount}) weniger als 5 Franken für '#{identifier}'  #{project.name} verrechnen"
       return nil
     end
+    rounding_difference  = (amount % round_to)
+    unless (rounding_difference*100) == 0
+      invoice.lines << InvoiceLine.new(:description => "Gerundet zugunsten Kunde", :quantity => 1, :price => -rounding_difference)
+    end
     RedmineMedelexis.log_to_system "Invoicing for #{identifier} #{project.name} amount #{amount.round(2)}. Has #{invoice.lines.size} lines "
     invoice.save
     invoice
