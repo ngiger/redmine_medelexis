@@ -73,7 +73,7 @@ h2. development: Loading a dump
 
 Afterwards you may examine the data as following
 
-bc. bundle exec rails console RAILS_ENV=development
+bc. set -x RAILS_ENV development; bundle exec rails console ; bundle exec rails console
 Project.all.first
 
 h2. Creating a dump from the production server

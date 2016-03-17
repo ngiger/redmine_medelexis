@@ -11,12 +11,21 @@ class Project
     custom.value.to_i > 0 ? true : false
   end
   def nrDoctors
-    custom_value_for(CustomField.find(:first, :conditions => { :name => '# Ärzte'} ).id).value.to_i
+    field = CustomField.find(:first, :conditions => { :name => '# Ärzte'} )
+    field ? custom_value_for(field).value.to_i : 0
+  end
+  def nrStations
+    field = CustomField.find(:first, :conditions => { :name => '# Stationen'} )
+    field ? custom_value_for(field).value.to_i : 0
+  end
+  def systemProperties
+    field = CustomField.find(:first, :conditions => { :name => 'systemProperties'} )
+    field ? custom_value_for(field).value : ''
   end
   def kundenstatus
     custom_field_values # forces evaluation. Avoids an error in test/functional
-    value = custom_value_for(CustomField.find(:first, :conditions => { :name => 'Kundenstatus'} ).id)
-    value ? value.value : nil
+    field = CustomField.find(:first, :conditions => { :name => 'Kundenstatus'} )
+    field ? custom_value_for(field).value : ''
   end
 end
 

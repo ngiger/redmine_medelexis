@@ -139,7 +139,7 @@ custom_values_023:
   value: LICENSED
 custom_values_024:
   id: 24
-  customized_type: Issue
-  customized_id: 6
-  custom_field_id: 2
-  value: LICENSED
+  customized_type: Project
+  customized_id: 3
+  custom_field_id: 10
+  value: 'thisProperty=isFantastic'

@@ -120,9 +120,9 @@ module RedmineMedelexis
                   "misApiKey"              => get_api_key(user.login),
                   "projectId"              => project.id,
                   "organization"           => project.name,
-                  "numberOfStations"       => "0", # project.
-                  "numberOfPractitioners"  => "1",
-                  "systemProperties"       => "",
+                  "numberOfStations"       => project.nrDoctors,
+                  "numberOfPractitioners"  => project.nrStations,
+                  "systemProperties"       => project.systemProperties,
                   }
   end
   

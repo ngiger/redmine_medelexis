@@ -185,3 +185,21 @@ custom_fields_009:
   editable: true
   visible: true
   multiple: false
+custom_fields_010:
+  id: 10
+  type: ProjectCustomField
+  name: systemProperties
+  field_format: text
+  possible_values:
+  regexp: ''
+  min_length: 0
+  max_length: 10000
+  is_required: false
+  is_for_all: false
+  is_filter: false
+  position: 4
+  searchable: false
+  default_value:
+  editable: true
+  visible: true
+  multiple: false
