@@ -57,6 +57,7 @@ class Redmine::ApiTest::LicenseTest < ActionController::TestCase
     assert_match("projectId=\"3\"", content)
     assert_match('<numberOfStations', content)
     assert_match('<numberOfPractitioners', content)
+    assert_match('<systemProperties', content)
     assert_match('<Signature xmlns', content)
     assert_match(Medelexis_License_Regexp, content)
   end

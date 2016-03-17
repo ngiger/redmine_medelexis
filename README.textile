@@ -69,7 +69,7 @@ h2. development: Loading a dump
 # remove color, crea
 
 
-@bundle exec rake RAILS_ENV=development db:data:load@ # loads db/data.yml
+@set -x RAILS_ENV developmen; bundle exec rake db:data:load@ # loads db/data.yml
 
 Afterwards you may examine the data as following
 
@@ -82,14 +82,14 @@ h2. Creating a dump from the production server
 
 h2. Reset admin login, password and skip ldap
 
-bc. RAILS_ENV=development bundle exec script/rails runner 'user = User.find(:first, :conditions => {:admin => true, :name => 'admin'}) ; \
+bc. set -x RAILS_ENV development; bundle exec script/rails runner 'user = User.find(:first, :conditions => {:admin => true, :name => 'admin'}) ; \
 user.auth_source_id = nil; user.password, user.password_confirmation = "my_password"; user.save!'
 
 If you know the login of you might also use something like @:conditions => {:login => "myLogin"}@
 
 h2. Start rails for development
 
-@bundle exec ruby script/rails server webrick RAILS_ENV=development --port=30001@
+@set -x RAILS_ENV development; bundle exec ruby script/rails server webrick --port=30001@
 
 h2. Running the tests
 
@@ -99,16 +99,17 @@ To run the tests, you must rake all plugins (as above) with RAILS_ENV=test. Then
 
 Prepare for running tests (assuming a bash shell) for redmine_medelexis-plugins using
 
-bc. bundle exec rake db:migrate RAILS_ENV=test
-bundle exec rake redmine:plugins NAME=redmine_contacts           RAILS_ENV=test
-bundle exec rake redmine:plugins NAME=redmine_contacts_helpdesk  RAILS_ENV=test
-bundle exec rake redmine:plugins NAME=redmine_products           RAILS_ENV=test
-bundle exec rake redmine:plugins NAME=redmine_contacts_invoices  RAILS_ENV=test
+bc. set -x RAILS_ENV test
+bundle exec rake db:migrate
+bundle exec rake redmine:plugins NAME=redmine_contacts
+bundle exec rake redmine:plugins NAME=redmine_contacts_helpdesk
+bundle exec rake redmine:plugins NAME=redmine_products
+bundle exec rake redmine:plugins NAME=redmine_contacts_invoices
 
 Run tests
 
-* @bundle exec rake redmine:plugins:test NAME=redmine_medelexis RAILS_ENV=test@ # runs all tests
-* @bundle exec ruby script/rails runner plugins/redmine_medelexis/test/functional/license_test.rb  RAILS_ENV=test@ # runs a single test
+* @set -x RAILS_ENV test; bundle exec rake redmine:plugins:test NAME=redmine_medelexis @ # runs all tests
+* @set -x RAILS_ENV test; bundle exec ruby script/rails runner plugins/redmine_medelexis/test/functional/license_test.rb@ # runs a single test
 
 h2. Scripts for the production server
 
@@ -131,3 +132,28 @@ The script scripts/create_invoices.rb creates 6 (test) invoices using the last d
 
 bc. bundle exec ruby script/rails runner plugins/redmine_medelexis/scripts/create_invoices.rb
 
+h2. Using docker
+
+See "doc":https://github.com/docker-library/docs/tree/master/redmine and "code":https://github.com/docker-library/redmine. Has no so old redmine. There adapted its Dockerfile.template.
+
+bc. docker build -t ngiger/redmine .
+docker run --detached -p 3000:3000 --env REDMINE_NO_DB_MIGRATE=1 -v /opt/src/redmine-medelexis/data2:/usr/src/redmine/files ngiger/redmine
+
+# -name some-postgres -e POSTGRES_PASSWORD=secret -e POSTGRES_USER=redmine postgres
+
+Status MIS-Beta 21.11.2015
+Redmine plugins:
+  redmine_access_filters         0.0.1
+  redmine_contacts               3.4.4
+  redmine_contacts_helpdesk      2.2.9-pro
+  redmine_contacts_invoices      3.2.3
+  redmine_issue_checklist        2.0.5
+  redmine_medelexis              0.2.1
+  redmine_products               1.0.3
+-rw-r--r-- 1 niklaus niklaus 539214 Mai  8  2015 redmine_contacts-3_4_4-pro.zip
+-rw-r--r-- 1 niklaus niklaus 248102 Mai  8  2015 redmine_contacts_helpdesk-2_3_0-pro.zip
+-rw-r--r-- 1 niklaus niklaus 541841 Mai  8  2015 redmine_contacts_invoices-3_2_3-pro.zip
+-rw-r--r-- 1 niklaus niklaus  26050 Mai  8  2015 redmine_issue_checklist-2_0_5.zip
+-rw-r--r-- 1 niklaus niklaus 154308 Mai  8  2015 redmine_products-1_0_3-pro.zip
+-rw-r--r-- 1 niklaus niklaus  49999 Mai  8  2015 redmine_questions-0_0_5-light.zip
+n

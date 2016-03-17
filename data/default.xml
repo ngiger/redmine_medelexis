@@ -8,6 +8,7 @@
     <organization>Praxis Dr. Mustermann</organization>
     <numberOfStations>0</numberOfStations>
     <numberOfPractitioners>1</numberOfPractitioners>
+    <systemProperties>property=default</systemProperties>
   </ownerData>
   <Signature xmlns="http://www.w3.org/2000/09/xmldsig#">
     <SignedInfo>

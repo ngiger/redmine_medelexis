@@ -121,7 +121,9 @@ module RedmineMedelexis
                   "projectId"              => project.id,
                   "organization"           => project.name,
                   "numberOfStations"       => "0", # project.
-                  "numberOfPractitioners"  => "1"}
+                  "numberOfPractitioners"  => "1",
+                  "systemProperties"       => "",
+                  }
   end
   
   def self.get_license(project)
@@ -158,7 +160,8 @@ module RedmineMedelexis
                       "projectId"             => [owner["projectId"]],
                       "organization"          => [owner["organization"]],
                       "numberOfStations"      => [owner["numberOfStations"]],
-                      "numberOfPractitioners" => [owner["numberOfPractitioners"]],                      
+                      "numberOfPractitioners" => [owner["numberOfPractitioners"]],
+                      "systemProperties"      => [owner["systemProperties"]],
                    }
                   ] ,
     "Signature"=>
