@@ -12,20 +12,36 @@ class Project
   end
   def nrDoctors
     field = CustomField.find(:first, :conditions => { :name => '# Ärzte'} )
-    field ? custom_value_for(field).value.to_i : 0
+    if (field && custom_value_for(field))
+      custom_value_for(field).value.to_i
+    else
+      ''
+    end
   end
   def nrStations
     field = CustomField.find(:first, :conditions => { :name => '# Stationen'} )
-    field ? custom_value_for(field).value.to_i : 0
+    if (field && custom_value_for(field))
+      custom_value_for(field).value.to_i
+    else
+      ''
+    end
   end
   def systemProperties
     field = CustomField.find(:first, :conditions => { :name => 'systemProperties'} )
-    field ? custom_value_for(field).value : ''
+    if (field && custom_value_for(field))
+      custom_value_for(field).value
+    else
+      ''
+    end
   end
   def kundenstatus
     custom_field_values # forces evaluation. Avoids an error in test/functional
     field = CustomField.find(:first, :conditions => { :name => 'Kundenstatus'} )
-    field ? custom_value_for(field).value : ''
+    if (field && custom_value_for(field))
+      custom_value_for(field).value
+    else
+      ''
+    end
   end
 end
 

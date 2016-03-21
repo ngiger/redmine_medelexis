@@ -108,7 +108,7 @@ bundle exec rake redmine:plugins NAME=redmine_contacts_invoices
 
 Run tests
 
-* @set -x RAILS_ENV test; bundle exec rake redmine:plugins:test NAME=redmine_medelexis @ # runs all tests
+* @set -x RAILS_ENV test; bundle exec rake redmine:plugins:test NAME=redmine_medelexis@ # runs all tests
 * @set -x RAILS_ENV test; bundle exec ruby script/rails runner plugins/redmine_medelexis/test/functional/license_test.rb@ # runs a single test
 
 h2. Scripts for the production server

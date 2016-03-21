@@ -4,5 +4,4 @@
 dir = File.expand_path('../../lib', __FILE__)
 $: << dir unless $:.index(dir)
 require 'medelexis_invoices'
-MedelexisInvoices.startInvoicing(DateTime.now.end_of_year.to_date, BigDecimal.new('0.05'))
-# MedelexisInvoices.invoice_for_project(123, DateTime.now.end_of_year.to_date, BigDecimal.new('0.05'))
+MedelexisInvoices.startInvoicing(DateTime.now.end_of_year.to_date, Date.today.beginning_of_year.to_date)

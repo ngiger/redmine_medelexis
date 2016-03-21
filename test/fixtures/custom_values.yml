@@ -143,3 +143,9 @@ custom_values_024:
   customized_id: 3
   custom_field_id: 10
   value: 'thisProperty=isFantastic'
+custom_values_025:
+  id: 25
+  customized_type: Issue
+  customized_id: 6
+  custom_field_id: 2
+  value: LICENSED

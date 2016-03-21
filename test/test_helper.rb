@@ -20,7 +20,12 @@
 # along with redmine_contacts.  If not, see <http://www.gnu.org/licenses/>.
 require File.expand_path(File.dirname(__FILE__) + '/../../../test/test_helper')
 Medelexis_License_Regexp = /<license endOfLicense="([0-9\-\+:]*)"\s*id="([\w\.]*)"\s*licenseType="(\w*)"\s*startOfLicense="([0-9\-\+:]*)"/
-
+require "minitest/reporters"
+Minitest::Reporters.use!(
+  Minitest::Reporters::DefaultReporter.new,
+  ENV,
+  Minitest.backtrace_filter
+)
 def fixture_files_path
   "#{File.expand_path('..',__FILE__)}/fixtures/files/"
 end
