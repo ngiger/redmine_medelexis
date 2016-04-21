@@ -66,6 +66,7 @@ Verrechnet werden Leistungen vom 2016-01-01 bis 2016-12-31."
                   6 => 4}
   MaxDiscount = 0.5
   DatumsFormat = '%Y-%m-%d'
+  TrialDays    = 31
 
   def self.stichtag(invoice)
     return nil unless invoice.subject.eql?(AboSubject)
@@ -85,7 +86,7 @@ Verrechnet werden Leistungen vom 2016-01-01 bis 2016-12-31."
     # raise "Stichtag #{stichtag} muss > sein als #{invoice_since} (Startag) " if (stich_tag <= invoice_since)
     status = issue.custom_field_values.first.value
     info = "#{issue.id} #{status}: #{invoice_since}-#{stich_tag} for issue #{issue.start_date} - #{issue.updated_on}"
-    return false if status.eql?('CANCELLED') && (issue.updated_on.to_date - issue.start_date.to_date).to_i <= 31
+    return false if status.eql?('CANCELLED') && (issue.updated_on.to_date - issue.start_date.to_date).to_i <= TrialDays
     if status.eql?('CANCELLED') || status.eql?('EXPIRED')
        if (issue.updated_on < invoice_since) || (issue.start_date > stich_tag)
          return false
@@ -123,8 +124,15 @@ Verrechnet werden Leistungen vom 2016-01-01 bis 2016-12-31."
             product.name.eql?(core_name) &&
             last_invoice.lines.find_all{|line| /#{core_name}/i.match(line.description)  }.size > 0
             puts "Skip #{core_name} line #{issue.id}" if $VERBOSE
-        elsif last_invoice && last_invoice.lines.find_all{|line| line.description.index(product.name) }.size > 0
-          puts "Skip matched product #{issue.id} #{product.name}" if $VERBOSE
+        elsif last_invoice
+          lines = last_invoice.lines.find_all{|line| line.description.index(product.name) }
+          if /gratis/i.match(lines.first.description)
+            puts "Add gratis product #{issue.id} #{product.name}" # if $VERBOSE
+          else
+            puts "Skip matched product #{issue.id} #{product.name}" # if $VERBOSE
+            next
+          end if lines.size > 0
+          open_issues << issue
         else
           puts "Adding #{issue.id} #{product.name}" if $VERBOSE
           open_issues << issue
@@ -161,7 +169,7 @@ Verrechnet werden Leistungen vom 2016-01-01 bis 2016-12-31."
     issue = Issue.find(:first, :conditions => {:id => issue_id})
     status = issue.custom_field_values.first.value
     daysThisYear = (day2invoice.end_of_year.to_date - day2invoice.beginning_of_year.to_date + 1).to_i
-    return 0, 31 if status == 'TRIAL'
+    return 0, TrialDays if status == 'TRIAL'
     if status == 'LICENSED'
       if issue.start_date < invoice_since
         nrDays = (day2invoice - invoice_since).to_i
@@ -183,7 +191,7 @@ Verrechnet werden Leistungen vom 2016-01-01 bis 2016-12-31."
       used_till = issue.updated_on.to_date
       if used_till < invoice_since # already invoiced
         return 0, 0
-      else
+      elsif (used_till - invoice_since).to_i < TrialDays
         nrDays = (used_till - invoice_since).to_i
       end
       return nrDays.to_f/daysThisYear, nrDays
@@ -275,7 +283,7 @@ Verrechnet werden Leistungen vom 2016-01-01 bis 2016-12-31."
         factor, days = getDaysOfYearFactor(issue.id, invoice_since, stich_tag)
         next if days < 0
         price = grund_price
-        if factor == 0
+        if factor == 0 || days <= TrialDays
           next if status.eql?('CANCELLED')
           next unless status.eql?('TRIAL')
           line_description += "\n#{product.name} gratis da noch im ersten Monat"

@@ -55,6 +55,11 @@ class InvoiceControllerTest < ActionController::TestCase
     User.current = nil
     RedmineMedelexis::TestCase.prepare
     RedmineMedelexis::TestCase.plugin_fixtures :redmine_medelexis, :all
+    @mustermann = Project.find(ID_mustermann)
+    @all_project_issues = Issue.find(:all, :conditions => { :project_id => ID_mustermann, :tracker_id => RedmineMedelexis::Tracker_Is_Service} )
+    @trial_issue = @all_project_issues.find{|x| x.custom_field_values.first.to_s.eql?('TRIAL') }
+    @end_of_year = Date.today.end_of_year
+    change_start_date(@trial_issue,  @end_of_year - 25)
   end
 
   def teardown
@@ -65,10 +70,9 @@ class InvoiceControllerTest < ActionController::TestCase
   def dump_invoice(invoice)
     puts "invoice #{invoice.id} #{invoice.number}. total #{invoice.calculate_amount.to_f.round(2)} from #{invoice.custom_field_values}"
     puts invoice.description
-    puts "   dumpling lines"
-    invoice.lines.each{
-      |line|
-      puts "#{line.description} #{line.quantity.to_f.round(2)} #{line.price.to_f.round(2)}"
+    invoice.lines.each_with_index{
+      |line, id|
+      puts "   #{id}: #{line.price.to_f.round(2)} #{line.description} #{line.quantity.to_f.round(2)} "
     }
     nil
   end
@@ -83,18 +87,25 @@ class InvoiceControllerTest < ActionController::TestCase
     nil
   end
 
-
   def change_start_date(issue, date)
+    issue.due_date = Date.new(2099, 1, 1)
     issue.start_date = date
-    issue.save
-    puts "Saved #{issue.id} #{issue.start_date}"
+    issue.created_on = date
+    issue.save!
+    puts "Saved #{issue.id} #{issue.start_date}" if $VERBOSE
+  end
+
+  def set_issue_state(issue, state = 'TRIAL')
+    issue.custom_field_values.first.value = state
+    issue.save_custom_field_values
+    issue.save!
   end
 
   test "verify invoicing today" do
-    mustermann = Project.find(ID_mustermann)
     oldSize= Invoice.all.size
-    stichtag = Date.today
-    res = MedelexisInvoices.startInvoicing(stichtag)
+    change_start_date(@all_project_issues.find{|x| /text/.match(x.subject)},  @end_of_year - 25)
+    res = MedelexisInvoices.startInvoicing(@end_of_year)
+    dump_invoice(Invoice.last)
     assert_not_nil res
     newSize= Invoice.all.size
     nrCreated = newSize -oldSize
@@ -107,7 +118,6 @@ class InvoiceControllerTest < ActionController::TestCase
   end
 
   test "after invoicing getDateOfLastInvoice must bill correct number of days" do
-    mustermann = Project.find(ID_mustermann)
     oldSize= Invoice.all.size
     invoice_since = Date.new(2015, 1, 1)
     stichtag = Date.new(2015, 2, 15)
@@ -125,11 +135,8 @@ class InvoiceControllerTest < ActionController::TestCase
   end
 
   test "verify invoicing with mustermann issues" do
-    mustermann = Project.find(ID_mustermann)
-    xxxSize= Project.all.size
     oldSize= Invoice.all.size
-    stichtag = Date.today.end_of_year
-    res = MedelexisInvoices.startInvoicing(stichtag)
+    res = MedelexisInvoices.startInvoicing(@end_of_year)
     assert_not_nil res
     newSize= Invoice.all.size
     nrCreated = newSize -oldSize
@@ -143,7 +150,6 @@ class InvoiceControllerTest < ActionController::TestCase
   end
 
   test "second invoicing may not produce a new invoice" do
-    mustermann = Project.find(ID_mustermann)
     oldSize= Invoice.all.size
     stichtag = Date.today
     res = MedelexisInvoices.startInvoicing(stichtag)
@@ -166,7 +172,6 @@ class InvoiceControllerTest < ActionController::TestCase
   end
 
   test "after invoicing getDateOfLastInvoice must return correct date" do
-    mustermann = Project.find(ID_mustermann)
     oldSize= Invoice.all.size
     stichtag = Date.today - 5
     res = MedelexisInvoices.startInvoicing(stichtag)
@@ -184,18 +189,20 @@ class InvoiceControllerTest < ActionController::TestCase
   end
 
   test "check amount for invoicing again after 3 months" do
-    mustermann = Project.find(ID_mustermann)
     Invoice.all.each{|x| x.delete}
     oldSize= Invoice.all.size
     abo_start = Date.new(2014, 1, 1)
     date_first_invoice = Date.new(2014, 12, 15)
+    change_start_date(@trial_issue,  date_first_invoice - 10)
+    set_issue_state(@trial_issue, 'TRIAL')
     res = MedelexisInvoices.startInvoicing(date_first_invoice, abo_start)
     assert_not_nil res
+    first_invoice = Invoice.first
+    dump_invoice(Invoice.first) # if $VERBOSE
     sizeAfterFirstRun= Invoice.all.size
     nrCreated = sizeAfterFirstRun -oldSize
     content = res.inspect.to_s
     assert (nrCreated == 1 ), "Must have created exactyl one. Not #{nrCreated}"
-    first_invoice = Invoice.first
     nr_days = 3*31
     change_start_date(Issue.find_by_subject('ch.elexis.added_later.feature'), Date.new(2014, 9, 30))
     date_second_invoice = date_first_invoice + nr_days
@@ -211,11 +218,11 @@ class InvoiceControllerTest < ActionController::TestCase
     nrFounds = first_invoice.lines.find_all{|line| line.description.match(/feature/)}.reject{|x| / gratis /i.match(x.description) }
     assert_equal(0, nrFounds.size, 'first_invoice must not contain any feature')
 
-    # Ensure that we find a partial payment
+    # Cancelled items must be paid for the whole year!
     nrFounds = first_invoice.lines.find_all{|line| line.description.match(/ wird für 348 Tage verrechnet/i)}
-    assert_equal(1, nrFounds.size, 'first_invoice must contain 348 Tage')
+    assert_equal(2, nrFounds.size, 'first_invoice must contain 348 Tage')
     nrFounds = first_invoice.lines.find_all{|line| line.description.match(/ wird für 280 Tage verrechnet/i)}
-    assert_equal(1, nrFounds.size, 'first_invoice must contain 280 Tage')
+    assert_equal(0, nrFounds.size, 'first_invoice must contain 280 Tage')
     nrFounds = first_invoice.lines.find_all{|line| line.description.match(/ wird für 160 Tage verrechnet/i)}
     assert_equal(0, nrFounds.size, 'first_invoice may not contain 160 Tage')
 
@@ -225,14 +232,14 @@ class InvoiceControllerTest < ActionController::TestCase
     nrFounds = second_invoice.lines.find_all{|line| line.description.match(/feature/i)}
     assert(1<= nrFounds.size, 'second_invoice must contain a feature')
     assert( first_invoice.lines.find{|line| line.description.match(/Medelexis.+ wird für 348 Tage verrechnet/i) }, 'first_invoice: correct day for Medelexis')
-    assert( first_invoice.lines.find{|line| line.description.match(/cancelled.+ wird für 280 Tage verrechnet/i) }, 'first_invoice: correct days for cancelled item')
+    assert( first_invoice.lines.find{|line| line.description.match(/cancelled.+ wird für 348 Tage verrechnet/i) }, 'first_invoice: correct days for cancelled item')
     assert( first_invoice.lines.find{|line| line.description.match(/gratis/i) }, 'first_invoice: TRIAL must be gratis')
     assert_nil( first_invoice.lines.find{|line| line.description.match(/added.+/i) }, 'first_invoice: later added item may not appear')
 
     assert( second_invoice.lines.find{|line| line.description.match(/Medelexis.+ wird für #{nr_days} Tage verrechnet/i) }, 'second_invoice: correct day for Medelexis')
     dump_invoice(second_invoice) if $VERBOSE
     assert( second_invoice.lines.find{|line| line.description.match(/added.+wird für.+93.+Tage/i) }, 'second_invoice: correct days for added item')
-    assert_nil( second_invoice.lines.find{|line| line.description.match(/cancelled.+ wird für 280 Tage verrechnet/i) }, 'second_invoice: cancelled item may not appear again')
+    assert_nil( second_invoice.lines.find{|line| line.description.match(/cancelled.+/i) }, 'second_invoice: cancelled item may not appear again')
     assert( second_invoice.lines.find{|line| line.description.match(/gratis/i) }, 'second_invoice: TRIAL must be gratis')
     # assert_nil( second_invoice.lines.find{|line| line.description.match(/Grundpreis von 0.0/i) }, 'second_invoice: prices with 0 should not appear')
 
@@ -243,15 +250,13 @@ class InvoiceControllerTest < ActionController::TestCase
   test "verify that project KeinVerrechnung does not get an invoicing" do
     project = Project.find(4)
     oldSize= Invoice.all.size
-    stichtag = Date.today.end_of_year
-    assert_equal(nil, MedelexisInvoices.invoice_for_project(project.id, stichtag))
+    assert_equal(nil, MedelexisInvoices.invoice_for_project(project.id, @end_of_year))
     newSize= Invoice.all.size
     nrCreated = newSize -oldSize
     assert_equal 0, nrCreated, "May not create an invoice #{nrCreated} newSize #{newSize} #{oldSize}"
   end
 
   test "second invoicing may not produce a new invoice even if since given" do
-    mustermann = Project.find(ID_mustermann)
     oldSize= Invoice.all.size
     stichtag = Date.today
     res = MedelexisInvoices.startInvoicing(stichtag)
@@ -323,26 +328,24 @@ class InvoiceControllerTest < ActionController::TestCase
   end
 
   test "check invoice issues added after first invoice" do
-    mustermann = Project.find(ID_mustermann)
     Invoice.all.each{|x| x.delete}
-    oldSize= Invoice.all.size
     abo_start = Date.new(2014, 1, 1)
     invoice_stichtag = Date.new(2014, 12, 31)
+    test_issue = @all_project_issues.find{|x| /ch.elexis.added_later.feature/.match(x.subject) }
+    change_start_date(test_issue,  invoice_stichtag + 25)
+    assert( test_issue.start_date > invoice_stichtag, 'last issued must not be contained in first invoice')
     res = MedelexisInvoices.startInvoicing(invoice_stichtag, abo_start)
     first_invoice = Invoice.first
     # dump_invoice(first_invoice);
     assert_not_nil res
     sizeAfterFirstRun= Invoice.all.size
-    assert( Issue.last.start_date > invoice_stichtag, 'last issued must not be contained in first invoice')
-    change_start_date(Issue.last, Date.new(2014, 6, 30))
-    change_start_date(Issue.find_by_subject('ch.elexis.added_later.feature'), Date.new(2014, 9, 30))
+    change_start_date(test_issue, invoice_stichtag -90 )
     res = MedelexisInvoices.startInvoicing(invoice_stichtag, abo_start)
     assert_not_nil res
-    sizeAfterSecondRun= Invoice.all.size
-    assert_equal(sizeAfterFirstRun + 1, sizeAfterSecondRun, 'Must have added an invoice')
+    assert_equal(sizeAfterFirstRun + 1, Invoice.all.size, 'Must have added an invoice')
     second_invoice = Invoice.last
-    # dump_invoice(second_invoice);
-    # assert_nil( second_invoice.lines.find{|line| line.description.match(/Grundpreis von 0.0/i) }, 'second_invoice: prices with 0 should not appear')
+    dump_invoice(second_invoice);
+    assert_nil(first_invoice.lines.find{|line| line.description.match(/ADDED LATER/i)},  'Must have ADDED LATER item')
     assert_nil( second_invoice.lines.find{|line| line.description.match(/added.+wird für.+76.+Tage/i) }, 'second_invoice: Do not invoice added item')
 
     msg =  "Amount of second invoice of #{second_invoice.calculate_amount.to_i} must be smaller than first invoice #{first_invoice.calculate_amount.to_i} from (#{invoice_stichtag})"
@@ -350,10 +353,7 @@ class InvoiceControllerTest < ActionController::TestCase
 
     assert_nil( second_invoice.lines.find{|line| line.description.match(/Medelexis.+Tage verrechnet/i) }, 'second_invoice: Do not invoice Medelexis')
     assert_nil( second_invoice.lines.find{|line| line.description.match(/gratis/i) }, 'second_invoice: TRIAL must be gratis')
-
-
-    assert( first_invoice.lines.find{|line| line.description.match(/cancelled.+ wird für 280 Tage verrechnet/i) },      'Must have cancelled item')
-    assert_nil( second_invoice.lines.find{|line| line.description.match(/cancelled.+ wird für 280 Tage verrechnet/i) }, 'May not have cancelled item')
+    assert(second_invoice.lines.find{|line| line.description.match(/ADDED LATER/i)},  'Must have ADDED LATER item')
   end
 
   test "get_lines must return correct array" do
@@ -374,22 +374,24 @@ class InvoiceControllerTest < ActionController::TestCase
   end
 
   test "check invoice don't add a line when cancelled after less than a month" do
-    mustermann = Project.find(ID_mustermann)
-    abo_start = Date.today - 90
-    issue = Issue.find_by_subject('ch.elexis.cancelled.feature')
+    days_ahead = 120
+    days_before = 90
     cancelled_date = Date.today - 25
+    abo_start = Date.today - days_before
+    issue = Issue.find_by_subject('ch.elexis.cancelled.feature')
     change_start_date(issue, cancelled_date)
     oldSize= Invoice.all.size
-    res = MedelexisInvoices.startInvoicing(Date.today + 120, abo_start)
+    res = MedelexisInvoices.startInvoicing(Date.today + days_ahead, abo_start)
     invoice = Invoice.last
     assert_not_nil res
     dump_invoice(invoice)
-    assert_nil( invoice.lines.find{|line| line.description.match(/cancelled/i) }, 'cancelled item may not appear')
+    canncelled_items = invoice.lines.find_all{|line| line.description.match(/cancelled/i) }
+    assert_equal(1, canncelled_items.size, 'cancelled item may not appear')
+    assert_match((days_before +  days_ahead).to_s + ' Tage', canncelled_items.first.description)
   end
 
   test "check invoice is taxed" do
     Setting.plugin_redmine_contacts["default_tax"] = 8.0
-    mustermann = Project.find(ID_mustermann)
     Invoice.all.each{|x| x.delete}
     oldSize= Invoice.all.size
     abo_start = Date.new(2014, 1, 1)
@@ -403,4 +405,27 @@ class InvoiceControllerTest < ActionController::TestCase
     assert_equal(first_invoice.lines.size, first_invoice.lines.collect{|line| line.tax}.size, 'each line must be taxed')
   end
 
+  test "Invoicing must invoice correctly issued marked Gratis in a previous invoice" do
+    project_id = Project.find(ID_mustermann)
+    Invoice.all.each{|x| x.delete}
+    abo_start = Date.today.beginning_of_year - 3.years
+    date_first_invoice = Date.today.beginning_of_year - 2.years
+    date_second_invoice = Date.today.end_of_year.to_date - 2.years
+    Issue.last.start_date = date_first_invoice < 15
+    change_start_date(@trial_issue,  date_first_invoice - 25)
+    res = MedelexisInvoices.startInvoicing(date_first_invoice, abo_start)
+    first_invoice = Invoice.first
+    sizeAfterFirstRun = Invoice.all.size
+    dump_invoice(first_invoice);
+    assert_not_nil res
+    RedmineMedelexis.convertExpiredTrial2License
+    res = MedelexisInvoices.startInvoicing(date_second_invoice, date_first_invoice)
+    assert_not_nil res
+    second_invoice = Invoice.last
+    dump_invoice(second_invoice);
+    sizeAfterSecondRun= Invoice.all.size
+    assert_equal(sizeAfterFirstRun + 1, sizeAfterSecondRun, 'Must have added an invoice')
+    assert_equal(0, second_invoice.lines.find_all{|x| /gratis/i.match(x.description)}.size, 'Must invoice previously marked Gratis item')
+    assert_nil( second_invoice.lines.find{|line| line.description.match(/added.+wird für.+76.+Tage/i) }, 'second_invoice: Do not invoice added item')
+  end
 end
