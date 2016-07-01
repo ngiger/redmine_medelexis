@@ -53,14 +53,14 @@ git clone git@github.com:paginagmbh/redmine_silencer.git
 cd ..
 bundle install
 bundle exec rake db:migrate RAILS_ENV=development
-bundle exec rake redmine:plugins NAME=redmine_contacts
-bundle exec rake redmine:plugins NAME=redmine_contacts_helpdesk
-bundle exec rake redmine:plugins NAME=redmine_contacts_invoices
-bundle exec rake redmine:plugins NAME=redmine_products
-bundle exec rake redmine:plugins NAME=redmine_questions
-bundle exec rake redmine:plugins NAME=redmine_silencer
+bundle exec rake redmine:plugins RAILS_ENV=development NAME=redmine_contacts
+bundle exec rake redmine:plugins RAILS_ENV=development NAME=redmine_contacts_helpdesk
+bundle exec rake redmine:plugins RAILS_ENV=development NAME=redmine_contacts_invoices
+bundle exec rake redmine:plugins RAILS_ENV=development NAME=redmine_products
+bundle exec rake redmine:plugins RAILS_ENV=development NAME=redmine_questions
+bundle exec rake redmine:plugins RAILS_ENV=development NAME=redmine_silencer
 # bundle exec rake redmine:plugins NAME=redmine_ldap_sync
-bundle exec rake redmine:plugins NAME=redmine_medelexis
+bundle exec rake redmine:plugins RAILS_ENV=development NAME=redmine_medelexis
 
 
 h2. development: Loading a dump
@@ -69,7 +69,7 @@ h2. development: Loading a dump
 # remove color, crea
 
 
-@set -x RAILS_ENV developmen; bundle exec rake db:data:load@ # loads db/data.yml
+@bundle exec rake RAILS_ENV=development db:data:load@ # loads db/data.yml
 
 Afterwards you may examine the data as following
 
@@ -82,8 +82,9 @@ h2. Creating a dump from the production server
 
 h2. Reset admin login, password and skip ldap
 
-bc. set -x RAILS_ENV development; bundle exec script/rails runner 'user = User.find(:first, :conditions => {:admin => true, :name => 'admin'}) ; \
-user.auth_source_id = nil; user.password, user.password_confirmation = "my_password"; user.save!'
+bc.  set -x RAILS_ENV development; bundle exec script/rails runner "user = User.find(:first, :conditions => {:admin => true, :name => 'admin'}) ; \
+-user.auth_source_id = nil; user.password, user.password_confirmation = 'my_password'; user.save!"
+
 
 If you know the login of you might also use something like @:conditions => {:login => "myLogin"}@
 
@@ -100,15 +101,17 @@ To run the tests, you must rake all plugins (as above) with RAILS_ENV=test. Then
 Prepare for running tests (assuming a bash shell) for redmine_medelexis-plugins using
 
 bc. set -x RAILS_ENV test
-bundle exec rake db:migrate
-bundle exec rake redmine:plugins NAME=redmine_contacts
-bundle exec rake redmine:plugins NAME=redmine_contacts_helpdesk
-bundle exec rake redmine:plugins NAME=redmine_products
-bundle exec rake redmine:plugins NAME=redmine_contacts_invoices
+bundle exec rake db:migrate RAILS_ENV=test
+bundle exec rake redmine:plugins RAILS_ENV=test NAME=redmine_contacts
+bundle exec rake redmine:plugins RAILS_ENV=test NAME=redmine_contacts_helpdesk
+bundle exec rake redmine:plugins RAILS_ENV=test NAME=redmine_products
+bundle exec rake redmine:plugins RAILS_ENV=test NAME=redmine_contacts_invoices
+bundle exec rake redmine:plugins RAILS_ENV=test NAME=redmine_questions
+bundle exec rake redmine:plugins RAILS_ENV=test NAME=redmine_silencer
 
 Run tests
 
-* @set -x RAILS_ENV test; bundle exec rake redmine:plugins:test NAME=redmine_medelexis@ # runs all tests
+* @set -x RAILS_ENV test; bundle exec rake redmine:plugins:test RAILS_ENV=test NAME=redmine_medelexis@ # runs all tests
 * @set -x RAILS_ENV test; bundle exec ruby script/rails runner plugins/redmine_medelexis/test/functional/license_test.rb@ # runs a single test
 
 h2. Scripts for the production server
