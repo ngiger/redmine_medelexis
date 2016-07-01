@@ -35,6 +35,14 @@ def login_as(user_login)
   change_user_password(user_login, clear_password)
 end
 
+def change_start_date(issue, date)
+  issue.start_date = date
+  issue.created_on = date
+  issue.due_date = issue.get_end_of_license
+  issue.save!
+  puts "Saved #{issue.id} #{issue.start_date}" if $VERBOSE
+end
+
 # Engines::Testing.set_fixture_path
 
 class RedmineMedelexis::TestCase

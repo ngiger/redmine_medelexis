@@ -87,14 +87,6 @@ class InvoiceControllerTest < ActionController::TestCase
     nil
   end
 
-  def change_start_date(issue, date)
-    issue.due_date = Date.new(2099, 1, 1)
-    issue.start_date = date
-    issue.created_on = date
-    issue.save!
-    puts "Saved #{issue.id} #{issue.start_date}" if $VERBOSE
-  end
-
   def set_issue_state(issue, state = 'TRIAL')
     issue.custom_field_values.first.value = state
     issue.save_custom_field_values
@@ -379,6 +371,7 @@ class InvoiceControllerTest < ActionController::TestCase
     cancelled_date = Date.today - 25
     abo_start = Date.today - days_before
     issue = Issue.find_by_subject('ch.elexis.cancelled.feature')
+    issue.due_date= RedmineMedelexis::EwigesAblaufdatum
     change_start_date(issue, cancelled_date)
     oldSize= Invoice.all.size
     res = MedelexisInvoices.startInvoicing(Date.today + days_ahead, abo_start)

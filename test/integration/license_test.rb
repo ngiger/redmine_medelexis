@@ -117,8 +117,14 @@ class Redmine::ApiTest::LicenseTest < ActionController::IntegrationTest
     assert_template 'license/show'
   end
  end
-  test "auth by api_key and verify content of generated license.xml" do
-    username = 'mustermann'    
+
+  test "auth by api_key. Verify trial date" do
+    username = 'mustermann'
+    issue = Issue.all.find{|x| x.custom_field_values[0].to_s.eql? 'TRIAL' }
+    start_date = Date.today - 10
+    change_start_date(issue, start_date)
+    end_date = issue.get_end_of_license
+    assert_equal(start_date + Issue::TrialDays, end_date, "end_date must be start_date #{start_date} +  #{Issue::TrialDays}")
     login_as(username)
     signed_xml = get_signed_xml_path(username)
     FileUtils.rm_f(signed_xml)
@@ -126,11 +132,25 @@ class Redmine::ApiTest::LicenseTest < ActionController::IntegrationTest
     assert_response :success
     verify_license_file(username)
     content = IO.read(signed_xml)
-    assert     ( /id="ch.medelexis.application.feature"/ .match(content) )
-    assert_nil ( /id="ch.elexis.base.textplugin.feature"/.match(content) )
-    assert ( /id="ch.elexis.cancelled.feature" licenseType="CANCELLED"/.match(content) )
+    trial_line = /(\d{4}-\d{2}-\d{2}).*#{issue.subject}.*/.match(content)
+    shown_end_date = Date.strptime(trial_line[1],"%Y-%m-%d")
+    assert_equal(end_date + 1 , shown_end_date, "due_date of issue (#{end_date}) must be >= #{start_date} + #{Issue::TrialDays} + 1, but is #{shown_end_date}")
   end
-  
+
+  test "auth by api_key and verify content of generated license.xml" do
+    username = 'mustermann'
+    login_as(username)
+    signed_xml = get_signed_xml_path(username)
+    FileUtils.rm_f(signed_xml)
+    get "/my/license.xml?key=#{User.find_by_login(username).api_key}"
+    assert_response :success
+    verify_license_file(username)
+    content = IO.read(signed_xml)
+    assert /id="ch.medelexis.application.feature"/ .match(content), "Must find ch.medelexis.application.feature"
+    assert_nil /id="ch.elexis.base.textplugin.feature"/.match(content), "Must not find expired h.elexis.base.textplugin.feature"
+    assert /id="ch.elexis.cancelled.feature" licenseType="CANCELLED"/.match(content), "Must find cancelled.feature"
+  end
+
   test "admin calls /my/license" do
     username = 'admin'
     login_as(username)

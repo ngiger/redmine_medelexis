@@ -169,7 +169,7 @@ Verrechnet werden Leistungen vom 2016-01-01 bis 2016-12-31."
     issue = Issue.find(:first, :conditions => {:id => issue_id})
     status = issue.custom_field_values.first.value
     daysThisYear = (day2invoice.end_of_year.to_date - day2invoice.beginning_of_year.to_date + 1).to_i
-    return 0, TrialDays if status == 'TRIAL'
+    return 0, TrialDays if issue.isTrial?
     if status == 'LICENSED'
       if issue.start_date < invoice_since
         nrDays = (day2invoice - invoice_since).to_i
@@ -283,9 +283,9 @@ Verrechnet werden Leistungen vom 2016-01-01 bis 2016-12-31."
         factor, days = getDaysOfYearFactor(issue.id, invoice_since, stich_tag)
         next if days < 0
         price = grund_price
-        if factor == 0 || days <= TrialDays
+        if factor == 0 || days <= Issue::TrialDays
           next if status.eql?('CANCELLED')
-          next unless status.eql?('TRIAL')
+          next unless issue.isTrial?
           line_description += "\n#{product.name} gratis da noch im ersten Monat"
           invoice.lines << InvoiceLine.new(:description => line_description, :quantity => multiplier, :price => 0,
                                            :units => "Feature",

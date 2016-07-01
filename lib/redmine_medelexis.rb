@@ -44,7 +44,7 @@ module RedmineMedelexisSettings
 
 end
 
-module RedmineMedelexis  
+module RedmineMedelexis
   Keystore          = '/srv/distribution-keys'
   LicenseStore      = File.join(Dir.tmpdir, 'redmine_medelexis')
 
@@ -57,7 +57,6 @@ module RedmineMedelexis
   def self.license_info_for_user(user)
     RedmineMedelexis.debug "#{__LINE__}: user #{user.inspect}"
     project = RedmineMedelexis.get_project(user)
-    
     RedmineMedelexis.debug "#{__LINE__}: project #{project.inspect}"
     return nil unless project
     info = {}
@@ -80,7 +79,6 @@ module RedmineMedelexis
   
     Zeitformat        = '%Y-%m-%d%:z'
     EwigesAblaufdatum = Time.new(2099, 12, 31).strftime(Zeitformat)
-    TrialTime         = 31 # Days
   def self.get_member(user)
     members =  Member.find_all_by_user_id(user.id)
     RedmineMedelexis.debug "#{__LINE__}: members #{members.inspect}"
@@ -125,26 +123,23 @@ module RedmineMedelexis
                   "systemProperties"       => project.systemProperties,
                   }
   end
-  
+
   def self.get_license(project)
     return nil unless project
     condition = "project_id = #{project.id}"
     issues = Issue.where(condition, Date.today)
     eternal = Issue.find(:all, :conditions => {:project_id => 1, :tracker_id => RedmineMedelexis::Tracker_Is_Service, :closed_on => nil})
     licenses = []
-    (issues+eternal).each{ |issue|  #>"2013-12-12+01:00",
-                  endOfLicense = issue.due_date ? issue.due_date : Time.new(2099, 12, 31)
-                  if /TRIAL/i.match(issue.custom_field_values[0].to_s)
-                    endOfLicense = issue.due_date ? issue.due_date : (issue.start_date + TrialTime)
-                    self.debug "TRIAL issue #{issue.id} of #{issue.due_date} endOfLicense #{endOfLicense} is expired? #{endOfLicense < Date.today}"
-                    next if endOfLicense < Date.today
-                  end
+    (issues+eternal).each do  |issue|  #>"2013-12-12+01:00",
+      endOfLicense = issue.get_end_of_license + 1
+      puts  "TRIAL issue #{issue.id} of #{issue.due_date} endOfLicense #{endOfLicense} is expired? #{endOfLicense < Date.today}" if issue.isTrial? && $VERBOSE
+      next if issue.isTrial? && endOfLicense < Date.today
       licenses<< {  "endOfLicense"    => endOfLicense.strftime(Zeitformat),
                     "id"              => issue.subject,
                     "licenseType"     => issue.custom_field_values[0].to_s,
                     "startOfLicense"  => issue.start_date.strftime(Zeitformat),
       }
-               }
+    end
     licenses
   end
   

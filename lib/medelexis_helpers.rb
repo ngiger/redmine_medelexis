@@ -18,6 +18,21 @@ require 'logger'
 require 'uri'
 require 'socket'
 
+class Issue
+  TrialDays         = 31 # Days
+  def isTrial?
+    /TRIAL/i.match(custom_field_values[0].to_s)
+  end
+
+  def get_end_of_license
+    endOfLicense = due_date ? due_date : Time.new(2099, 12, 31)
+    if isTrial?
+      endOfLicense = (start_date + TrialDays)
+    end
+    endOfLicense
+  end
+end
+
 module RedmineMedelexis
   @@idFromTials2License ||= []
   Tracker_Is_Service      = 4
@@ -54,7 +69,7 @@ module RedmineMedelexis
 
   def self.getExpiredTrialIssues
     unclosed_issues = Issue.find(:all, :conditions => {:tracker_id => Tracker_Is_Service, :closed_on => nil})
-    trial2order = unclosed_issues.find_all{|x| x.valid? and x.start_date < -1.month.from_now.to_date and x.custom_field_values.first.value == 'TRIAL'}
+    trial2order = unclosed_issues.find_all{|x| x.valid? && x.isTrial? && x.get_end_of_license < (Date.today-1) }
   end
 
   def self.issue_to_licensed(issue)
