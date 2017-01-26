@@ -160,7 +160,42 @@ class InvoiceControllerTest < ActionController::TestCase
     res = MedelexisInvoices.startInvoicing(stichtag)
     assert_not_nil res
     sizeAfterSecondRun= Invoice.all.size
-    assert_equal(sizeAfterFirstRun, sizeAfterSecondRun)
+    assert_equal(sizeAfterFirstRun, sizeAfterSecondRun, 'must have some number of invoices after first and second run')
+  end
+
+  test "invoicing with due_date before stichtag may not be included in a invoice" do
+    oldSize = Invoice.all.size
+    stichtag = Date.today
+    concerned_issues = Issue.all.find_all{|x| x.due_date && x.due_date > stichtag}
+    assert_equal(1, concerned_issues.size)
+    unique_title =  'Darf nicht mehr verrechnet werden'
+    issue = concerned_issues.first
+    issue.start_date = stichtag - 300
+    issue.due_date = stichtag-1
+    issue.description = unique_title
+    issue.save!
+    res = MedelexisInvoices.startInvoicing(stichtag)
+    assert_not_nil res
+    assert_equal(oldSize + 1,  Invoice.all.size, 'Must have produced an invoice')
+    assert_nil( Invoice.last.lines.to_s.index(unique_title), "May not include #{unique_title}")
+  end
+
+  test "invoicing with due_date before stichtag, but updated_on later may not may not be included in a invoice" do
+    oldSize = Invoice.all.size
+    stichtag = Date.today
+    concerned_issues = Issue.all.find_all{|x| x.due_date && x.due_date > stichtag}
+    assert_equal(1, concerned_issues.size)
+    unique_title =  'Darf nicht mehr verrechnet werden'
+    issue = concerned_issues.first
+    issue.updated_on = stichtag + 300
+    issue.start_date = stichtag - 300
+    issue.due_date = stichtag - 1
+    issue.description = unique_title
+    issue.save!
+    res = MedelexisInvoices.startInvoicing(stichtag)
+    assert_not_nil res
+    assert_equal(oldSize + 1,  Invoice.all.size, 'Must have produced an invoice')
+    assert_nil( Invoice.last.lines.to_s.index(unique_title), "May not include #{unique_title}")
   end
 
   test "after invoicing getDateOfLastInvoice must return correct date" do
@@ -251,7 +286,8 @@ class InvoiceControllerTest < ActionController::TestCase
   test "second invoicing may not produce a new invoice even if since given" do
     oldSize= Invoice.all.size
     stichtag = Date.today
-    res = MedelexisInvoices.startInvoicing(stichtag)
+    invoice_since = stichtag-365
+    res = MedelexisInvoices.startInvoicing(stichtag, invoice_since)
     assert_not_nil res
     sizeAfterFirstRun= Invoice.all.size
     nrCreated = sizeAfterFirstRun -oldSize
@@ -264,10 +300,10 @@ class InvoiceControllerTest < ActionController::TestCase
     trial_issue = last_invoice.lines.find_all{|x| x.description if /gratis/i.match(x.description) }
     assert_equal 1, trial_issue.size,       "Invoice must have 1 free product. Not #{trial_issue.size}" # one item is TRIAL
     assert ( last_invoice.calculate_amount < 10000.0 ), "Amount must be smaller than 10kFr. But is #{last_invoice.calculate_amount.to_f.round(2)}"
-    res = MedelexisInvoices.startInvoicing(stichtag, stichtag-365)
+    res = MedelexisInvoices.startInvoicing(stichtag, invoice_since)
     assert_not_nil res
     sizeAfterSecondRun= Invoice.all.size
-    assert_equal(sizeAfterFirstRun, sizeAfterSecondRun)
+    assert_equal(sizeAfterFirstRun, sizeAfterSecondRun, 'must have some number of invoices after first and second run')
   end
 
   test "Must match correct invoice stichtag" do
@@ -288,6 +324,35 @@ class InvoiceControllerTest < ActionController::TestCase
     buchhaltung.custom_field_values = { IssueCustomField.first.id.to_s => 'LICENSED'}
     buchhaltung.save!
   end
+
+  test 'check issue ranges updated_on after due_date and stichtag' do
+    licensed = Issue.find(6)
+    start_of_year = Date.new(2016, 1,  1)
+    end_of_year   = Date.new(2016,12, 31)
+    updated       = Date.new(2016, 4, 15)
+    due_date      = start_of_year
+    assert_equal('LICENSED', licensed.custom_field_values.first.to_s)
+    licensed.start_date = start_of_year -365
+    licensed.due_date   = nil
+    licensed.updated_on = nil
+    licensed.save!
+    licensed
+    assert_equal(true, MedelexisInvoices.issueDateInRange?(licensed, end_of_year, start_of_year), 'before cancelling it must be in the range')
+
+    cancel_string = 'CANCELLED'.force_encoding('utf-8')
+    licensed.custom_field_values.first.value  = cancel_string
+    licensed.due_date = start_of_year
+    licensed.updated_on = end_of_year + 300
+    licensed.save!
+    assert_equal(cancel_string, licensed.custom_field_values.first.to_s)
+    assert_equal(false, MedelexisInvoices.issueDateInRange?(licensed, end_of_year, start_of_year), 'after cancelling it may not be in the range')
+
+    licensed.due_date = updated
+    licensed.save!
+    assert_equal(cancel_string, licensed.custom_field_values.first.to_s)
+    assert_equal(true, MedelexisInvoices.issueDateInRange?(licensed, end_of_year, start_of_year), 'after cancelling inside the range it must be in the range')
+  end
+
   test 'check issue ranges' do
     licensed = Issue.find(6)
     test_day = Date.new(2014, 6, 15)
@@ -298,15 +363,16 @@ class InvoiceControllerTest < ActionController::TestCase
     assert_equal('LICENSED', licensed.custom_field_values.first.to_s)
 
     licensed.start_date = test_day
-    assert_equal(true, MedelexisInvoices.issueDateInRange?(licensed, days_after, days_before), 'start_date is between to days')
+
+    assert_equal(true, MedelexisInvoices.issueDateInRange?(licensed, days_after, days_before), 'start_date is between two days 1')
     assert_equal(true, MedelexisInvoices.issueDateInRange?(licensed, month_after, month_before), 'start_date is between two month 2')
-    assert_equal(true, MedelexisInvoices.issueDateInRange?(licensed, month_after, days_after), 'start_date is between to days 3')
+    assert_equal(true, MedelexisInvoices.issueDateInRange?(licensed, month_after, days_after), 'start_date is between two days 3')
 
     cancelled = Issue.find(4)
     assert_equal('CANCELLED', cancelled.custom_field_values.first.to_s)
     cancelled.start_date = test_day
     test_day_2 = Date.new(2015, 6, 15)
-    cancelled.updated_on = test_day_2
+    cancelled.due_date = test_day_2
 
     assert_equal(true, MedelexisInvoices.issueDateInRange?(cancelled, test_day_2 + 1, days_before), 'cancelled start_date is between two days')
     assert_equal(true,  MedelexisInvoices.issueDateInRange?(cancelled, month_after, days_after), 'cancelled start_date is between two days')
@@ -315,8 +381,8 @@ class InvoiceControllerTest < ActionController::TestCase
     assert_equal(false, MedelexisInvoices.issueDateInRange?(cancelled, days_before, month_before), 'cancelled start_date is between two days')
 
     assert_equal(false, MedelexisInvoices.issueDateInRange?(cancelled, month_before, days_before), 'cancelled start_date is between two days')
-    assert_equal(false, MedelexisInvoices.issueDateInRange?(licensed, month_before, days_before), 'start_date is between to days')
-    assert_equal(false, MedelexisInvoices.issueDateInRange?(licensed, days_after, month_after), 'start_date is between two days')
+    assert_equal(false, MedelexisInvoices.issueDateInRange?(licensed, month_before, days_before), 'start_date is between two days 4')
+    assert_equal(false, MedelexisInvoices.issueDateInRange?(licensed, days_after, month_after), 'start_date is between two days 5')
   end
 
   test "check invoice issues added after first invoice" do

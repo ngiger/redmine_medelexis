@@ -85,12 +85,13 @@ Verrechnet werden Leistungen vom 2016-01-01 bis 2016-12-31."
     return false if (stich_tag <= invoice_since)
     # raise "Stichtag #{stichtag} muss > sein als #{invoice_since} (Startag) " if (stich_tag <= invoice_since)
     status = issue.custom_field_values.first.value
-    info = "#{issue.id} #{status}: #{invoice_since}-#{stich_tag} for issue #{issue.start_date} - #{issue.updated_on}"
-    return false if status.eql?('CANCELLED') && (issue.updated_on.to_date - issue.start_date.to_date).to_i <= TrialDays
+    info = "#{issue.id} #{status}: #{invoice_since}-#{stich_tag} for issue #{issue.start_date} - #{issue.updated_on}. Due #{issue.due_date}"
+    return false if status.eql?('CANCELLED') && issue.due_date && (issue.due_date.to_date - issue.start_date.to_date).to_i <= TrialDays
     if status.eql?('CANCELLED') || status.eql?('EXPIRED')
-       if (issue.updated_on < invoice_since) || (issue.start_date > stich_tag)
-         return false
-       end
+      return false unless issue.due_date
+      if (issue.due_date <= invoice_since) || (issue.start_date > stich_tag)
+        return false
+      end
     end
     if (issue.start_date < stich_tag)
       return true
@@ -127,9 +128,9 @@ Verrechnet werden Leistungen vom 2016-01-01 bis 2016-12-31."
         elsif last_invoice
           lines = last_invoice.lines.find_all{|line| line.description.index(product.name) }
           if /gratis/i.match(lines.first.description)
-            puts "Add gratis product #{issue.id} #{product.name}" # if $VERBOSE
+            puts "Add gratis product #{issue.id} #{product.name}" if $VERBOSE
           else
-            puts "Skip matched product #{issue.id} #{product.name}" # if $VERBOSE
+            puts "Skip matched product #{issue.id} #{product.name}" if $VERBOSE
             next
           end if lines.size > 0
           open_issues << issue
@@ -188,7 +189,7 @@ Verrechnet werden Leistungen vom 2016-01-01 bis 2016-12-31."
       nrDays = (day2invoice - issue.start_date).to_i
     end
     if status == 'CANCELLED' or status == 'EXPIRED'
-      used_till = issue.updated_on.to_date
+      used_till = issue.due_date.to_date
       if used_till < invoice_since # already invoiced
         return 0, 0
       elsif (used_till - invoice_since).to_i < TrialDays
