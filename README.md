@@ -77,21 +77,22 @@ Afterwards execute and verify these steps (assuming a bash shell). Using ruby 1.
     bundle exec rake redmine:plugins NAME=redmine_products
     bundle exec rake redmine:plugins NAME=redmine_medelexis
 
+## Creating a dump from the production server
+
+`bundle exec rake RAILS_ENV=production db:data:dump` # creates db/data.yml
+
 ## development: Loading a dump
 
-# remove color (twice in deal_statuses ), remove auth_sources from data.yml
-# remove color, crea
+Copy the yaml dump to db/data.yml. You must manually remove in from db/data.yml the following items
+* color (twice in deal_statuses)
+* remove auth_sources 
 
-`bundle exec rake RAILS_ENV=development db:data:load` # loads db/data.yml
+Now you can load it using `bundle exec rake RAILS_ENV=development db:data:load`, which will use db/data.yml
 
 Afterwards you may examine the data as following
 
     set -x RAILS_ENV development; bundle exec rails console ; bundle exec rails console
     Project.all.first
-
-## Creating a dump from the production server
-
-`bundle exec rake RAILS_ENV=production db:data:dump` # creates db/data.yml
 
 ## Reset admin login, password and skip ldap
 
