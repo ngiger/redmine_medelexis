@@ -21,6 +21,8 @@ able to build ruby 2.2.7
 * gcc-6 autoconf bison build-essential libssl-dev libyaml-dev libreadline6-dev zlib1g-dev libncurses5-dev libffi-dev libgdbm3 libgdbm-dev
 * libssl1.0-dev libffi-dev
 
+Then use the following commands
+
     cd /path/to/redmine/plugins
     git clone git`github.com:ngiger/redmine_medelexis.github
     service restart redmine
@@ -84,8 +86,8 @@ Afterwards execute and verify these steps (assuming a bash shell). Using ruby 1.
 
 Afterwards you may examine the data as following
 
-> set -x RAILS_ENV development; bundle exec rails console ; bundle exec rails console
-> Project.all.first
+    set -x RAILS_ENV development; bundle exec rails console ; bundle exec rails console
+    Project.all.first
 
 ## Creating a dump from the production server
 
@@ -93,8 +95,8 @@ Afterwards you may examine the data as following
 
 ## Reset admin login, password and skip ldap
 
-> set -x RAILS_ENV development; bundle exec script/rails runner "user = User.find(:first, :conditions => {:admin => true, :name => 'admin'}) ; \
-> -user.auth_source_id = nil; user.password, user.password_confirmation = 'my_password'; user.save!"
+    set -x RAILS_ENV development; bundle exec script/rails runner "user = User.find(:first, :conditions => {:admin => true, :name => 'admin'}) ; \
+    -user.auth_source_id = nil; user.password, user.password_confirmation = 'my_password'; user.save!"
 
 
 If you know the login of you might also use something like `:conditions => {:login => "myLogin"}`
@@ -111,10 +113,11 @@ To run the tests, you must rake all plugins (as above) with RAILS_ENV=test. Then
 
 Prepare for running tests (assuming a bash shell) for redmine_medelexis-plugins using
 
-> export RAILS_ENV test
-> bundle exec rake db:migrate
-> bundle exec rake redmine:plugins NAME=redmine_contacts
-> and load the same plugins as above
+    export RAILS_ENV test
+    bundle exec rake db:migrate
+    bundle exec rake redmine:plugins NAME=redmine_contacts
+
+and load the same plugins as above
 
 Run tests
 
@@ -128,8 +131,8 @@ Run tests
 
 The script scripts/convert_test_abo_to_orders.rb converts all open 'TRIAL' issues older than 1 month into 'LICENSED'. It should be run daily with a cron scripts. E.g. `/etc/cron.daily/onvert_test_abo_to_orders.sh` could have the following content.
 
-> #!/bin/bash
-> cd /path/to/redmine/checkout && bundle exec ruby script/rails runner plugins/redmine_medelexis/scripts/convert_test_abo_to_orders.rb
+    #!/bin/bash
+    cd /path/to/redmine/checkout && bundle exec ruby script/rails runner plugins/redmine_medelexis/scripts/convert_test_abo_to_orders.rb
 
 It will add the log entries like this to the system log
 
@@ -147,6 +150,6 @@ bc. bundle exec ruby script/rails runner plugins/redmine_medelexis/scripts/creat
 
 See "doc":https://github.com/docker-library/docs/tree/master/redmine and "code":https://github.com/docker-library/redmine. Has no so old redmine. There adapted its Dockerfile.template.
 
-> docker build -t ngiger/redmine .
-> docker run --detached -p 3000:3000 --env REDMINE_NO_DB_MIGRATE=1 -v /opt/src/redmine-medelexis/data2:/usr/src/redmine/files ngiger/redmine
+    docker build -t ngiger/redmine .
+    docker run --detached -p 3000:3000 --env REDMINE_NO_DB_MIGRATE=1 -v /opt/src/redmine-medelexis/data2:/usr/src/redmine/files ngiger/redmine
 
