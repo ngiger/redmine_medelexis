@@ -68,7 +68,7 @@ module RedmineMedelexis
   end
 
   def self.getExpiredTrialIssues
-    unclosed_issues = Issue.find(:all, :conditions => {:tracker_id => Tracker_Is_Service, :closed_on => nil})
+    unclosed_issues = Issue.where(tracker_id: Tracker_Is_Service, closed_on: nil)
     trial2order = unclosed_issues.find_all{|x| x.valid? && x.isTrial? && x.get_end_of_license < (Date.today-1) }
   end
 
@@ -92,7 +92,7 @@ module RedmineMedelexis
   end
 
   def self.getHauptkontakt(project_id)
-    Project.find(project_id).contacts.find(:all, :conditions => { :cached_tag_list => 'Hauptkontakt'} ).first
+    Contact.where(cached_tag_list: 'Hauptkontakt').find{|x| x.projects.where(id: project_id)}
   end
 
 end

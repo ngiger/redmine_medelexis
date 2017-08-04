@@ -20,7 +20,7 @@
 # along with redmine_contacts.  If not, see <http://www.gnu.org/licenses/>.
 require File.expand_path('../../test_helper', __FILE__)
 
-class Redmine::ApiTest::LicenseTest < ActionController::IntegrationTest
+class Redmine::ApiTest::LicenseTest < Redmine::IntegrationTest
     ActiveRecord::Fixtures.create_fixtures(Redmine::Plugin.find(:redmine_medelexis).directory + '/test/fixtures/',
                             [
                              :contacts,
@@ -51,7 +51,7 @@ class Redmine::ApiTest::LicenseTest < ActionController::IntegrationTest
     Setting.rest_api_enabled = '0'
     Setting.login_required = '0'
   end
-  
+
   test "verify convertExpiredTrial2License" do
     assert_equal('LICENSED', Issue.find(1).custom_field_values.first.value)
     assert_equal('TRIAL', Issue.find(2).custom_field_values.first.value)
@@ -62,5 +62,5 @@ class Redmine::ApiTest::LicenseTest < ActionController::IntegrationTest
     assert_equal 'Issue', Journal.last.journalized_type
     assert /TRIAL/.match(Journal.last.notes)
   end
-  
+
 end

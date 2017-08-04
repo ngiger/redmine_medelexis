@@ -20,7 +20,7 @@
 # along with redmine_contacts.  If not, see <http://www.gnu.org/licenses/>.
 require File.expand_path('../../test_helper', __FILE__)
 
-class Redmine::ApiTest::LicenseTest < ActionController::IntegrationTest
+class Redmine::ApiTest::LicenseTest < Redmine::IntegrationTest
     ActiveRecord::Fixtures.create_fixtures(Redmine::Plugin.find(:redmine_medelexis).directory + '/test/fixtures/',
                             [:settings,
                              :issues,
@@ -49,7 +49,7 @@ class Redmine::ApiTest::LicenseTest < ActionController::IntegrationTest
     Setting.rest_api_enabled = '0'
     Setting.login_required = '0'
   end
-  
+
   def get_signed_xml_path(username)
     signed_xml = File.join(Dir.tmpdir, 'redmine_medelexis', "#{username}_signed.xml")
   end
@@ -67,10 +67,10 @@ class Redmine::ApiTest::LicenseTest < ActionController::IntegrationTest
     assert_match('<Signature xmlns', content)
     assert_match(Medelexis_License_Regexp, content)
   end
-  
+
 #  Redmine::ApiTest::Base.should_allow_api_authentication(:get, "/my/license.xml") # now has only 4 errors
   test "GET /my/license.xml by api_key" do
-    username = 'mustermann'    
+    username = 'mustermann'
     res = get "/my/license.xml", { 'key' => RedmineMedelexis.get_api_key(username) }
     assert_response :success
   end

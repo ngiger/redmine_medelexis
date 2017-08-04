@@ -5,7 +5,6 @@ users_001:
   hashed_password: ''
   firstname: Redmine
   lastname: Admin
-  mail: admin@example.net
   admin: true
   status: 1
   last_login_on: 2013-11-28 16:18:38.629462000 +01:00
@@ -24,7 +23,6 @@ users_002:
   hashed_password: ''
   firstname: ''
   lastname: Anonymous
-  mail: ''
   admin: false
   status: 0
   last_login_on: 
@@ -43,7 +41,6 @@ users_003:
   hashed_password: ''
   firstname: Marco
   lastname: Descher
-  mail: descher@medevit.at
   admin: true
   status: 1
   last_login_on: 2013-11-22 14:23:00.000000000 +01:00
@@ -62,7 +59,6 @@ users_004:
   hashed_password: ''
   firstname: WebFrontend
   lastname: Connector
-  mail: wfe@medevit.at
   admin: true
   status: 1
   last_login_on: 2013-11-22 08:36:07.000000000 +01:00
@@ -81,7 +77,6 @@ users_005:
   hashed_password: ''
   firstname: Max
   lastname: Mustermann
-  mail: mustermann@medevit.at
   admin: false
   status: 1
   last_login_on: 2013-11-22 14:09:46.000000000 +01:00
@@ -100,7 +95,6 @@ users_006:
   hashed_password: ''
   firstname: Niklaus
   lastname: Giger
-  mail: niklaus.giger@member.fsf.org
   admin: false
   status: 1
   last_login_on: 2013-10-25 11:34:56.000000000 +02:00
@@ -119,7 +113,6 @@ users_007:
   hashed_password: ''
   firstname: Julian
   lastname: Kappis
-  mail: julian.kappis@argomed.ch
   admin: true
   status: 1
   last_login_on: 2013-11-21 11:23:11.000000000 +01:00
@@ -138,7 +131,6 @@ users_008:
   hashed_password: ''
   firstname: Test
   lastname: User
-  mail: testuser@medevit.at
   admin: false
   status: 1
   last_login_on: 2013-11-15 17:10:53.000000000 +01:00

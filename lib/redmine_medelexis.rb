@@ -49,11 +49,11 @@ module RedmineMedelexis
   LicenseStore      = File.join(Dir.tmpdir, 'redmine_medelexis')
 
   def self.get_api_key(username)
-    user = User.find_by_login(username)    
+    user = User.find_by_login(username)
     token = Token.find_by_user_id_and_action(user.id, :api)
     token ? token.value : nil
   end
-  
+
   def self.license_info_for_user(user)
     RedmineMedelexis.debug "#{__LINE__}: user #{user.inspect}"
     project = RedmineMedelexis.get_project(user)
@@ -64,7 +64,7 @@ module RedmineMedelexis
     info['license']    = RedmineMedelexis.get_license(project)
     info
   end
-  
+
   private
 
   # Resumen of project mmustermann
@@ -76,23 +76,23 @@ module RedmineMedelexis
   # contacts_004:  id: 4  first_name: Praxis Dr. Mustermann  is_company: true created_on: 2013-11-15 14:30:21.000000000 +01:00
   # contacts_002:  id: 2  first_name: Max  last_name: Mustermann  is_company: false created_on: 2013-10-23 08:35:17.000000000 +02:00
   # members_001:  id: 1  user_id: 5  project_id: 3
-  
+
     Zeitformat        = '%Y-%m-%d%:z'
     EwigesAblaufdatum = Time.new(2099, 12, 31).strftime(Zeitformat)
   def self.get_member(user)
-    members =  Member.find_all_by_user_id(user.id)
+    members =  Member.where(id: user.id)
     RedmineMedelexis.debug "#{__LINE__}: members #{members.inspect}"
     if members.size == 1
       members.first
     else
       kundenRolle = Role.where("name = 'Kunde'")
-      members =  Member.find_all_by_user_id(user.id)
+      members =  Member.where(user.id)
       RedmineMedelexis.debug "#{__LINE__}: members #{members.inspect}"
       return nil unless members.size == 1
       return members.first
     end
   end
-  
+
   def self.get_project(user)
     # Project.all.each{|p| pp puts "Project id #{p.id} identifier #{p.identifier} name #{p.name}" }
     return nil unless user
@@ -106,12 +106,11 @@ module RedmineMedelexis
     RedmineMedelexis.debug "#{__LINE__}: user #{user.name} #{user.name} > project #{project.inspect}"
     return project if project
   end
-  
+
   def self.get_ownerdata(user, project)
     return nil unless user
     return {'customerId' => 'anonymous?' } if user.anonymous?
-    members =  Member.find_all_by_user_id(user.id)
-    member = members[0]
+    member = Member.find_by_project_id_and_user_id(project.id, user.id)
     condition = "project_id = #{member.project_id}"
     RedmineMedelexis.debug "#{__LINE__}: member #{member.inspect}"
     ownerData = { "customerId"             => user.login,
@@ -128,7 +127,7 @@ module RedmineMedelexis
     return nil unless project
     condition = "project_id = #{project.id}"
     issues = Issue.where(condition, Date.today)
-    eternal = Issue.find(:all, :conditions => {:project_id => 1, :tracker_id => RedmineMedelexis::Tracker_Is_Service, :closed_on => nil})
+    eternal = Issue.where(project_id: 1, tracker_id: RedmineMedelexis::Tracker_Is_Service, closed_on: nil)
     licenses = []
     (issues+eternal).each do  |issue|  #>"2013-12-12+01:00",
       endOfLicense = issue.get_end_of_license + 1
@@ -142,7 +141,7 @@ module RedmineMedelexis
     end
     licenses
   end
-  
+
   def self.write_unencrypted_xml(license, info)
     info ?  owner   = info['ownerdata'] : owner   = {}
     info ?  licInfo = info['license']   : licInfo = [ {} ]
@@ -183,7 +182,7 @@ module RedmineMedelexis
     all_xml = XmlSimple.xml_out(all_xml, {'RootName' => 'medelexisLicense' ,'XmlDeclaration' => '<?xml version="1.0" encoding="UTF-8" standalone="no"?>' })
     all_xml
   end
-  
+
   def self.encrypt(info, userName)
     data_dir = File.expand_path(File.join(File.expand_path(File.dirname(__FILE__)), '..', '..', 'data'))
     signingKey        = "#{Keystore}/signingKey.pem"

@@ -20,7 +20,8 @@
 # along with redmine_contacts.  If not, see <http://www.gnu.org/licenses/>.
 require File.expand_path('../../test_helper', __FILE__)
 
-class Redmine::InvoiceTest < ActionController::IntegrationTest
+
+class Redmine::InvoiceTest < Redmine::IntegrationTest
     ActiveRecord::Fixtures.create_fixtures(Redmine::Plugin.find(:redmine_medelexis).directory + '/test/fixtures/',
                             [:settings,
                              :invoices,
@@ -37,7 +38,8 @@ class Redmine::InvoiceTest < ActionController::IntegrationTest
                              :custom_values,
                              ])
   def setup
-    user = User.find(:first, :conditions => {:admin => true, :login => 'admin'})
+    user = User.where(admin: true, login: 'admin').first
+    user.email_address = EmailAddress.create!(:user_id => user.id, :address => 'another@somenet.foo')
     user.password, user.password_confirmation = "my_password"; user.save!
     Setting.rest_api_enabled = '1'
     Setting.login_required = '1'
@@ -102,5 +104,5 @@ class Redmine::InvoiceTest < ActionController::IntegrationTest
     Setting.rest_api_enabled = '0'
     Setting.login_required = '0'
   end
-  
+
 end

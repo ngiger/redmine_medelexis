@@ -26,13 +26,17 @@ Minitest::Reporters.use!(
   ENV,
   Minitest.backtrace_filter
 )
+begin require 'pry'; rescue LoadError; end
 def fixture_files_path
   "#{File.expand_path('..',__FILE__)}/fixtures/files/"
 end
 
 def login_as(user_login)
   clear_password = 'dummy8753'
-  change_user_password(user_login, clear_password)
+  user = User.where(login: user_login).first
+  user.password = user.password_confirmation = clear_password
+  user.email_address = EmailAddress.create!(:user_id => user.id, :address => "info@#{user_login}.org")
+  user.save
 end
 
 def change_start_date(issue, date)
@@ -48,13 +52,13 @@ end
 class RedmineMedelexis::TestCase
   include ActionDispatch::TestProcess
   def self.prepare
-    Role.find(1, 2, 3).each do |r| 
+    Role.find(1, 2, 3).each do |r|
       r.permissions << :view_contacts
       r.permissions << :view_invoices
       r.permissions << :view_expenses
       r.save
     end
-    Role.find(1, 2).each do |r| 
+    Role.find(1, 2).each do |r|
       r.permissions << :edit_contacts
       r.permissions << :edit_invoices
       r.permissions << :edit_expenses
@@ -63,13 +67,13 @@ class RedmineMedelexis::TestCase
       r.save
     end
 
-    Project.find(1, 2, 3).each do |project| 
+    Project.find(1, 2, 3).each do |project|
       EnabledModule.create(:project => project, :name => 'contacts_module')
       EnabledModule.create(:project => project, :name => 'contacts_invoices')
       EnabledModule.create(:project => project, :name => 'contacts_expenses')
     end
   end
-  
+
   def self.plugin_fixtures(plugin, *fixture_names)
     plugin_fixture_path = "#{Redmine::Plugin.find(plugin).directory}/test/fixtures"
     if fixture_names.first == :all
@@ -77,7 +81,7 @@ class RedmineMedelexis::TestCase
       fixture_names.map! { |f| f[(plugin_fixture_path.size + 1)..-5] }
     else
       fixture_names = fixture_names.flatten.map { |n| n.to_s }
-    end    
+    end
   end
 
   def uploaded_test_file(name, mime)

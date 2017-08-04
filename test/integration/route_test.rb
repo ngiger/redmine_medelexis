@@ -21,7 +21,7 @@
 
 require File.expand_path('../../test_helper', __FILE__)
 
-class RoutingTest < ActionController::IntegrationTest
+class RoutingTest < Redmine::IntegrationTest
 
   test "invoices" do
     assert_routing({ :path => "/medelexis/rechnungslauf", :method => :get },

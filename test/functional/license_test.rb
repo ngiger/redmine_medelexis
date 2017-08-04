@@ -68,7 +68,7 @@ class Redmine::ApiTest::LicenseTest < ActionController::TestCase
     res = RedmineMedelexis.license_info_for_user(user)
     assert_nil res
   end
-  
+
   test "verify that I got no license for an nil user" do
     res = RedmineMedelexis.license_info_for_user(nil)
     assert_nil res
@@ -105,4 +105,10 @@ class Redmine::ApiTest::LicenseTest < ActionController::TestCase
     assert     ( /"id"=>"ch.elexis.fop_wrapper.feature.feature.group", "licenseType"=>"LICENSED",/ .match(content) ) # 'Must find eternal license for fop'
   end
 
+  test "test get_member" do
+    username = 'mustermann'
+    user = User.find_by_login(username)
+    res = RedmineMedelexis.get_member(user)
+    assert res.is_a?(Member)
+  end
 end

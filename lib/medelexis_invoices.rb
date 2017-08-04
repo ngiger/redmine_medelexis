@@ -6,12 +6,13 @@ require 'medelexis_helpers'
 
 class Project
   def keineVerrechnung
-    return false unless field = CustomField.find(:first, :conditions => { :name => 'Keine Verrechnung'} )
+    field = CustomField.all.find{|x| /Keine Verrechnung/i.match(x.name)}
+    return false unless field
     return false unless custom = custom_value_for(field.id)
     custom.value.to_i > 0 ? true : false
   end
   def nrDoctors
-    field = CustomField.find(:first, :conditions => { :name => '# Ärzte'} )
+    field = CustomField.all.find{|x| /# Ärzte/i.match(x.name)}
     if (field && custom_value_for(field))
       custom_value_for(field).value.to_i
     else
@@ -19,7 +20,7 @@ class Project
     end
   end
   def nrStations
-    field = CustomField.find(:first, :conditions => { :name => '# Stationen'} )
+    field = CustomField.all.find{|x| /# Stationen/i.match(x.name)}
     if (field && custom_value_for(field))
       custom_value_for(field).value.to_i
     else
@@ -27,7 +28,7 @@ class Project
     end
   end
   def systemProperties
-    field = CustomField.find(:first, :conditions => { :name => 'systemProperties'} )
+    field = CustomField.all.find{|x| /systemProperties/i.match(x.name)}
     if (field && custom_value_for(field))
       custom_value_for(field).value
     else
@@ -36,7 +37,7 @@ class Project
   end
   def kundenstatus
     custom_field_values # forces evaluation. Avoids an error in test/functional
-    field = CustomField.find(:first, :conditions => { :name => 'Kundenstatus'} )
+    field = CustomField.all.find{|x| /Kundenstatus/i.match(x.name)}
     if (field && custom_value_for(field))
       custom_value_for(field).value
     else
@@ -104,8 +105,8 @@ Verrechnet werden Leistungen vom 2016-01-01 bis 2016-12-31."
     invoice_since  ||= Date.today.beginning_of_year
     puts "findAllOpenServicesForProjectID #{stich_tag.inspect} #{invoice_since.inspect}" if $VERBOSE
     return [] if (stich_tag.to_date - invoice_since.to_date).to_i < 0
-    all_project_issues = Issue.find(:all, :conditions => { :project_id => project_id, :tracker_id => RedmineMedelexis::Tracker_Is_Service} )
-    invoices = Invoice.find(:all, :conditions => {:project_id => project_id}).reject{ |invoice| stichtag(invoice) == nil || stichtag(invoice) < invoice_since }
+    all_project_issues = Issue.where(project_id: project_id, tracker_id: RedmineMedelexis::Tracker_Is_Service)
+    invoices = Invoice.where(project_id: project_id).reject{ |invoice| stichtag(invoice) == nil || stichtag(invoice) < invoice_since }
     last_invoice = getLastInvoiceForProject(project_id)
     return all_project_issues unless last_invoice
     open_issues = []
@@ -144,13 +145,13 @@ Verrechnet werden Leistungen vom 2016-01-01 bis 2016-12-31."
   end
 
   def self.getLastInvoiceForProject(project_id)
-    projects = Project.find(:all, :conditions => { :id => project_id } )
+    projects = Project.where(id: project_id )
     unless projects.size > 0
       puts "getDateOfLastInvoice no projects found for #{project_id}" if $VERBOSE
       return nil
     end
     project = projects.first
-    invoices = Invoice.find(:all, :conditions => {:project_id => project.id}).reject{ |invoice| stichtag(invoice) == nil }
+    invoices = Invoice.where(project_id: project.id).reject{ |invoice| stichtag(invoice) == nil }
     unless invoices.size > 0
       puts "getDateOfLastInvoice no invoices found for #{project_id}" if $VERBOSE
       return nil
@@ -166,8 +167,7 @@ Verrechnet werden Leistungen vom 2016-01-01 bis 2016-12-31."
     lastDate
   end
 
-  def self.getDaysOfYearFactor(issue_id, invoice_since, day2invoice = Date.today.to_datetime.end_of_year)
-    issue = Issue.find(:first, :conditions => {:id => issue_id})
+  def self.getDaysOfYearFactor(issue, invoice_since, day2invoice = Date.today.to_datetime.end_of_year)
     status = issue.custom_field_values.first.value
     daysThisYear = (day2invoice.end_of_year.to_date - day2invoice.beginning_of_year.to_date + 1).to_i
     return 0, TrialDays if issue.isTrial?
@@ -210,7 +210,7 @@ Verrechnet werden Leistungen vom 2016-01-01 bis 2016-12-31."
 
   def self.getProduct(issue)
     subject = issue.subject.sub('feature.group', 'feature').sub('feature.feature', 'feature')
-    Product.find(:first, :conditions => {:code => subject})
+    Product.where(code: subject).first
   end
 
   def self.findProjects2invoice(day2invoice = Date.today.end_of_year, invoice_since = nil)
@@ -235,13 +235,9 @@ Verrechnet werden Leistungen vom 2016-01-01 bis 2016-12-31."
 
   def self.invoice_for_project(identifier, stich_tag = Date.today.end_of_year.to_date, invoice_since = Date.today.beginning_of_year, issues = nil)
     round_to = BigDecimal.new('0.05')
-    if identifier.to_i >0
-      project= Project.find(identifier.to_i)
-    else
-      project= Project.find(:first,  :conditions => {:identifier => identifier})
-    end
+    project= Project.find(identifier.to_i)
     raise "Projekt '#{identifier}' konnte weder als Zahl noch als Name gefunden werden" unless project
-    admin = User.find(:first, :conditions => {:admin => true})
+    admin = User.where(:admin => true).first
     nrDoctors = project.nrDoctors
     multiplier = nrDoctors <= 6 ? DiscountMap[nrDoctors] : DiscountMap[6] + (nrDoctors-6)*MaxDiscount
     puts "project identifier #{identifier} with #{nrDoctors} doctors multiplier #{multiplier} keineVerrechnung #{project.keineVerrechnung} is: #{project}" if $VERBOSE
@@ -281,7 +277,7 @@ Verrechnet werden Leistungen vom 2016-01-01 bis 2016-12-31."
         next unless product
         line_description = product.name # + ". Wiki: http://wiki.elexis.info/#{subject}.feature.group"
         grund_price = product.price.to_f
-        factor, days = getDaysOfYearFactor(issue.id, invoice_since, stich_tag)
+        factor, days = getDaysOfYearFactor(issue, invoice_since, stich_tag)
         next if days < 0
         price = grund_price
         if factor == 0 || days <= Issue::TrialDays
@@ -305,7 +301,8 @@ Verrechnet werden Leistungen vom 2016-01-01 bis 2016-12-31."
                                          :tax => ContactsSetting.default_tax
                                         )
     }
-    invoice.lines.sort! { |a,b| b.price.to_i <=> a.price.to_i } # by price descending
+    # TODO: Force this order in the database
+    # invoice.lines.sort_by{ |a| a.price.to_i }
     puts "Added #{invoice.lines.size} lines (of #{issues.size} service tickets). Stich_tag #{stich_tag.strftime(DatumsFormat)} due #{invoice.due_date.strftime(DatumsFormat)} description is now #{description}" if $VERBOSE
     invoice.description  = description
     invoice.custom_field_values.first.value = stich_tag_string

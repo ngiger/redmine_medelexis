@@ -56,7 +56,7 @@ class InvoiceControllerTest < ActionController::TestCase
     RedmineMedelexis::TestCase.prepare
     RedmineMedelexis::TestCase.plugin_fixtures :redmine_medelexis, :all
     @mustermann = Project.find(ID_mustermann)
-    @all_project_issues = Issue.find(:all, :conditions => { :project_id => ID_mustermann, :tracker_id => RedmineMedelexis::Tracker_Is_Service} )
+    @all_project_issues = Issue.where(project_id: ID_mustermann, tracker_id: RedmineMedelexis::Tracker_Is_Service)
     @trial_issue = @all_project_issues.find{|x| x.custom_field_values.first.to_s.eql?('TRIAL') }
     @end_of_year = Date.today.end_of_year
     change_start_date(@trial_issue,  @end_of_year - 25)
