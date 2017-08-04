@@ -17,7 +17,7 @@ class MedelexisController < ApplicationController
   MEDELEXIS_SETTINGS = '/settings/plugin/redmine_medelexis'
 
   def alle_rechnungen
-    @invoices=Invoice.find(:all)
+    @invoices=Invoice.all
   end
 
   def rechnungslauf
@@ -81,7 +81,6 @@ class MedelexisController < ApplicationController
 
   def confirm_invoice_lines
     RedmineMedelexis.log_to_system("confirm_invoice_lines from IP #{request.remote_ip} via #{request.protocol}#{request.host_with_port}#{request.fullpath} user #{User.current} : rechnungen_erstellt #{params['key']} action_name #{action_name}")
-    puts "params are #{params}"
     if request.post?
       @change_name_to = params['change_invoice_lines']['change_name_to']
       @name_to_search = params['change_invoice_lines']['name_to_search']
@@ -91,8 +90,7 @@ class MedelexisController < ApplicationController
         redirect_to :controller => "medelexis", :action => "changed_invoice_lines",
             :name_to_search => @name_to_search,
             :change_name_to => @change_name_to,
-            :changed_lines => changed_lines
-
+            :cl => changed_lines
       rescue => exception
         flash[:notice] = exception.to_s + "\n<br> Stacktrace is\n<br>" +  exception.backtrace[0..9].join("\n<br>")
         redirect_to MEDELEXIS_SETTINGS

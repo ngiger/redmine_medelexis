@@ -13,6 +13,7 @@ Redmine::Plugin.register :redmine_medelexis do
       {:controller => 'settings', :action => 'plugin', :id => "redmine_medelexis"},
        :caption => :label_medelexis, :param => :project_id
 end
+begin require 'pry'; rescue LoadError; end
 
 where = File.expand_path(File.dirname(__FILE__))
 # require "#{where}/lib/medelexis_hook_listener"

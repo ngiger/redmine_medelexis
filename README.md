@@ -85,26 +85,29 @@ Afterwards execute and verify these steps (assuming a bash shell). Using ruby 1.
 
 Copy the yaml dump to db/data.yml. You must manually remove in from db/data.yml the following items
 * color (twice in deal_statuses)
-* remove auth_sources 
+* remove auth_sources (LDAP)
 
 Now you can load it using `bundle exec rake RAILS_ENV=development db:data:load`, which will use db/data.yml
 
 Afterwards you may examine the data as following
 
-    set -x RAILS_ENV development; bundle exec rails console ; bundle exec rails console
-    Project.all.first
+    export RAILS_ENV=development
+    bundle exec ruby bin/rails console
+    irb(main)> Project.all.first
 
 ## Reset admin login, password and skip ldap
 
-    set -x RAILS_ENV development; bundle exec script/rails runner "user = User.find(:first, :conditions => {:admin => true, :name => 'admin'}) ; \
-    -user.auth_source_id = nil; user.password, user.password_confirmation = 'my_password'; user.save!"
+    bundle exec ruby bin/rails runner \
+    "user = User.where(admin: true).first; user.login='test_admin'; user.auth_source = nil; \
+    user.email_address = EmailAddress.create!(:user_id => user.id, :address => 'info#{Time.now.to_i}@tst.org') unless user.email_address; \
+    user.password = user.password_confirmation = 'test_password'; user.save!"
 
 
 If you know the login of you might also use something like `:conditions => {:login => "myLogin"}`
 
 ## Start rails for development
 
-`set -x RAILS_ENV development; bundle exec ruby script/rails server webrick --port=30001`
+`export RAILS_ENV=development; bundle exec ruby bin/rails server webrick --port=30001`
 
 ## Running the tests
 

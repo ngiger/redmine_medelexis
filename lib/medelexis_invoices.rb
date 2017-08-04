@@ -235,7 +235,8 @@ Verrechnet werden Leistungen vom 2016-01-01 bis 2016-12-31."
 
   def self.invoice_for_project(identifier, stich_tag = Date.today.end_of_year.to_date, invoice_since = Date.today.beginning_of_year, issues = nil)
     round_to = BigDecimal.new('0.05')
-    project= Project.find(identifier.to_i)
+    puts "invoice_for_project #{identifier.inspect}"
+    project = (identifier.to_i == 0 ? Project.where(identifier: identifier).first : Project.where(identifier: identifier))
     raise "Projekt '#{identifier}' konnte weder als Zahl noch als Name gefunden werden" unless project
     admin = User.where(:admin => true).first
     nrDoctors = project.nrDoctors
@@ -346,6 +347,7 @@ Verrechnet werden Leistungen vom 2016-01-01 bis 2016-12-31."
     changed_lines = []
     ActiveRecord::Base.transaction do
       get_line_items(from).sort{|x,y| x.invoice_id <=> y.invoice_id}.reverse.each do |invoice_line|
+        next if Invoice.where(id: invoice_line.invoice_id).size == 0
         invoice_line.description = invoice_line.description.sub(from, to)
         invoice_line.save!
         changed_lines << invoice_line.id

@@ -1,12 +1,12 @@
 <%= link_to "Refresh" %>
 
-<h2><%= "#{params[:changed_lines].size}" %> Zeilen wurden korrigiert</h2>
+<h2><%= "#{params[:cl].size}" %> Zeilen wurden korrigiert</h2>
 
 <ul>
   <li>Gesucht nach <%= "#{params[:name_to_search]}" %> </li>
   <li>Ersetzt durch <%= "#{params[:change_name_to]}" %> </li>
   <ol>
-    <% params[:changed_lines].each do |id|
+    <% params[:cl].each do |id|
       line = InvoiceLine.find(id)
       invoice = Invoice.find(line.invoice_id)
       project = Project.find(invoice.project_id)

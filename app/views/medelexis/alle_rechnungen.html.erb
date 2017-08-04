@@ -10,7 +10,7 @@ Project-Id, Project-Name, Rechnungs-Id, Status, Betrag, Fällig am, Titel, Zeile
   "<%= invoice.id %>",
   "<%= invoice.status_id %>",
   "<%= invoice.amount %>",
-  "<%= [Invoice::PAID_INVOICE, Invoice::CANCELED_INVOICE].index(invoice.status_id) ? '' : invoice.due_date.strftime('%Y.%m.%d') %>",
+  "<%= [Invoice::PAID_INVOICE, Invoice::CANCELED_INVOICE].index(invoice.status_id) ? '' : (invoice.due_date ? invoice.due_date.strftime('%Y.%m.%d') : 'nil') %>",
   "<%= invoice.number %>",
   "<%= invoice.subject %>",
   "<%= /\d{4}-\d{2}-\d{2}/.match(invoice.description.split("\n")[-1]) %>",

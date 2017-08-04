@@ -283,6 +283,12 @@ class InvoiceControllerTest < ActionController::TestCase
     assert_equal 0, nrCreated, "May not create an invoice #{nrCreated} newSize #{newSize} #{oldSize}"
   end
 
+  test "verify that project invoice_for_project works when passing a name" do
+    project = Project.find(4)
+    oldSize= Invoice.all.size
+    assert_equal(nil, MedelexisInvoices.invoice_for_project(project.identifier, @end_of_year))
+  end
+
   test "second invoicing may not produce a new invoice even if since given" do
     oldSize= Invoice.all.size
     stichtag = Date.today
