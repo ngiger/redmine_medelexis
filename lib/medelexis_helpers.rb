@@ -86,13 +86,22 @@ module RedmineMedelexis
       startTime = Time.now
       getExpiredTrialIssues.each{|issue| issue_to_licensed(issue) }
       duration = (Time.now-startTime).to_i
-      self.log_to_system("issue_to_licensed took #{duration} second for ids #{@@idFromTials2License.join(',')}")
+      self.log_to_system("issue_to_licensed took #{duration} second for issues with ids #{@@idFromTials2License.join(',')}")
     end
     @@idFromTials2License
   end
 
   def self.getHauptkontakt(project_id)
-    Contact.where(cached_tag_list: 'Hauptkontakt').find{|x| x.projects.where(id: project_id)}
+    contacts = Project.find(project_id).contacts
+    if contacts.size != 1
+      hauptkontakt = contacts.where(cached_tag_list: 'Hauptkontakt')
+      if hauptkontakt.size != 1
+        raise "Don't know how to handle Project with id #{project_id} and not exactly one Hauptkontakt (actually we have #{contacts.size})."
+      end
+      return hauptkontakt.first
+    else
+      return contacts.first
+    end
   end
 
 end

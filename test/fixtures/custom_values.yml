@@ -149,3 +149,9 @@ custom_values_025:
   customized_id: 6
   custom_field_id: 2
   value: LICENSED
+custom_values_026:
+  id: 26
+  customized_type: Issue
+  customized_id: 7
+  custom_field_id: 2
+  value: CANCELLED

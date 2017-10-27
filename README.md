@@ -50,6 +50,7 @@ Get the needed zip files. Used versions are found under https://mis.foo.org/admi
 * redmine_contacts_invoices      4.1.6
 * redmine_medelexis              0.2.1
 * redmine_products               2.0.4
+* redmineup_tags                 2.0.0
 
 Afterwards execute and verify these steps (assuming a bash shell). Using ruby 1.9.3p547 was fine for me. Ruby 2.1.2 had some problems
 
@@ -68,14 +69,17 @@ Afterwards execute and verify these steps (assuming a bash shell). Using ruby 1.
     bundle install
     export RAILS_ENV=development
     # bundle exec rake generate_secret_token # only once
+    # bundle exec rake db:create
     bundle exec rake db:migrate RAILS_ENV=development
     # bundle exec rake redmine:plugins NAME=redmine_access_filters
+    bundle exec rake redmine:plugins NAME=redmine_agile
     bundle exec rake redmine:plugins NAME=redmine_checklists
     bundle exec rake redmine:plugins NAME=redmine_contacts
     bundle exec rake redmine:plugins NAME=redmine_contacts_helpdesk
     bundle exec rake redmine:plugins NAME=redmine_contacts_invoices
     bundle exec rake redmine:plugins NAME=redmine_products
     bundle exec rake redmine:plugins NAME=redmine_medelexis
+    bundle exec rake redmine:plugins NAME=redmineup_tags
 
 ## Creating a dump from the production server
 
@@ -85,7 +89,8 @@ Afterwards execute and verify these steps (assuming a bash shell). Using ruby 1.
 
 Copy the yaml dump to db/data.yml. You must manually remove in from db/data.yml the following items
 * color (twice in deal_statuses)
-* remove auth_sources (LDAP)
+* remove auth_sources and access_filters (LDAP)
+* remove taggings ???
 
 Now you can load it using `bundle exec rake RAILS_ENV=development db:data:load`, which will use db/data.yml
 
@@ -99,7 +104,7 @@ Afterwards you may examine the data as following
 
     bundle exec ruby bin/rails runner \
     "user = User.where(admin: true).first; user.login='test_admin'; user.auth_source = nil; \
-    user.email_address = EmailAddress.create!(:user_id => user.id, :address => 'info#{Time.now.to_i}@tst.org') unless user.email_address; \
+    user.email_address = EmailAddress.all.first unless user.email_address; \
     user.password = user.password_confirmation = 'test_password'; user.save!"
 
 
@@ -136,9 +141,9 @@ Run tests
 The script scripts/convert_test_abo_to_orders.rb converts all open 'TRIAL' issues older than 1 month into 'LICENSED'. It should be run daily with a cron scripts. E.g. `/etc/cron.daily/onvert_test_abo_to_orders.sh` could have the following content.
 
     #!/bin/bash
-    cd /path/to/redmine/checkout && bundle exec ruby script/rails runner plugins/redmine_medelexis/scripts/convert_test_abo_to_orders.rb
+    cd /path/to/redmine/checkout && bundle exec ruby bin/rails runner plugins/redmine_medelexis/scripts/convert_test_abo_to_orders.rb
 
-It will add the log entries like this to the system log
+It will add the log entries like this to a log file in the current directory name like <fqdn>.log
 
 > Aug 11 20:28:11 host user: redmine_medelexis: issue_to_licensed took 1 second for ids 20,21,22
 
@@ -148,7 +153,7 @@ It bundles all changes into a single transaction which includes the system log o
 
 The script scripts/create_invoices.rb creates 6 (test) invoices using the last day of this year.
 
-bc. bundle exec ruby script/rails runner plugins/redmine_medelexis/scripts/create_invoices.rb
+bc. bundle exec ruby bin/rails runner plugins/redmine_medelexis/scripts/create_invoices.rb
 
 ## Using docker
 

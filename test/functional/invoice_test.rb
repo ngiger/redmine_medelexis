@@ -493,4 +493,17 @@ class InvoiceControllerTest < ActionController::TestCase
     assert_equal(0, second_invoice.lines.find_all{|x| /gratis/i.match(x.description)}.size, 'Must invoice previously marked Gratis item')
     assert_nil( second_invoice.lines.find{|line| line.description.match(/added.+wird für.+76.+Tage/i) }, 'second_invoice: Do not invoice added item')
   end
+
+  test 'HauptKontakt must be correct' do
+    project = Project.find(ID_mustermann)
+    assert_equal(3, project.contacts.size, 'Mustermann must have 3 contacts')
+    contact = RedmineMedelexis.getHauptkontakt(project.id)
+    assert_equal('Max', contact.first_name, 'HauptKontakt must be Max')
+    assert_equal('Mustermann', contact.last_name, 'HauptKontakt must be Mustermann')
+  end
+
+  test 'handle issue with due_date nil' do
+    assert_equal('CANCELLED', nil_due_dates.last.custom_field_values.first.to_s)
+    assert_nil(nil_due_dates.last.due_date)
+  end
 end

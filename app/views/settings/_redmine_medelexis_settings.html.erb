@@ -9,11 +9,11 @@
 <p>
   <label><%= "Output debugging info" %></label>
   <%= check_box_tag 'settings[debug]', 1, @settings["debug"] %>
-  Output goes to the standard logger
+  Output goes to <%= RedmineMedelexis::LogName %>
   <br>
 </p>
 <p>
-  <label> <%= "Keep generated temporary files." %></label>
+  <label> <%= "Keep generated temporar@logdevy files." %></label>
   <%= check_box_tag 'settings[keep_temp_license_files]', 1, @settings["keep_temp_license_files"] %>
   The license files are stored under: <%= RedmineMedelexis::LicenseStore %>
 </p>

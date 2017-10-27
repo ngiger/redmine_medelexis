@@ -189,6 +189,9 @@ Verrechnet werden Leistungen vom 2016-01-01 bis 2016-12-31."
       nrDays = (day2invoice - issue.start_date).to_i
     end
     if status == 'CANCELLED' or status == 'EXPIRED'
+      unless issue.due_date
+        return 0, 0
+      end
       used_till = issue.due_date.to_date
       if used_till < invoice_since # already invoiced
         return 0, 0
@@ -236,7 +239,9 @@ Verrechnet werden Leistungen vom 2016-01-01 bis 2016-12-31."
   def self.invoice_for_project(identifier, stich_tag = Date.today.end_of_year.to_date, invoice_since = Date.today.beginning_of_year, issues = nil)
     round_to = BigDecimal.new('0.05')
     puts "invoice_for_project #{identifier.inspect}"
-    project = (identifier.to_i == 0 ? Project.where(identifier: identifier).first : Project.where(identifier: identifier))
+    # Starting with redmine 3.2.7, the query returned Project::ActiveRecord_Relation and no longer a project
+    project = (identifier.to_i == 0 ? Project.where(identifier: identifier).first : Project.where(id: identifier))
+    project = project.first if project && project.is_a?(Project::ActiveRecord_Relation)
     raise "Projekt '#{identifier}' konnte weder als Zahl noch als Name gefunden werden" unless project
     admin = User.where(:admin => true).first
     nrDoctors = project.nrDoctors
