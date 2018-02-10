@@ -21,7 +21,8 @@ require 'socket'
 class Issue
   TrialDays         = 31 # Days
   def isTrial?
-    /TRIAL/i.match(custom_field_values[0].to_s)
+    statusField = custom_field_values.find{|x| x.custom_field.name.eql?('Abostatus')}.value
+    !!/TRIAL/i.match(statusField)
   end
 
   def get_end_of_license
@@ -73,10 +74,14 @@ module RedmineMedelexis
   end
 
   def self.issue_to_licensed(issue)
-    issue.custom_field_values.first.value = 'LICENSED'
+    statusField = issue.custom_field_values.find{|x| x.custom_field.name.eql?('Abostatus')}
+    aboStatus = statusField.value.clone
+    msg ="Issue #{issue.id} valid? #{issue.valid?} isTrial #{issue.isTrial?} eol #{issue.get_end_of_license} #{File.basename(__FILE__)}: #{aboStatus} -> LICENSED"
+    statusField.value = 'LICENSED'
     issue.save_custom_field_values
     issue.save!
-    addJournal('Issue', issue.id, "#{File.basename(__FILE__)}: TRIAL -> LICENSED")
+    self.log_to_system("issue_to_licensed id #{msg}")
+    addJournal('Issue', issue.id, msg)
     @@idFromTials2License << issue.id
   end
 
