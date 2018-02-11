@@ -194,11 +194,13 @@ Verrechnet werden Leistungen vom 2016-01-01 bis 2016-12-31."
       unless issue.due_date
         return 0, 0
       end
-      used_till = issue.due_date.to_date
+      used_till = Date.parse(issue.updated_on.to_s)
       if used_till < invoice_since # already invoiced
         return 0, 0
-      elsif (used_till - invoice_since).to_i < TrialDays
-        nrDays = (used_till - invoice_since).to_i
+      elsif (used_till - issue.start_date).to_i  < TrialDays # was less then 30 days in trial
+        return 0, 0
+      else
+        nrDays = (day2invoice - used_till).to_i
       end
       return nrDays.to_f/daysThisYear, nrDays
     end
@@ -288,6 +290,7 @@ Verrechnet werden Leistungen vom 2016-01-01 bis 2016-12-31."
         factor, days = getDaysOfYearFactor(issue, invoice_since, stich_tag)
         next if days < 0
         price = grund_price
+        next if status.eql?('CANCELLED') && days <= Issue::TrialDays
         if factor == 0 || days <= Issue::TrialDays
           next if status.eql?('CANCELLED')
           next unless issue.isTrial?

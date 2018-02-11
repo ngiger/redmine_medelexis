@@ -121,8 +121,7 @@ class InvoiceControllerTest < ActionController::TestCase
     nrCreated = sizeAfterFirstRun -oldSize
     content = res.inspect.to_s
     assert (nrCreated == 1 ), "Must have created exactyl one. Not #{nrCreated}"
-    assert_equal(stichtag, MedelexisInvoices.getDateOfLastInvoice(Invoice.first.project_id,stichtag))
-    Invoice.all.last.lines.each{ |line| puts line.description }
+    assert_equal(stichtag, MedelexisInvoices.getDateOfLastInvoice(Invoice.first.project_id, stichtag))
     assert_match(/wird für\s+45\s+Tage verrechnet/, Invoice.all.last.lines.last.description)
   end
 
@@ -247,7 +246,7 @@ class InvoiceControllerTest < ActionController::TestCase
 
     # Cancelled items must be paid for the whole year!
     nrFounds = first_invoice.lines.find_all{|line| line.description.match(/ wird für 348 Tage verrechnet/i)}
-    assert_equal(2, nrFounds.size, 'first_invoice must contain 348 Tage')
+    assert_equal(1, nrFounds.size, 'first_invoice must contain 348 Tage')
     nrFounds = first_invoice.lines.find_all{|line| line.description.match(/ wird für 280 Tage verrechnet/i)}
     assert_equal(0, nrFounds.size, 'first_invoice must contain 280 Tage')
     nrFounds = first_invoice.lines.find_all{|line| line.description.match(/ wird für 160 Tage verrechnet/i)}
@@ -259,7 +258,7 @@ class InvoiceControllerTest < ActionController::TestCase
     nrFounds = second_invoice.lines.find_all{|line| line.description.match(/feature/i)}
     assert(1<= nrFounds.size, 'second_invoice must contain a feature')
     assert( first_invoice.lines.find{|line| line.description.match(/Medelexis.+ wird für 348 Tage verrechnet/i) }, 'first_invoice: correct day for Medelexis')
-    assert( first_invoice.lines.find{|line| line.description.match(/cancelled.+ wird für 348 Tage verrechnet/i) }, 'first_invoice: correct days for cancelled item')
+    assert_nil( first_invoice.lines.find{|line| line.description.match(/cancelled.+ wird für 348 Tage verrechnet/i) }, 'first_invoice: correct days for cancelled item')
     assert( first_invoice.lines.find{|line| line.description.match(/gratis/i) }, 'first_invoice: TRIAL must be gratis')
     assert_nil( first_invoice.lines.find{|line| line.description.match(/added.+/i) }, 'first_invoice: later added item may not appear')
 
@@ -455,8 +454,7 @@ class InvoiceControllerTest < ActionController::TestCase
     assert_not_nil res
     dump_invoice(invoice)
     canncelled_items = invoice.lines.find_all{|line| line.description.match(/cancelled/i) }
-    assert_equal(1, canncelled_items.size, 'cancelled item may not appear')
-    assert_match((days_before +  days_ahead).to_s + ' Tage', canncelled_items.first.description)
+    assert_equal(0, canncelled_items.size, 'cancelled item may not appear')
   end
 
   test "check invoice is taxed" do
