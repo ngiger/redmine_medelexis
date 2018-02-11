@@ -69,7 +69,7 @@ Verrechnet werden Leistungen vom 2016-01-01 bis 2016-12-31."
   DatumsFormat = '%Y-%m-%d'
   TrialDays    = 31
 
-  def self.stichtag(invoice)
+  def self.getStichtag(invoice)
     return nil unless invoice.subject.eql?(AboSubject)
     m = DurationMatcher.match(invoice.description)
     string_date = m[1] if m
@@ -106,13 +106,15 @@ Verrechnet werden Leistungen vom 2016-01-01 bis 2016-12-31."
     puts "findAllOpenServicesForProjectID #{stich_tag.inspect} #{invoice_since.inspect}" if $VERBOSE
     return [] if (stich_tag.to_date - invoice_since.to_date).to_i < 0
     all_project_issues = Issue.where(project_id: project_id, tracker_id: RedmineMedelexis::Tracker_Is_Service)
-    invoices = Invoice.where(project_id: project_id).reject{ |invoice| stichtag(invoice) == nil || stichtag(invoice) < invoice_since }
-    last_invoice = getLastInvoiceForProject(project_id)
-    return all_project_issues unless last_invoice
+    invoices = Invoice.where(project_id: project_id).reject{ |invoice| getStichtag(invoice) == nil || getStichtag(invoice) < invoice_since }
+    return all_project_issues unless invoices
+    last_invoices = getLastInvoicesForProject(project_id, stich_tag)
+    has_invoices_for_stichtag = last_invoices && last_invoices.size > 0
+    return all_project_issues unless has_invoices_for_stichtag
+    last_invoices = last_invoices
     open_issues = []
     core_name = Product.first.name
-    # binding.pry if $VERBOSE
-    return all_project_issues if (last_invoice &&  (stichtag(last_invoice) < stich_tag))
+    all_invoices_lines = invoices.collect{|invoice| invoice.lines.collect{|line| line.description }}.flatten
     all_project_issues.each do |issue|
       if !issueDateInRange?(issue, stich_tag, invoice_since)
         puts "Skipping #{issue.id} #{issue.subject} with #{issue.start_date}" if $VERBOSE
@@ -122,13 +124,13 @@ Verrechnet werden Leistungen vom 2016-01-01 bis 2016-12-31."
           puts "Skip no product for #{issue.id} #{issue.subject}" if $VERBOSE
         elsif product.price.to_f.to_i == 0
           puts "Skip price #{issue.id} #{issue.subject}" if $VERBOSE
-        elsif last_invoice &&
+        elsif has_invoices_for_stichtag &&
             product.name.eql?(core_name) &&
-            last_invoice.lines.find_all{|line| /#{core_name}/i.match(line.description)  }.size > 0
+            all_invoices_lines.find_all{|line| /#{core_name}/i.match(line)  }.size > 0
             puts "Skip #{core_name} line #{issue.id}" if $VERBOSE
-        elsif last_invoice
-          lines = last_invoice.lines.find_all{|line| line.description.index(product.name) }
-          if /gratis/i.match(lines.first.description)
+        elsif has_invoices_for_stichtag
+          lines = all_invoices_lines.find_all{|line| line.index(product.name) }
+          if /gratis/i.match(lines.first)
             puts "Add gratis product #{issue.id} #{product.name}" if $VERBOSE
           else
             puts "Skip matched product #{issue.id} #{product.name}" if $VERBOSE
@@ -144,26 +146,26 @@ Verrechnet werden Leistungen vom 2016-01-01 bis 2016-12-31."
     open_issues
   end
 
-  def self.getLastInvoiceForProject(project_id)
+  def self.getLastInvoicesForProject(project_id, stichtag)
     projects = Project.where(id: project_id )
     unless projects.size > 0
-      puts "getDateOfLastInvoice no projects found for #{project_id}" if $VERBOSE
+      puts "getLastInvoicesForProject no projects found for #{project_id}" if $VERBOSE
       return nil
     end
     project = projects.first
-    invoices = Invoice.where(project_id: project.id).reject{ |invoice| stichtag(invoice) == nil }
+    invoices = Invoice.where(project_id: project.id).reject{ |invoice| getStichtag(invoice) == nil }
     unless invoices.size > 0
-      puts "getDateOfLastInvoice no invoices found for #{project_id}" if $VERBOSE
+      puts "getLastInvoicesForProject no invoices found for #{project_id}" if $VERBOSE
       return nil
     end
-    last = invoices.max {|a,b| stichtag(a) <=> stichtag(b) }
+    invoices.find_all{ |x| getStichtag(x).eql?(stichtag)}
   end
 
-  def self.getDateOfLastInvoice(project_id)
-    last = getLastInvoiceForProject(project_id)
-    return nil unless last
-    lastDate = stichtag(last)
-    puts "getDateOfLastInvoice lastDate for #{project_id} was #{lastDate}" if $VERBOSE
+  def self.getDateOfLastInvoice(project_id, stichtag = Date.today.to_datetime.end_of_year)
+    last = getLastInvoicesForProject(project_id, stichtag)
+    return nil unless last && last.size > 0
+    lastDate = getStichtag(last.first)
+    puts "getDateOfLastInvoice lastDate for #{project_id}/#{stichtag} was #{lastDate}" if $VERBOSE
     lastDate
   end
 
@@ -225,7 +227,7 @@ Verrechnet werden Leistungen vom 2016-01-01 bis 2016-12-31."
         status = project.kundenstatus
         next if project.keineVerrechnung
         next unless status and ['Neukunde', 'Kunde'].index(status)
-        last_invoiced = getDateOfLastInvoice(project.id)
+        last_invoiced = getDateOfLastInvoice(project.id, day2invoice)
         puts "Invoicing #{idx} project #{project.id}. last  #{last_invoiced} invoice_since #{invoice_since} >= #{day2invoice}? #{invoice_since ? 'No invoice found' : 'invoice_since ' + invoice_since.to_s}" if $VERBOSE
         issues = findAllOpenServicesForProjectID(project.id, day2invoice, invoice_since)
         next if issues.size == 0
@@ -259,10 +261,10 @@ Verrechnet werden Leistungen vom 2016-01-01 bis 2016-12-31."
     puts "Invoicing for #{identifier} contact #{contact} til #{stich_tag_string}" if $VERBOSE
     rechnungs_nummer = "Rechnung #{Time.now.strftime(DatumsFormat)}-#{Invoice.last ? Invoice.last.id+1 : 1}"
     invoice = Invoice.new
-    last_invoiced = getDateOfLastInvoice(project.id)
+    last_invoiced = getDateOfLastInvoice(project.id, stich_tag)
     invoice.number = rechnungs_nummer
     invoice.invoice_date = Time.now
-    invoice_since ||= getDateOfLastInvoice(project.id)
+    invoice_since ||= getDateOfLastInvoice(project.id, stich_tag)
     invoice_since ||= Date.today.beginning_of_year.to_date
     description = "Rechnung mit Stichtag vom #{stich_tag_string} für #{nrDoctors == 1 ? 'einen Arzt' : nrDoctors.to_s + ' Ärzte'}."
     description += "\nMultiplikator für abonnierte Features ist #{multiplier}." if multiplier != 1

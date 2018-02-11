@@ -121,7 +121,7 @@ class InvoiceControllerTest < ActionController::TestCase
     nrCreated = sizeAfterFirstRun -oldSize
     content = res.inspect.to_s
     assert (nrCreated == 1 ), "Must have created exactyl one. Not #{nrCreated}"
-    assert_equal(stichtag, MedelexisInvoices.getDateOfLastInvoice(Invoice.first.project_id))
+    assert_equal(stichtag, MedelexisInvoices.getDateOfLastInvoice(Invoice.first.project_id,stichtag))
     Invoice.all.last.lines.each{ |line| puts line.description }
     assert_match(/wird für\s+45\s+Tage verrechnet/, Invoice.all.last.lines.last.description)
   end
@@ -207,7 +207,7 @@ class InvoiceControllerTest < ActionController::TestCase
     nrCreated = sizeAfterFirstRun -oldSize
     content = res.inspect.to_s
     assert (nrCreated == 1 ), "Must have created exactyl one. Not #{nrCreated}"
-    assert_equal(stichtag, MedelexisInvoices.getDateOfLastInvoice(Invoice.first.project_id))
+    assert_equal(stichtag, MedelexisInvoices.getDateOfLastInvoice(Invoice.first.project_id, stichtag))
   end
 
   test "test findLastInvoiceDate" do
@@ -391,7 +391,7 @@ class InvoiceControllerTest < ActionController::TestCase
     assert_equal(false, MedelexisInvoices.issueDateInRange?(licensed, days_after, month_after), 'start_date is between two days 5')
   end
 
-  test "check invoice issues added after first invoice" do
+  test "check invoice issues added after first invoice only once" do
     Invoice.all.each{|x| x.delete}
     abo_start = Date.new(2014, 1, 1)
     invoice_stichtag = Date.new(2014, 12, 31)
@@ -418,6 +418,10 @@ class InvoiceControllerTest < ActionController::TestCase
     assert_nil( second_invoice.lines.find{|line| line.description.match(/Medelexis.+Tage verrechnet/i) }, 'second_invoice: Do not invoice Medelexis')
     assert_nil( second_invoice.lines.find{|line| line.description.match(/gratis/i) }, 'second_invoice: TRIAL must be gratis')
     assert(second_invoice.lines.find{|line| line.description.match(/ADDED LATER/i)},  'Must have ADDED LATER item')
+
+    res = MedelexisInvoices.startInvoicing(invoice_stichtag, abo_start)
+    assert_not_nil res
+    assert_equal(sizeAfterFirstRun + 1, Invoice.all.size, 'Must have added the invoice only once')
   end
 
   test "get_lines must return correct array" do
@@ -502,8 +506,4 @@ class InvoiceControllerTest < ActionController::TestCase
     assert_equal('Mustermann', contact.last_name, 'HauptKontakt must be Mustermann')
   end
 
-  test 'handle issue with due_date nil' do
-    assert_equal('CANCELLED', nil_due_dates.last.custom_field_values.first.to_s)
-    assert_nil(nil_due_dates.last.due_date)
-  end
 end
