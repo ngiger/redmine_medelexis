@@ -240,6 +240,11 @@ Verrechnet werden Leistungen vom 2016-01-01 bis 2016-12-31."
     project_ids2invoice
   end
 
+  def self.getMultiplier(project)
+    nrDoctors = project.nrDoctors
+    multiplier = nrDoctors <= 6 ? DiscountMap[nrDoctors] : DiscountMap[6] + (nrDoctors-6)*MaxDiscount
+  end
+
   def self.invoice_for_project(identifier, stich_tag = Date.today.end_of_year.to_date, invoice_since = Date.today.beginning_of_year, issues = nil)
     round_to = BigDecimal.new('0.05')
     puts "invoice_for_project #{identifier.inspect}"
@@ -249,7 +254,7 @@ Verrechnet werden Leistungen vom 2016-01-01 bis 2016-12-31."
     raise "Projekt '#{identifier}' konnte weder als Zahl noch als Name gefunden werden" unless project
     admin = User.where(:admin => true).first
     nrDoctors = project.nrDoctors
-    multiplier = nrDoctors <= 6 ? DiscountMap[nrDoctors] : DiscountMap[6] + (nrDoctors-6)*MaxDiscount
+    multiplier = getMultiplier(project)
     puts "project identifier #{identifier} with #{nrDoctors} doctors multiplier #{multiplier} keineVerrechnung #{project.keineVerrechnung} is: #{project}" if $VERBOSE
     if project.keineVerrechnung
       RedmineMedelexis.log_to_system "project '#{identifier}' #{project.name} soll nicht verrechnet werden"

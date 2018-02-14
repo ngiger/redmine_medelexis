@@ -17,6 +17,7 @@
 require 'logger'
 require 'uri'
 require 'socket'
+require 'csv'
 
 class Issue
   TrialDays         = 31 # Days
@@ -109,4 +110,52 @@ module RedmineMedelexis
     end
   end
 
+  StatEntry = Struct.new(:id, :basePrice, :nrClients, :nrDoctors, :value) do
+    def showStat
+      "#{id} used  by #{nrClients}/#{nrDoctors} generating #{value}/year"
+    end
+  end
+
+  def self.genStatistics(withValue = true)
+    ActiveRecord::Base.transaction do
+      startTime = Time.now
+      stats = {}
+      allProjects = Project.all
+      puts "#{startTime}: Generating statistics for #{allProjects.size} projects"
+      nrClients = 0
+      nrDoctors = 0
+      allProjects.each do | project|
+        status = project.kundenstatus
+        next if project.keineVerrechnung
+        next unless status && ['Neukunde', 'Kunde'].index(status)
+        issues = MedelexisInvoices.findAllOpenServicesForProjectID(project.id, Date.today.end_of_year.to_date, Date.today.beginning_of_year)
+        next if issues.size == 0
+        nrClients += 1
+        nrDoctors += project.nrDoctors
+        multiplier = MedelexisInvoices.getMultiplier(project)
+        issues.each do |issue|
+          next unless MedelexisInvoices.getProduct(issue)
+          grund_price = MedelexisInvoices.getProduct(issue).price.to_f
+          issueId = issue.subject.gsub('.group','').gsub('.feature','')
+          if stats[issueId]
+            stats[issueId].nrClients += 1
+            stats[issueId].nrDoctors += project.nrDoctors
+            stats[issueId].value += grund_price * multiplier
+          else
+            stats[issueId] ||= StatEntry.new(issueId, grund_price, 1, project.nrDoctors, grund_price * multiplier)
+          end
+        end
+      end
+      CSV.open('statistics.csv', 'wb') do |csv|
+        csv << ['issueId', 'grund_price', 'nrClients', 'nrDoctors', withValue ? 'value' : nil]
+        stats.values.each do |entry|
+          csv <<  [entry.id, entry.basePrice, entry.nrClients, entry.nrDoctors, withValue ? sprintf('%0.f', entry.value) : nil ]
+        end
+      end
+      duration = (Time.now-startTime).to_i
+      msg ="Generating statistics for #{allProjects.size} projects with #{nrClients} active practices (#{nrDoctors} doctors) took #{duration} second found #{stats.size} features"
+      puts "#{Time.now}: #{msg}"
+      self.log_to_system(msg)
+    end
+  end
 end
