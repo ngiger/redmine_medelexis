@@ -130,6 +130,7 @@ module RedmineMedelexis
     eternal = Issue.where(project_id: 1, tracker_id: RedmineMedelexis::Tracker_Is_Service, closed_on: nil)
     licenses = []
     (issues+eternal).each do  |issue|  #>"2013-12-12+01:00",
+      next unless statusField = issue.custom_field_values.find{|x| x.custom_field.name.eql?('Abostatus')}
       endOfLicense = issue.get_end_of_license + 1
       puts  "TRIAL issue #{issue.id} of #{issue.due_date} endOfLicense #{endOfLicense} is expired? #{endOfLicense < Date.today}" if issue.isTrial? && $VERBOSE
       next if issue.isTrial? && endOfLicense < Date.today
