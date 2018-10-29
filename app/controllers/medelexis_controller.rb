@@ -1,6 +1,7 @@
 require 'tmpdir'
 require 'xmlsimple'
 require 'medelexis_helpers'
+# require 'ostruct'
 
 class MedelexisController < ApplicationController
   unloadable
@@ -13,8 +14,65 @@ class MedelexisController < ApplicationController
   accept_api_auth :confirm_invoice_lines
   accept_rss_auth :alle_rechnungen
   accept_api_auth :alle_rechnungen
+  accept_rss_auth :alle_kunden
+  accept_api_auth :alle_kunden
 
   MEDELEXIS_SETTINGS = '/settings/plugin/redmine_medelexis'
+
+  def alle_kunden
+    respond_to do |format|
+      format.csv { return alle_kunden }
+    end
+  end
+
+  def alle_kunden
+    @kunden = []
+    Project.all.each do |project|
+      begin
+        kontakt = RedmineMedelexis.getHauptkontakt(project.id)
+      rescue
+        kontakt = nil
+      end
+      next unless kontakt
+      kunde = OpenStruct.new
+      kunde.project = project
+      kunde.kontakt =kontakt
+      @kunden << kunde
+    end
+   # require 'pry'; binding.pry
+    csv_config = {col_sep: ";",
+              row_sep: "\n",
+              headers: true,
+              encoding: Encoding::UTF_8
+             }
+    csv_string = CSV.generate(csv_config) do |csv|
+      csv << ['Project-Id', 'Project-Name', 'Kunden-Id', 'Status', 'Verrechnen', 'Mandanten', 'Stationen', 'Telefon', 'E-Mail', 'Web-Seite', 'Strasse', 'Strasse2', 'Land', 'PLZ', 'Ort' ]
+      @kunden.each do |kunde|
+        csv << [ kunde.project.id,
+          kunde.project.name,
+          kunde.kontakt.id,
+          kunde.project.kundenstatus,
+          kunde.project.keineVerrechnung ? 'Keine Verrechnung' : '',
+          kunde.project.nrDoctors,
+          kunde.project.nrStations,
+          kunde.kontakt.phone ? kunde.kontakt.phone.gsub(',', ' / ').gsub('"','') : '',
+          kunde.kontakt.email,
+          kunde.kontakt.website,
+          kunde.kontakt.address.street1 ? kunde.kontakt.address.street1.gsub('"','') : '',
+          kunde.kontakt.address.street2 ? kunde.kontakt.address.street2.gsub('"','') : '',
+          kunde.kontakt.address.country,
+          kunde.kontakt.address.postcode,
+          kunde.kontakt.address.city 
+        ]
+      end
+    end
+    send_data(
+      csv_string,
+      :type => 'text/csv',
+      :filename => 'alle_kunden.csv',
+      :disposition => 'attachment'
+    )
+  end
 
   def alle_rechnungen
     @invoices=Invoice.all

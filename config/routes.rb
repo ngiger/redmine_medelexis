@@ -10,6 +10,7 @@
   post '/medelexis/rechnungslauf', :to => 'medelexis#rechnungslauf'
 
   get  '/medelexis/alle_rechnungen', :to => 'medelexis#alle_rechnungen'
+  get  '/medelexis/alle_kunden',     :to => 'medelexis#alle_kunden'
 
   get  '/medelexis/correct_invoice_lines', :to => 'medelexis#correct_invoice_lines'
   post '/medelexis/correct_invoice_lines', :to => 'medelexis#correct_invoice_lines'

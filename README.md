@@ -126,7 +126,7 @@ Prepare for running tests (assuming a bash shell) for redmine_medelexis-plugins 
     bundle exec rake db:migrate
     bundle exec rake redmine:plugins NAME=redmine_contacts
 
-and load the same plugins as above
+and load the same plugins as above. Now you should able to login (as a admin-user) test_admin with the password test_password
 
 Run tests
 
