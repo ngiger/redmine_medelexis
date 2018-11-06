@@ -18,7 +18,11 @@ class MedelexisController < ApplicationController
   accept_api_auth :alle_kunden
 
   MEDELEXIS_SETTINGS = '/settings/plugin/redmine_medelexis'
-
+  MEDELEXIS_CSV_CONG = {col_sep: ";",
+              row_sep: "\n",
+              headers: true,
+              encoding: Encoding::UTF_8
+             }
   def alle_kunden
     respond_to do |format|
       format.csv { return alle_kunden }
@@ -39,13 +43,7 @@ class MedelexisController < ApplicationController
       kunde.kontakt =kontakt
       @kunden << kunde
     end
-   # require 'pry'; binding.pry
-    csv_config = {col_sep: ";",
-              row_sep: "\n",
-              headers: true,
-              encoding: Encoding::UTF_8
-             }
-    csv_string = CSV.generate(csv_config) do |csv|
+    csv_string = CSV.generate(MEDELEXIS_CSV_CONG) do |csv|
       csv << ['Project-Id', 'Project-Name', 'Kunden-Id', 'Status', 'Verrechnen', 'Mandanten', 'Stationen', 'Telefon', 'E-Mail', 'Web-Seite', 'Strasse', 'Strasse2', 'Land', 'PLZ', 'Ort' ]
       @kunden.each do |kunde|
         csv << [ kunde.project.id,
@@ -75,7 +73,40 @@ class MedelexisController < ApplicationController
   end
 
   def alle_rechnungen
+    respond_to do |format|
+      format.csv { return alle_rechnungen }
+    end
+  end
+
+  def alle_rechnungen
     @invoices=Invoice.all
+    csv_string = CSV.generate(MEDELEXIS_CSV_CONG) do |csv|
+      csv << ['Project-Id', 'Project-Name', 'Rechnungs-Id', 'Status', 'Betrag', 'Fällig am','Titel', 'Zeile 1', 'Zeile 2', 'Zeile 3']
+      @invoices.sort_by{|x| x.project_id }.each do |invoice|
+        lines = invoice.description.split(/[\r\n]+/)
+        line_1 = lines[0]
+        line_2 = lines[1]
+        line_3 = lines[2]
+        csv << [invoice.id,
+                Project.find(invoice.project_id).name,
+                invoice.number,
+                invoice.status_id,
+                invoice.amount,
+                [Invoice::PAID_INVOICE, Invoice::CANCELED_INVOICE].index(invoice.status_id) ? '' : (invoice.due_date ? invoice.due_date.strftime('%Y.%m.%d') : 'nil'),
+                invoice.subject,
+                # /\d{4}-\d{2}-\d{2}/.match(invoice.description.split(/[\r\n]+/)[-1]),
+                line_1,
+                line_2,
+                line_3,
+          ]
+      end
+    end
+    send_data(
+      csv_string,
+      :type => 'text/csv',
+      :filename => 'alle_rechnungen.csv',
+      :disposition => 'attachment'
+    )
   end
 
   def rechnungslauf
