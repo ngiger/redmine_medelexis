@@ -162,3 +162,15 @@ See "doc":https://github.com/docker-library/docs/tree/master/redmine and "code":
     docker build -t ngiger/redmine .
     docker run --detached -p 3000:3000 --env REDMINE_NO_DB_MIGRATE=1 -v /opt/src/redmine-medelexis/data2:/usr/src/redmine/files ngiger/redmine
 
+# Deployment
+
+Auf mis.medelexis.ch läuft anfangs Dezember immer noch ruby 1.9.1.
+
+## 2018.12.12
+
+Alles von srv/services/mis-redmine-beta auf /home/ngiger/mis-redmine-beta kopiert und dort folgende Anpassungen gemacht.
+
+* Im top Gemfile: nokogiri wie folgt definieren: gem "nokogiri", (RUBY_VERSION >= "2.1" ? "~> 1.7.2" : "~> 1.6.8"), :source => 'https://rubygems.org'$
+* Im plugins/redmine_medelexis/Gemfile debugger wie folgt definieren: gem (RUBY_VERSION >= "2.0" ? 'pry-byebug' : 'debugger')
+* Zum Starten muss man export RAILS_ENV=production; bundle exec ruby1.9.3 bin/rails server RAILS_ENV=production aufrufen
+
