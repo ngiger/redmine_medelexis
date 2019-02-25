@@ -54,32 +54,39 @@ Get the needed zip files. Used versions are found under https://mis.foo.org/admi
 
 Afterwards execute and verify these steps (assuming a bash shell). Using ruby 1.9.3p547 was fine for me. Ruby 2.1.2 had some problems
 
-    unzip redmine-*.zip
+    git clone https://github.com/redmine/redmine redmine-3.4
+    cd redmine-3.4
+    git checkout 3.4-stable
     export RAILS_ENV=development
-    cd redmine-2.4.2
     cd plugins
-    unzip redmine_contacts-*-pro.zip
-    unzip redmine_contacts_helpdesk-*.zip
-    unzip redmine_contacts_invoices-*.zip
-    unzip redmine_products-*.zip
-    # (Skip unless production) git clone https://github.com/thorin/redmine_ldap_sync
-    git clone git@github.com:ngiger/redmine_medelexis.git # or https://github.com/ngiger/redmine_medelexis.git
-    git clone git@github.com:paginagmbh/redmine_silencer.git
+    unzip /path/to/zipfiles/redmine_checklists-3_1_14-pro.zip
+    unzip /path/to/zipfiles/redmine_contacts_invoices-4_1_7-pro.zip
+    unzip /path/to/zipfiles/redmine_products-2_0_6-pro.zip
+    unzip /path/to/zipfiles/redmine_contacts_helpdesk-4_0_2-pro.zip
+    unzip /path/to/zipfiles/redmine_crm-4_2_3-pro.zip
+    unzip /path/to/zipfiles/redmineup_tags-2_0_4-light.zip
+    git clone https://github.com/abahgat/redmine_didyoumean
+    git clone https://github.com/syntacticvexation/redmine_favourite_projects
+    cd redmine_favourite_projects; git checkout redmine3.4-compatible; cd ..
+    git clone https://github.com/joaopedrotaveira/redmine_mylyn_connector
+    git clone https://github.com/tleish/redmine_revision_branches
+    git clone https://www.redmineup.com/pages/plugins/tags redmineup_tags
+    git clone https://github.com/foton/redmine_watcher_groups
+    git clone https://github.com/xelkano/redmine_xapian
+    git clone git@github.com:paginagmbh/redmine_silencer.git redmine_silencer
     cd ..
+    rm plugins/redmine_didyoumean/Gemfile.lock
+    # unset mysql version in plugins/redmine_didyoumean/Gemfile
+    bundle exec rake tmp:cache:clear
     bundle install
     export RAILS_ENV=development
     # bundle exec rake generate_secret_token # only once
     # bundle exec rake db:create
-    bundle exec rake db:migrate RAILS_ENV=development
+    bundle exec rake db:migrate
+    bundle exec rake generate_secret_token
     # bundle exec rake redmine:plugins NAME=redmine_access_filters
-    bundle exec rake redmine:plugins NAME=redmine_agile
-    bundle exec rake redmine:plugins NAME=redmine_checklists
-    bundle exec rake redmine:plugins NAME=redmine_contacts
-    bundle exec rake redmine:plugins NAME=redmine_contacts_helpdesk
-    bundle exec rake redmine:plugins NAME=redmine_contacts_invoices
-    bundle exec rake redmine:plugins NAME=redmine_products
-    bundle exec rake redmine:plugins NAME=redmine_medelexis
-    bundle exec rake redmine:plugins NAME=redmineup_tags
+    bundle exec rake redmine:plugins:migrate
+    bundle exec rake tmp:cache:clear
 
 ## Creating a dump from the production server
 
