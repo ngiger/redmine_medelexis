@@ -3,8 +3,13 @@
 
 #custom routes for this plugin
   resources :licenses
-  match 'my/license', :to => 'license#show', :via => 'get'
-  match ':login/license', :to => 'license#show', :via => 'get', :render => :api
+  match 'my/license.xml',     :to => 'license#show', :via => 'get', :render => :html
+  match 'my/license.html',    :to => 'license#show', :via => 'get', :render => :html
+  match 'my/license',         :to => 'license#show', :via => 'get', :render => :plain
+  match ':login/license.xml', :to => 'license#show', :via => 'get', :render => :html
+  match ':login/license.html',:to => 'license#show', :via => 'get', :render => :html
+  match ':login/license',     :to => 'license#show', :via => 'get', :render => :plain
+  match 'unauthorized',       :to => 'license#unauthorized', :via => 'get', :render => :html
 
   get  '/medelexis/rechnungslauf', :to => 'medelexis#rechnungslauf'
   post '/medelexis/rechnungslauf', :to => 'medelexis#rechnungslauf'
@@ -18,7 +23,6 @@
   post '/medelexis/confirm_invoice_lines', :to => 'medelexis#confirm_invoice_lines'
   get  '/medelexis/changed_invoice_lines', :to => 'medelexis#changed_invoice_lines'
 
-  match ':login/license', :to => 'license#show', :via => 'get', :render => :api
 
   Redmine::Plugin.register :medelexis do
     permission :rechnungslauf, :medelexis => :rechnungslauf

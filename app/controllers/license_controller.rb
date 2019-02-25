@@ -7,7 +7,7 @@ class LicenseController < ApplicationController
   unloadable
   layout 'base'
   accept_rss_auth :index
-  accept_api_auth :index, :show, :create, :update, :destroy
+  accept_api_auth :index, :show, :create, :update, :destroy, :unauthorized
   skip_before_filter :check_if_login_required
 
   helper :invoices
@@ -16,13 +16,28 @@ class LicenseController < ApplicationController
 # Zum Testen http://0.0.0.0:30001/my/license.xml?key=fe2167a329f3c22799b1bcc3cb8cf93e7688f136 # development
 # http://0.0.0.0:30001/my/license?e631d4560a13047970cc2ba4a95519782bdd4106.xml
   def show
-    RedmineMedelexis.log_to_system("show from IP #{request.remote_ip} via #{request.protocol}#{request.host_with_port}#{request.fullpath} user #{User.current} : api_key is #{params['key']} action_name #{action_name} enabled?#{Setting.rest_api_enabled?}  api_key_from_request #{api_key_from_request}")
+    RedmineMedelexis.log_to_system("show from IP #{request.remote_ip} via #{request.protocol}#{request.host_with_port}#{request.fullpath} user #{User.current} : api_key is #{params['key']} action_name #{action_name} enabled? ^#{Setting.rest_api_enabled?}  api_key_from_request #{api_key_from_request}")
+    if User.current.type.to_s.eql?(AnonymousUser.to_s)
+      render template: "license/unauthorized";
+      return
+    end
     @user = find_user(params)
     find_license_info
+    RedmineMedelexis.log_to_system("show from IP #{request.remote_ip} via #{request.protocol}#{request.host_with_port}#{request.fullpath} user #{User.current} : api_key is #{params['key']} action_name #{action_name} enabled? #{Setting.rest_api_enabled?}  api_key_from_request #{api_key_from_request}")
+    if params['render'].eql?(:plain)
+      render :body => @encrypted
+      return
+    end
     respond_to do |format|
       format.html { render template: "license/show"; }
-      format.xml  { if  @info then render :xml => @encrypted else render_error(:status => :unauthorized) end; }
-      format.api  { render template: "license/show"; }
+      format.api  { if  @info ; then render :body => @encrypted; else format.html { render template: "license/unauthorized"; } end }
+    end
+  end
+
+  def unauthorized
+    @user = find_user(params)
+    respond_to do |format|
+      format.html { render template: "license/unauthorized"; }
     end
   end
 
@@ -42,7 +57,7 @@ private
     RedmineMedelexis.debug("#{__LINE__}: user ist #{@user.inspect}")
     @user
   end
-  
+
   def find_license_info
     if @user
       @api_key =  RedmineMedelexis.get_api_key(@user.login)
