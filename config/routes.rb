@@ -3,6 +3,7 @@
 
 #custom routes for this plugin
   resources :licenses
+  match 'my/license.xml', :to => 'license#api', :via => 'get'
   match 'my/license', :to => 'license#show', :via => 'get'
   match ':login/license.xml', :to => 'license#show', :via => 'get', :render => :xml
   match ':login/license', :to => 'license#show', :via => 'get'
