@@ -22,10 +22,7 @@
   <% } %>
   </ol>
   <h2>Info (raw data)</h2>
-  <%= @info.inspect %>
+  <%= info_copy = @info; info_copy['ownerdata'].delete('misApiKey'); info_copy.inspect %>
 <% else %>
   <h3>Invalid license for user <%= @user ? @user.login : 'no valid user' %></h3>
 <% end %>
-
- 
-
