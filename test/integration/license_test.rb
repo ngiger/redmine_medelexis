@@ -55,7 +55,10 @@ class Redmine::ApiTest::LicenseTest < Redmine::IntegrationTest
   end
   def verify_license_file(username)
     signed_xml = get_signed_xml_path(username)
-    pp signed_xml
+    unless File.directory?(RedmineMedelexis::Keystore)
+      puts "Cannot test xml generation without #{ RedmineMedelexis::Keystore }"
+      return false
+    end
     assert(File.exists?(signed_xml))
     content = IO.read(signed_xml)
     assert_match('<medelexisLicense xmlns', content)
@@ -130,7 +133,7 @@ class Redmine::ApiTest::LicenseTest < Redmine::IntegrationTest
     FileUtils.rm_f(signed_xml)
     get "/my/license.xml?key=#{User.find_by_login(username).api_key}"
     assert_response :success
-    verify_license_file(username)
+    return unless verify_license_file(username)
     content = IO.read(signed_xml)
     trial_line = /(\d{4}-\d{2}-\d{2}).*#{issue.subject}.*/.match(content)
     shown_end_date = Date.strptime(trial_line[1],"%Y-%m-%d")
@@ -144,7 +147,7 @@ class Redmine::ApiTest::LicenseTest < Redmine::IntegrationTest
     FileUtils.rm_f(signed_xml)
     get "/my/license.xml?key=#{User.find_by_login(username).api_key}"
     assert_response :success
-    verify_license_file(username)
+    return unless verify_license_file(username)
     content = IO.read(signed_xml)
     assert /id="ch.medelexis.application.feature"/ .match(content), "Must find ch.medelexis.application.feature"
     assert_nil /id="ch.elexis.base.textplugin.feature"/.match(content), "Must not find expired h.elexis.base.textplugin.feature"

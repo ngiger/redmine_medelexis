@@ -35,8 +35,9 @@ def login_as(user_login)
   clear_password = 'dummy8753'
   user = User.where(login: user_login).first
   user.password = user.password_confirmation = clear_password
-  user.email_address = EmailAddress.create!(:user_id => user.id, :address => "info@#{user_login}.org")
+  user.email_address = EmailAddress.create!(:user_id => user.id, :address => "info@#{user_login}.org", :is_default => true)
   user.save
+  user
 end
 
 def change_start_date(issue, date)
