@@ -17,12 +17,15 @@ class LicenseController < ApplicationController
 # http://0.0.0.0:30001/my/license?e631d4560a13047970cc2ba4a95519782bdd4106.xml
   def show
     RedmineMedelexis.log_to_system("show from IP #{request.remote_ip} via #{request.protocol}#{request.host_with_port}#{request.fullpath} user #{User.current} : api_key is #{params['key']} action_name #{action_name} enabled?#{Setting.rest_api_enabled?}  api_key_from_request #{api_key_from_request}")
+    if User.current.type.to_s.eql?(AnonymousUser.to_s)
+      render template: "license/unauthorized";
+      return
+    end
     @user = find_user(params)
     find_license_info
     respond_to do |format|
       format.html { render template: "license/show"; }
       format.xml  { if  @info then render :xml => @encrypted else render_error(:status => :unauthorized) end; }
-      format.api  { render template: "license/show"; }
     end
   end
 
