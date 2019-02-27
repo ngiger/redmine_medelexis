@@ -43,28 +43,4 @@ class RoutingTest < Redmine::IntegrationTest
                    { :controller => "medelexis", :action => "changed_invoice_lines" })
   end
 
-  test "my_license_html" do
-    assert_recognizes( {"controller"=>"license", "action"=>"show", "format"=>"html"}, {path: '/my/license.html'})
-  end
-
-  test "my_license_xml" do
-    assert_routing({ :path => "/my/license.xml", :method => :get },
-                   { :controller => "license",  :action => "show", :format =>'xml' })
-  end
-
-  test "my_license" do
-    assert_routing({ :path => "/my/license", :method => :get },
-                   { :controller => "license", :action => "show" })
-  end
-
-  test "mustermann_license" do
-    assert_routing({ :path => "/mustermann/license", :method => :get },
-                   { :controller => "license", :action => "show", :login => 'mustermann' })
-  end
-
-  test "mustermann_license_xml" do
-    assert_routing({ :path => "/mustermann/license.xml", :method => :get },
-                   { :render =>:xml,  :controller => "license", :action => "show", :login => 'mustermann' })
-  end
-
 end

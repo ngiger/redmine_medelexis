@@ -38,8 +38,8 @@ class Redmine::InvoiceTest < Redmine::IntegrationTest
                              :custom_values,
                              ])
   def setup
-    user = User.where(admin: true).first
-    user.email_address = EmailAddress.create!(:user_id => user.id, :address => 'another@somenet.foo', :is_default => true)
+    user = User.where(admin: true, login: 'admin').first
+    user.email_address = EmailAddress.create!(:user_id => user.id, :address => 'another@somenet.foo')
     user.password, user.password_confirmation = "my_password"; user.save!
     Setting.rest_api_enabled = '1'
     Setting.login_required = '1'

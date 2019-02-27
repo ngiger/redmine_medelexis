@@ -1,4 +1,5 @@
 <h2>License for user <%= @user %></h2>
+<p>API-key is: <%= @api_key.inspect %></p>
 <% ownerdata = {}; info = @info; ownerdata = @info['ownerdata'] if @info and @info['ownerdata'] %>
 <% if info %>
   <ul>
@@ -22,7 +23,10 @@
   <% } %>
   </ol>
   <h2>Info (raw data)</h2>
-  <%= info_copy = @info; info_copy['ownerdata'].delete('misApiKey'); info_copy.inspect %>
+  <%= @info.inspect %>
 <% else %>
   <h3>Invalid license for user <%= @user ? @user.login : 'no valid user' %></h3>
 <% end %>
+
+ 
+
