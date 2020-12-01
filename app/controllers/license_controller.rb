@@ -8,7 +8,7 @@ class LicenseController < ApplicationController
   layout 'base'
   accept_rss_auth :index
   accept_api_auth :index, :show, :create, :update, :destroy
-  skip_before_filter :check_if_login_required
+  skip_before_action :check_if_login_required
 
   helper :invoices
   include InvoicesHelper
