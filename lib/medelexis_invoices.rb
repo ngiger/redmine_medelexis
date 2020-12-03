@@ -250,7 +250,7 @@ Verrechnet werden Leistungen vom 2016-01-01 bis 2016-12-31."
     puts "invoice_for_project #{identifier.inspect}"
     # Starting with redmine 3.2.7, the query returned Project::ActiveRecord_Relation and no longer a project
     project = (identifier.to_i == 0 ? Project.where(identifier: identifier).first : Project.where(id: identifier))
-    project = project.first if project && project.is_a?(Project::ActiveRecord_Relation)
+    project = project.first if project && project.respond_to?(:first) # Happens if we select more than one project
     raise "Projekt '#{identifier}' konnte weder als Zahl noch als Name gefunden werden" unless project
     admin = User.where(:admin => true).first
     nrDoctors = project.nrDoctors
