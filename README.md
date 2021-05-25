@@ -41,16 +41,21 @@ Under http://foo.org/settings/plugin/redmine_medelexis you can add more debuggin
 ## Installation from scratch for development
 
 Get the needed zip files. Used versions are found under https://mis.foo.org/admin/info
-* rails-4.2.7.1
-* redmine 3.2.7.stable
-* redmine_access_filters         0.0.1
-* redmine_checklists             3.1.6
-* redmine_contacts               4.1.1
-* redmine_contacts_helpdesk      3.0.8
-* redmine_contacts_invoices      4.1.6
-* redmine_medelexis              0.2.1
-* redmine_products               2.0.4
-* redmineup_tags                 2.0.0
+
+*  Redmine version                4.1.3.stable
+*  Ruby version                   2.5.5-p157 (2019-03-15) [x86_64-linux-gnu]
+*  rails                          5.2.6
+*  redmine_access_filters         0.0.2
+*  redmine_agile                  1.5.4
+*  redmine_checklists             3.1.18
+*  redmine_contacts               4.3.2
+*  redmine_contacts_helpdesk      4.1.10
+*  redmine_contacts_invoices      4.2.3
+*  redmine_favorite_projects      2.1.1
+*  redmine_medelexis              0.2.6
+*  redmine_products               2.1.2
+*  redmineup_tags                 2.0.8
+
 
 Afterwards execute and verify these steps (assuming a bash shell). Using ruby 1.9.3p547 was fine for me. Ruby 2.1.2 had some problems
 
@@ -59,24 +64,17 @@ Afterwards execute and verify these steps (assuming a bash shell). Using ruby 1.
     git checkout 3.4-stable
     export RAILS_ENV=development
     cd plugins
-    unzip /path/to/zipfiles/redmine_checklists-3_1_14-pro.zip
-    unzip /path/to/zipfiles/redmine_contacts_invoices-4_1_7-pro.zip
-    unzip /path/to/zipfiles/redmine_products-2_0_6-pro.zip
-    unzip /path/to/zipfiles/redmine_contacts_helpdesk-4_0_2-pro.zip
-    unzip /path/to/zipfiles/redmine_crm-4_2_3-pro.zip
-    unzip /path/to/zipfiles/redmineup_tags-2_0_4-light.zip
-    git clone https://github.com/abahgat/redmine_didyoumean
-    git clone https://github.com/syntacticvexation/redmine_favourite_projects
-    cd redmine_favourite_projects; git checkout redmine3.4-compatible; cd ..
-    git clone https://github.com/joaopedrotaveira/redmine_mylyn_connector
-    git clone https://github.com/tleish/redmine_revision_branches
-    git clone https://www.redmineup.com/pages/plugins/tags redmineup_tags
-    git clone https://github.com/foton/redmine_watcher_groups
-    git clone https://github.com/xelkano/redmine_xapian
-    git clone git@github.com:paginagmbh/redmine_silencer.git redmine_silencer
+    unzip /path/teo/zipfilesredmine_agile-240720-m.zip
+    unzip /path/teo/zipfilesredmine_checklists-3_1_18-pro.zip
+    unzip /path/teo/zipfilesredmine_contacts-170820-m.zip
+    unzip /path/teo/zipfilesredmine_contacts_helpdesk-4_1_10-pro.zip
+    unzip /path/teo/zipfilesredmine_contacts_invoices-4_2_3-pro.zip
+    unzip /path/teo/zipfilesredmine_favorite_projects-2_1_1-light.zip
+    unzip /path/teo/zipfilesredmine_products-2_1_2-pro.zip
+    unzip /path/teo/zipfilesredmineup_tags-2_0_8-light.zip
+    git clone https://github.com/ngiger/redmine_medelexis.git
+    git clone https://github.com/ngiger/redmine_access_filters.git
     cd ..
-    rm plugins/redmine_didyoumean/Gemfile.lock
-    # unset mysql version in plugins/redmine_didyoumean/Gemfile
     bundle exec rake tmp:cache:clear
     bundle install
     export RAILS_ENV=development
@@ -162,22 +160,80 @@ The script scripts/create_invoices.rb creates 6 (test) invoices using the last d
 
 bc. bundle exec ruby bin/rails runner plugins/redmine_medelexis/scripts/create_invoices.rb
 
-## Using docker
-
-See "doc":https://github.com/docker-library/docs/tree/master/redmine and "code":https://github.com/docker-library/redmine. Has no so old redmine. There adapted its Dockerfile.template.
-
-    docker build -t ngiger/redmine .
-    docker run --detached -p 3000:3000 --env REDMINE_NO_DB_MIGRATE=1 -v /opt/src/redmine-medelexis/data2:/usr/src/redmine/files ngiger/redmine
-
 # Deployment
 
 Auf mis.medelexis.ch läuft anfangs Dezember immer noch ruby 1.9.1.
 
-## 2018.12.12
+## 2021.05.25
 
-Alles von srv/services/mis-redmine-beta auf /home/ngiger/mis-redmine-beta kopiert und dort folgende Anpassungen gemacht.
+### PgLoader
 
-* Im top Gemfile: nokogiri wie folgt definieren: gem "nokogiri", (RUBY_VERSION >= "2.1" ? "~> 1.7.2" : "~> 1.6.8"), :source => 'https://rubygems.org'$
-* Im plugins/redmine_medelexis/Gemfile debugger wie folgt definieren: gem (RUBY_VERSION >= "2.0" ? 'pry-byebug' : 'debugger')
-* Zum Starten muss man export RAILS_ENV=production; bundle exec ruby1.9.3 bin/rails server RAILS_ENV=production aufrufen
+Marco updated from the MySQL database to postgres using pgloader and the following snippet
 
+```
+LOAD DATABASE
+    FROM mysql://redmine:***@mis.medelexis.ch/redmine 
+    INTO postgresql://redmine:***@localhost/redmine_medelexis_ch
+WITH 
+    quote identifiers
+CAST 
+type int when (= 11 precision) to integer drop typemod,
+type varchar when (= 255 precision) to varchar drop typemod,
+type int when unsigned to integer drop typemod,
+type int with extra auto_increment to serial drop typemod
+ALTER schema 'redmine' RENAME TO 'public';
+```
+
+### Update from redmine 3.4 to 4.1 for mis
+
+Installation auf me-core mit folgenden Schritten (getestet auf einer jungfräulichen Debian/Buster VM).
+
+We assume that you have a user named debian with UID 1000 and sudo privilges.
+
+But first we have to save the settings for the plugin redmine_contacts manually.
+The settings from the old mis for redmine_contacts must be added manually by calling inside the mysql
+`select name,value from settings where name like "plugin_redmine_contacts";`
+
+
+```shell
+sudo apt install git rsync postgresql
+sudo apt-get build-dep ruby-activemodel rails ruby-sqlite3 libpq-dev
+sudo mkdir -p /srv/services/mis-beta.medelexis.ch
+sudo 1000 debian /srv/services/mis-beta.medelexis.ch
+cd /srv/services/mis-beta.medelexis.ch
+  # create initial database
+sudo -u postgres psql -tc "create database mis_beta_medelexis_ch encoding 'utf8' template template0;"
+sudo -u postgres psql -tc "create user elexis with password 'elexisTest';"
+sudo -u postgres psql -tc "create user mis_beta_medelexis_ch with password 'elexisTest';"
+sudo -u postgres psql -tc "alter ROLE elexis SUPERUSER;"
+  # allow login into database without prompting for password
+echo localhost:5432:mis_beta_medelexis_ch:elexis:elexisTest >~/.pgpass
+psql -U elexis mis_beta_medelexis_ch --host=localhost --command \\dt
+  # get all old files 
+rsync -avp mis.medelexis.ch:/srv/services/mis-redmine/files .
+  # import old database copied here
+sudo -u postgres pg_restore --dbname=mis_beta_medelexis_ch mis_beta_medelexis_ch.sql
+  # Avoid error when logging
+  # ActionView::Template::Error (undefined method `with_indifferent_access' for ActionController::Parameters
+psql -U elexis mis_beta_medelexis_ch --host=localhost --command "delete from settings where name = 'plugin_redmine_contacts';'"
+bundle install
+bundle exec rake db:migrate
+  # unzip all plugins
+  cd plugins
+  # copy by hand all plugins into this directory, then
+  for aPlugin in *.zip
+  do
+    echo "Will unzip $aPlugin" 
+    unzip $aPlugin
+  done
+  cd ..
+  # migrate the plugins
+for aPlugin in plugins/*/
+do
+  plugin_name=`basename ${aPlugin}`
+  echo "Will migrate $plugin_name"
+  bundle exec rake redmine:plugins NAME=${plugin_name} RAILS_ENV=production
+done
+```
+
+The settings from the old mis for redmine_contacts must be added manually.
