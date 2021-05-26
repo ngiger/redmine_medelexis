@@ -59,9 +59,9 @@ Get the needed zip files. Used versions are found under https://mis.foo.org/admi
 
 Afterwards execute and verify these steps (assuming a bash shell). Using ruby 1.9.3p547 was fine for me. Ruby 2.1.2 had some problems
 
-    git clone https://github.com/redmine/redmine redmine-3.4
-    cd redmine-3.4
-    git checkout 3.4-stable
+    git clone https://github.com/redmine/redmine redmine-4.1
+    cd redmine-4.1
+    git checkout 4.1-stable
     export RAILS_ENV=development
     cd plugins
     unzip /path/teo/zipfilesredmine_agile-240720-m.zip
@@ -85,6 +85,9 @@ Afterwards execute and verify these steps (assuming a bash shell). Using ruby 1.
     # bundle exec rake redmine:plugins NAME=redmine_access_filters
     bundle exec rake redmine:plugins:migrate
     bundle exec rake tmp:cache:clear
+    # Apply patches_contact_invoices.patch for plugins/redmine_contacts_invoices/
+    # lib/redmine_invoices.rb
+    # lib/redmine_invoices.rb
 
 ## Creating a dump from the production server
 
@@ -184,7 +187,7 @@ type int with extra auto_increment to serial drop typemod
 ALTER schema 'redmine' RENAME TO 'public';
 ```
 
-### Update from redmine 3.4 to 4.1 for mis
+### Update from redmine 4.1 to 4.1 for mis
 
 Installation auf me-core mit folgenden Schritten (getestet auf einer jungfräulichen Debian/Buster VM).
 

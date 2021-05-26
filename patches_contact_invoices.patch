@@ -1,0 +1,55 @@
+diff --git a/app/models/invoice.rb b/app/models/invoice.rb
+index a02c25d..28390cc 100644
+--- a/app/models/invoice.rb
++++ b/app/models/invoice.rb
+@@ -483,7 +483,8 @@ class Invoice < ActiveRecord::Base
+       scope = Issue.eager_load(:time_entries).where("#{Issue.table_name}.id" => issues_ids)
+       scope = scope.where("#{TimeEntry.table_name}.hours > 0")
+       issues = scope.all
+-      self.lines << InvoiceLine.new(:description => issues.map { |i| " - #{i.subject} (#{l_hours(i.spent_hours)})" }.join("\n"),
++      # self.lines << InvoiceLine.new(:description => issues.map { |i| " - #{i.subject} (#{l_hours(i.spent_hours)})" }.join("\n"),
++      self.lines << InvoiceLine.new(:description => issues.map { |i| "##{i.id} #{i.start_date.strftime('%d.%m.%Y')} - #{i.subject} (#{l_hours(i.spent_hours)})" }.join("\n"), # Patched 2020.11.03 by Medelexis
+                                     :units => l(:label_invoice_hours),
+                                     :quantity => "%.2f" % total_time.to_f)
+     when 5 # by time entries
+@@ -572,7 +573,18 @@ class Invoice < ActiveRecord::Base
+       time_entries = scope.all
+       time_entries.each do |time_entry|
+         issue = time_entry.issue
+-        line_description = "#{time_entry.activity.name}#{' - ' + issue.to_s if issue} #{'- ' + time_entry.comments + ' ' unless time_entry.comments.blank?}"
++        
++        # generation of line_description patched by Medelexis on May-26 2021 (Issue 22527)
++        # for case 5 by time entries
++        date = time_entry.spent_on.strftime('%d.%m.%Y')
++        if issue
++          line_description = "##{issue.id} #{date} - #{issue.subject} "
++        else
++          line_description = "#{date} - #{time_entry.activity.name} "
++        end
++        line_description += '- ' + time_entry.comments + ' ' if time_entry.comments
++        # End of Medelexis patch
++        
+         self.lines << InvoiceLine.new(:description => line_description,
+                                       :units => l(:label_invoice_hours),
+                                       :quantity => "%.2f" % time_entry.hours.to_f,
+@@ -588,6 +600,7 @@ class Invoice < ActiveRecord::Base
+ 
+         time_entries_without_issues = TimeEntry.where(:id => time_entries_ids).where(:issue_id => nil).where(:activity_id => k)
+         description = issues.map{|i| " - ##{i.id} #{i.subject} (#{l_hours(i.time_entries.where(:id => time_entries_ids).where(:activity_id => k).sum(:hours))})"}.join("\n")
++        description = issues.map{|i| " - ##{i.id} #{i.start_date.strftime('%d.%m.%Y')} #{i.subject} (#{l_hours(i.time_entries.where(:id => time_entries_ids).where(:activity_id => k).sum(:hours))})"}.join("\n") # Patched by Medelexis
+         description << (description.blank? ? "" : "\n") + time_entries_without_issues.map{|t| " - #{t.comments} (#{l_hours(t.hours)})"}.join("\n") unless time_entries_without_issues.blank?
+ 
+         self.lines << InvoiceLine.new(:description => Enumeration.find(k).name.humanize + "\n" +
+diff --git a/lib/redmine_invoices.rb b/lib/redmine_invoices.rb
+index 5d8838c..25ac8ba 100644
+--- a/lib/redmine_invoices.rb
++++ b/lib/redmine_invoices.rb
+@@ -164,7 +164,7 @@ module RedmineInvoices
+                 :conditions => { :project_id => project.id, :user_id => user.id },
+                 :order => "#{Rate.table_name}.date_in_effect ASC").try(:amount).to_s
+     else
+-      0.0
++      180.0
+     end
+   end
+   def self.build_zip(reports)
