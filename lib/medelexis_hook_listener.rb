@@ -6,6 +6,7 @@ class MedelexisHookListener < Redmine::Hook::ViewListener
  #  def view_contacts_sidebar_after_attributes(context={})
   def view_contacts_show_details_bottom(context={})
     userId = context[:contact].id
+    return "" unless User.find_by_id(userId)
     apiKey = User.find(userId).api_key
     return content_tag(:a, "myLink")
   end
