@@ -15,25 +15,6 @@ A few goodies for the Medelexis MIS
 
 ### requirements
 
-With redmine 3.2.7 you need ruby < 2.3. In Debian Stretch we have Ruby 2.3.3. Therefore I had to install rbenv and the following packages to be
-able to build ruby 2.2.7
-
-* gcc-6 autoconf bison build-essential libssl-dev libyaml-dev libreadline6-dev zlib1g-dev libncurses5-dev libffi-dev libgdbm3 libgdbm-dev
-* libssl1.0-dev libffi-dev
-
-Then use the following commands
-
-    cd /path/to/redmine/plugins
-    git clone git`github.com:ngiger/redmine_medelexis.github
-    service restart redmine
-    [09:51:04] Marco Descher: Für Admin user https://mis.foo.org/mustermann/license.xml
-    [09:52:15] Marco Descher:  https://mis.foo.org/my/license - list of all service tickets
-    [09:52:23] Marco Descher:  https://mis.foo.org/my/license.xml - encrypted and signed license
-    [09:52:35] Marco Descher: https://mis.foo.org/mustermann/license - list of all service tickets
-    [09:52:42] Marco Descher: https://mis.foo.org/mustermann/license.xml -encrypted and signed license
-
-Im logger IP-Adresse des Aufrufes abspeichern.
-
 ## configuration
 
 Under http://foo.org/settings/plugin/redmine_medelexis you can add more debugging (to the default system logger) and to keep the temporary license files.
@@ -165,8 +146,6 @@ bc. bundle exec ruby bin/rails runner plugins/redmine_medelexis/scripts/create_i
 
 # Deployment
 
-Auf mis.medelexis.ch läuft anfangs Dezember immer noch ruby 1.9.1.
-
 ## 2021.05.25
 
 ### PgLoader
@@ -213,7 +192,7 @@ sudo -u postgres psql -tc "alter ROLE elexis SUPERUSER;"
 echo localhost:5432:mis_beta_medelexis_ch:elexis:elexisTest >~/.pgpass
 psql -U elexis mis_beta_medelexis_ch --host=localhost --command \\dt
   # get all old files 
-rsync -avp mis.medelexis.ch:/srv/services/mis-redmine/files .
+rsync -avp mis.medelexis.ch:/srv/services/mis-beta.medelexis.ch/files .
   # import old database copied here
 sudo -u postgres pg_restore --dbname=mis_beta_medelexis_ch mis_beta_medelexis_ch.sql
   # Avoid error when logging
@@ -240,3 +219,28 @@ done
 ```
 
 The settings from the old mis for redmine_contacts must be added manually.
+
+# Create a mis development environment under nixos
+
+Assure that you have imagemagick and a postgresql server installed on your machine
+and that you have created the postgres DB and copied the files.
+Edit the config/database.yml correspondingly.
+
+Then:
+
+```
+cd /opt/src
+git clone https://github.com/redmine/redmine.git
+cd redmine
+rm -rfv plugins
+git clone git@gitlab.medelexis.ch:mdescher/redmine-mis-plugins.git plugins
+cd plugins
+git clone git@github.com:ngiger/redmine_access_filters.git
+git clone git@github.com:ngiger/redmine_access_filters.git
+cd ..
+ln -s plugins/redmine_medelexis/shell.nix .
+nix-shell
+[nix-shell] bundle install # generates Gemfile.lock
+[nix-shell] bundix         # generates gemset.nix
+[nis-shell] bundle exec ruby bin/rails server webrick --port=30001 -e production
+```
