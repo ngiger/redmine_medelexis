@@ -111,17 +111,20 @@ To run the tests, you must rake all plugins (as above) with RAILS_ENV=test. Then
 
 Prepare for running tests (assuming a bash shell) for redmine_medelexis-plugins using
 
-    export RAILS_ENV test
-    bundle exec rake db:migrate
-    bundle exec rake redmine:plugins NAME=redmine_contacts
+    mv plugins no_plugins
+    bundle exec rake db:migrate  RAILS_ENV=test
+    mv no_plugins plugins
+    bundle exec rake db:migrate  RAILS_ENV=test
+    bundle exec rake redmine:plugins NAME=redmine_medelexis RAILS_ENV=test
 
 and load the same plugins as above. Now you should able to login (as a admin-user) test_admin with the password test_password
 
 Run tests
 
+* bundle exec rake db:drop db:create db:migrate redmine:plugins:migrate redmine:load_default_data RAILS_ENV=test
 * `export RAILS_ENV=test`
 * `bundle exec rake redmine:plugins:test NAME=redmine_medelexis` # runs all tests
-* `bundle exec ruby bin/rails runner plugins/redmine_medelexis/test/functional/license_test.rb` # runs a single test
+* `bundle exec ruby bin/rails runner plugins/redmine_medelexis/test/functional/license_test.rb RAILS_ENV=test` # runs a single test
 
 ## Scripts for the production server
 
@@ -130,6 +133,7 @@ Run tests
 The script scripts/convert_test_abo_to_orders.rb converts all open 'TRIAL' issues older than 1 month into 'LICENSED'. It should be run daily with a cron scripts. E.g. `/etc/cron.daily/onvert_test_abo_to_orders.sh` could have the following content.
 
     #!/bin/bash
+    export RAILS_ENV=production
     cd /path/to/redmine/checkout && bundle exec ruby bin/rails runner plugins/redmine_medelexis/scripts/convert_test_abo_to_orders.rb
 
 It will add the log entries like this to a log file in the current directory name like <fqdn>.log
