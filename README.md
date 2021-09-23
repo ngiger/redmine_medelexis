@@ -33,7 +33,7 @@ Get the needed zip files. Used versions are found under https://mis.foo.org/admi
 *  redmine_contacts_helpdesk      4.1.10
 *  redmine_contacts_invoices      4.2.3
 *  redmine_favorite_projects      2.1.1
-*  redmine_medelexis              0.2.7
+*  redmine_medelexis              0.2.9
 *  redmine_products               2.1.2
 *  redmineup_tags                 2.0.8
 

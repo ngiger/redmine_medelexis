@@ -71,7 +71,7 @@ module RedmineMedelexis
 
   def self.getExpiredTrialIssues
     unclosed_issues = Issue.where(tracker_id: Tracker_Is_Service, closed_on: nil)
-    trial2order = unclosed_issues.find_all{|x| x.valid? && x.isTrial? && x.get_end_of_license < (Date.today-3) } # convert to ordered after 28 days
+    trial2order = unclosed_issues.find_all{|x| x.valid? && x.isTrial? && x.get_end_of_license < (Date.today+3) } # convert to ordered after 28 days
   end
 
   def self.issue_to_licensed(issue)
