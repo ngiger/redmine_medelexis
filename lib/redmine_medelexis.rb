@@ -127,10 +127,14 @@ module RedmineMedelexis
     return nil unless project
     condition = "project_id = #{project.id}"
     issues = Issue.where(condition, Date.today)
-    eternal = Issue.where(project_id: 1, tracker_id: RedmineMedelexis::Tracker_Is_Service, closed_on: nil)
+    eternal = Issue.where(project_id: 1, closed_on: nil)
     licenses = []
+    uniq_ids = []
     (issues+eternal).each do  |issue|  #>"2013-12-12+01:00",
+      next unless issue.tracker_id == Tracker_Is_Service
+      next if uniq_ids.index(issue.subject)
       next unless statusField = issue.custom_field_values.find{|x| x.custom_field.name.eql?('Abostatus')}
+      uniq_ids << issue.subject
       endOfLicense = issue.get_end_of_license + 1
       puts  "TRIAL issue #{issue.id} of #{issue.due_date} endOfLicense #{endOfLicense} is expired? #{endOfLicense < Date.today}" if issue.isTrial? && $VERBOSE
       next if issue.isTrial? && endOfLicense < Date.today
@@ -140,6 +144,9 @@ module RedmineMedelexis
                     "startOfLicense"  => issue.start_date.strftime(Zeitformat),
       }
     end
+    # ids = licenses.collect{ |x| x['id']}.sort
+    # File.open('/home/niklaus/ids.txt', 'w') {|f| ids.each{|x| f.puts x}}
+    #  	17538 	Service-ES 	Neu 	TRIAL 	Normal 	at.medevit.elexis.agenda.reminder.es.feature.feature.group 	Max Mustermann 	17.10.2022 13:52 	Aktionen
     licenses
   end
 
