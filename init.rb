@@ -2,7 +2,7 @@ Redmine::Plugin.register :redmine_medelexis do
   name 'Redmine Medelexis plugin'
   author 'Niklaus Giger <niklaus.giger@member.fsf.org>'
   description 'Redmine plugin for the new configurator'
-  version '0.2.9'
+  version '0.3.0'
   url 'https://github.com/ngiger/redmine_medelexis'
   author_url 'http://www.giger-electronique.ch'
   settings :default => {'empty' => true}, :partial => 'settings/redmine_medelexis_settings'

@@ -23,20 +23,29 @@ Under http://foo.org/settings/plugin/redmine_medelexis you can add more debuggin
 
 Get the needed zip files. Used versions are found under https://mis.foo.org/admin/info
 
-*  Redmine version                4.1.3.stable
-*  Ruby version                   2.5.5-p157 (2019-03-15) [x86_64-linux-gnu]
-*  rails                          5.2.6
-*  redmine_access_filters         0.0.2
-*  redmine_agile                  1.5.4
-*  redmine_checklists             3.1.18
-*  redmine_contacts               4.3.2
-*  redmine_contacts_helpdesk      4.1.10
-*  redmine_contacts_invoices      4.2.3
-*  redmine_favorite_projects      2.1.1
-*  redmine_medelexis              0.2.9
-*  redmine_products               2.1.2
-*  redmineup_tags                 2.0.8
-
+    Environment:
+        Redmine version                4.2.8.stable
+        Ruby version                   2.7.4-p191 (2021-07-07) [x86_64-linux-gnu]
+        Rails version                  5.2.8.1
+        Environment                    production
+        Database adapter               PostgreSQL
+        Mailer queue                   ActiveJob::QueueAdapters::AsyncAdapter
+        Mailer delivery                sendmail
+    SCM:
+        Subversion                     1.14.1
+        Git                            2.30.2
+        Filesystem
+    Redmine plugins:
+        redmine_access_filters         1.0.1
+        redmine_agile                  1.6.4
+        redmine_checklists             3.1.21
+        redmine_contacts               4.3.6
+        redmine_contacts_helpdesk      4.2.0
+        redmine_contacts_invoices      4.2.6
+        redmine_favorite_projects      2.1.1
+        redmine_medelexis              0.3.0
+        redmine_products               2.1.5
+        redmineup_tags                 2.0.12
 
 Afterwards execute and verify these steps (assuming a bash shell). Using ruby 1.9.3p547 was fine for me. Ruby 2.1.2 had some problems
 
@@ -101,7 +110,7 @@ If you know the login of you might also use something like `:conditions => {:log
 
 ## Start rails for development
 
-`export RAILS_ENV=development; bundle exec ruby bin/rails server webrick --port=30001`
+`export RAILS_ENV=development; bundle exec ruby bin/rails server webrick --port=30033`
 
 ## Running the tests
 
