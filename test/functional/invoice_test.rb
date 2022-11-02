@@ -458,7 +458,9 @@ class InvoiceControllerTest < ActionController::TestCase
   end
 
   test "check invoice is taxed" do
-    Setting.plugin_redmine_contacts["default_tax"] = 8.0
+    assert_equal 0.0, ContactsSetting.default_tax
+    Setting.plugin_redmine_crm['default_tax'] = 8.0
+    assert_equal 8.0, ContactsSetting.default_tax
     Invoice.all.each{|x| x.delete}
     oldSize= Invoice.all.size
     abo_start = Date.new(2014, 1, 1)
