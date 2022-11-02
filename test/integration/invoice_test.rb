@@ -22,7 +22,7 @@ require File.expand_path('../../test_helper', __FILE__)
 
 
 class Redmine::InvoiceTest < Redmine::IntegrationTest
-    ActiveRecord::Fixtures.create_fixtures(Redmine::Plugin.find(:redmine_medelexis).directory + '/test/fixtures/',
+        ActiveRecord::FixtureSet.create_fixtures(Redmine::Plugin.find(:redmine_medelexis).directory + '/test/fixtures/',
                             [:settings,
                              :invoices,
                              :users,

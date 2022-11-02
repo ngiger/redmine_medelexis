@@ -83,7 +83,7 @@ module RedmineMedelexis
     issue.save!
     self.log_to_system("issue_to_licensed id #{msg}")
     addJournal('Issue', issue.id, msg)
-    @@idFromTials2License << issue.id
+    @@idFromTials2License << issue.id unless @@idFromTials2License.index(issue.id)
   end
 
   def self.convertExpiredTrial2License

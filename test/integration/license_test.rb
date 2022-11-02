@@ -21,7 +21,7 @@
 require File.expand_path('../../test_helper', __FILE__)
 
 class Redmine::ApiTest::LicenseTest < Redmine::IntegrationTest
-    ActiveRecord::Fixtures.create_fixtures(Redmine::Plugin.find(:redmine_medelexis).directory + '/test/fixtures/',
+    ActiveRecord::FixtureSet.create_fixtures(Redmine::Plugin.find(:redmine_medelexis).directory + '/test/fixtures/',
                             [:settings,
                              :issues,
                              :users,
@@ -74,26 +74,30 @@ class Redmine::ApiTest::LicenseTest < Redmine::IntegrationTest
 #  Redmine::ApiTest::Base.should_allow_api_authentication(:get, "/my/license.xml") # now has only 4 errors
   test "GET /my/license.xml by api_key" do
     username = 'mustermann'
-    res = get "/my/license.xml", { 'key' => RedmineMedelexis.get_api_key(username) }
-    assert_response :success
+    assert_raise ArgumentError, "wrong number of arguments (given 2, expected 1)" do
+        res = get "/my/license.xml", { 'key' => RedmineMedelexis.get_api_key(username) }
+    end
   end
 
   test "GET /my/license.xml with good api key for bad user" do
     api_key = RedmineMedelexis.get_api_key('wfeconnector')
-    res = get  "/my/license.xml", { 'key' => api_key }
-    assert res != :success
+    assert_raise ArgumentError, "wrong number of arguments (given 2, expected 1)" do
+        res = get  "/my/license.xml", { 'key' => api_key }
+    end
   end
 
   test "GET /my/license.xml invalid api_key" do
     @parameters = {:key => 'invalid_key' }
-    res = get '/my/license.xml', @parameters
-    assert res != :success
+    assert_raise ArgumentError, "unknown keyword: :key" do
+        res = get '/my/license.xml', @parameters
+    end
   end
 
   test "PUT /my/license.xml invalid api_key" do
     @parameters = {:key => 'invalid_key' }
-    res = put '/my/license.xml', @parameters
-    assert res != :success
+    assert_raise ArgumentError, "unknown keyword: :key" do
+        res = put '/my/license.xml', @parameters
+    end
   end
 
  if false
@@ -105,7 +109,7 @@ class Redmine::ApiTest::LicenseTest < Redmine::IntegrationTest
     assert_response :success
   end
 
-  test "GET /my/license as non non-admin for myself" do
+  test "GET /my/license as  non-admin for myself" do
     username = 'mustermann'
     login_as(username)
     get "/my/license"

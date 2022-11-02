@@ -20,8 +20,8 @@
 # along with redmine_contacts.  If not, see <http://www.gnu.org/licenses/>.
 require File.expand_path(File.dirname(__FILE__) + '/../test_helper')
 
-class Redmine::ApiTest::LicenseTest < ActionController::TestCase
-    ActiveRecord::Fixtures.create_fixtures(Redmine::Plugin.find(:redmine_medelexis).directory + '/test/fixtures/',
+class LicenseTest < ActionController::TestCase
+    ActiveRecord::FixtureSet.create_fixtures(Redmine::Plugin.find(:redmine_medelexis).directory + '/test/fixtures/',
                             [:settings,
                              :issues,
                              :users,

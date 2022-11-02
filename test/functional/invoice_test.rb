@@ -22,7 +22,7 @@ require File.expand_path(File.dirname(__FILE__) + '/../test_helper')
 
 class InvoiceControllerTest < ActionController::TestCase
   ID_mustermann = 3
-    ActiveRecord::Fixtures.create_fixtures(Redmine::Plugin.find(:redmine_medelexis).directory + '/test/fixtures/',
+    ActiveRecord::FixtureSet.create_fixtures(Redmine::Plugin.find(:redmine_medelexis).directory + '/test/fixtures/',
                             [
                              :contacts,
                              :contacts_projects,

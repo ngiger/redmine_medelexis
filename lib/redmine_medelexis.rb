@@ -66,7 +66,7 @@ module RedmineMedelexis
       members.first
     else
       kundenRolle = Role.where("name = 'Kunde'")
-      members =  Member.where(user.id)
+      members =  Member.where(user.id.to_s)
       RedmineMedelexis.debug "#{__LINE__}: members #{members.inspect}"
       return nil unless members.size == 1
       return members.first
