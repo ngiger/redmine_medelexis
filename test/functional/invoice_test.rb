@@ -210,8 +210,8 @@ class InvoiceControllerTest < ActionController::TestCase
   end
 
   test "test findLastInvoiceDate" do
-    assert_equal(nil, MedelexisInvoices.getDateOfLastInvoice(-1), 'an invalid project_id must return nil')
-    assert_equal(nil, MedelexisInvoices.getDateOfLastInvoice(Invoice.first.project_id))
+    assert_nil( MedelexisInvoices.getDateOfLastInvoice(-1), 'an invalid project_id must return nil')
+    assert_nil( MedelexisInvoices.getDateOfLastInvoice(Invoice.first.project_id))
   end
 
   test "check amount for invoicing again after 3 months" do
@@ -276,7 +276,7 @@ class InvoiceControllerTest < ActionController::TestCase
   test "verify that project KeinVerrechnung does not get an invoicing" do
     project = Project.find(4)
     oldSize= Invoice.all.size
-    assert_equal(nil, MedelexisInvoices.invoice_for_project(project.id, @end_of_year))
+    assert_nil( MedelexisInvoices.invoice_for_project(project.id, @end_of_year))
     newSize= Invoice.all.size
     nrCreated = newSize -oldSize
     assert_equal 0, nrCreated, "May not create an invoice #{nrCreated} newSize #{newSize} #{oldSize}"
@@ -285,7 +285,7 @@ class InvoiceControllerTest < ActionController::TestCase
   test "verify that project invoice_for_project works when passing a name" do
     project = Project.find(4)
     oldSize= Invoice.all.size
-    assert_equal(nil, MedelexisInvoices.invoice_for_project(project.identifier, @end_of_year))
+    assert_nil( MedelexisInvoices.invoice_for_project(project.identifier, @end_of_year))
   end
 
   test "second invoicing may not produce a new invoice even if since given" do

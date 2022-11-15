@@ -246,7 +246,7 @@ Verrechnet werden Leistungen vom 2016-01-01 bis 2016-12-31."
   end
 
   def self.invoice_for_project(identifier, stich_tag = Date.today.end_of_year.to_date, invoice_since = Date.today.beginning_of_year, issues = nil)
-    round_to = BigDecimal.new('0.05')
+    round_to = BigDecimal('0.05')
     puts "invoice_for_project #{identifier.inspect}"
     # Starting with redmine 3.2.7, the query returned Project::ActiveRecord_Relation and no longer a project
     project = (identifier.to_i == 0 ? Project.where(identifier: identifier).first : Project.where(id: identifier))
@@ -323,7 +323,7 @@ Verrechnet werden Leistungen vom 2016-01-01 bis 2016-12-31."
     invoice.description  = description
     invoice.custom_field_values.first.value = stich_tag_string
     invoice.save_custom_field_values
-    amount = BigDecimal.new(invoice.calculate_amount.to_d)
+    amount = BigDecimal(invoice.calculate_amount.to_d)
     if amount < 5
       RedmineMedelexis.log_to_system "Invoicing for #{identifier} #{project.name} skipped as amount #{amount.round(2)} is < 5 Fr."
       invoice.delete
